@@ -1,11 +1,10 @@
 ﻿import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import "./App.css";
-import { ApiError } from "./api/client";
+import { getErrorMessage } from "./api/errors";
 import { acceptInvitation, confirmMFASetup, loginAsAdmin } from "./api/auth";
 import type {
   AcceptInvitationResponse,
-  AuthTokenResponse,
   MFASetupRequiredResponse,
   MFAMethod,
 } from "./api/auth";
@@ -24,40 +23,14 @@ import type {
   PlatformAdminSummary,
   UpdateISPRequest,
 } from "./api/platformAdmin";
-import { getISPAdminSummary } from "./api/ispAdmin";
-import type { ISPAdminSummary } from "./api/ispAdmin";
-
-function saveSession(session: AuthTokenResponse) {
-  localStorage.setItem("pulsefi_access_token", session.access_token);
-  localStorage.setItem("pulsefi_admin_name", session.full_name);
-  localStorage.setItem("pulsefi_admin_role", session.role ?? "");
-}
-
-function clearSession() {
-  localStorage.removeItem("pulsefi_access_token");
-  localStorage.removeItem("pulsefi_admin_name");
-  localStorage.removeItem("pulsefi_admin_role");
-}
-
-function getErrorMessage(error: unknown, fallback: string) {
-  if (error instanceof ApiError) {
-    const details =
-      typeof error.body.details === "string"
-        ? error.body.details
-        : JSON.stringify(error.body.details ?? "");
-
-    return [
-      error.body.message,
-      details,
-      error.body.error ? `Error code: ${error.body.error}` : "",
-      `HTTP status: ${error.status}`,
-    ]
-      .filter(Boolean)
-      .join(" ");
-  }
-
-  return fallback;
-}
+import {
+  clearSession,
+  getAdminName,
+  getAdminRole,
+  hasSession,
+  saveSession,
+} from "./auth/session";
+import ISPAdminDashboard from "./pages/ISPAdminDashboard";
 
 function isMFASetupRequiredResponse(
   response: unknown
@@ -425,7 +398,31 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
   }
 
   useEffect(() => {
-    loadISPs();
+    let isCancelled = false;
+
+    async function loadInitialISPs() {
+      try {
+        const data = await listISPs();
+
+        if (!isCancelled) {
+          setIsps(data);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setErrorMessage(getErrorMessage(error, "Could not load ISPs."));
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadInitialISPs();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   function chooseISP(isp: ISP) {
@@ -797,90 +794,11 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
   );
 }
 
-function ISPAdminDashboard({ onLogout }: { onLogout: () => void }) {
-  const [summary, setSummary] = useState<ISPAdminSummary | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const adminName = localStorage.getItem("pulsefi_admin_name") ?? "ISP Admin";
-
-  useEffect(() => {
-    async function loadSummary() {
-      try {
-        const data = await getISPAdminSummary();
-        setSummary(data);
-      } catch (error) {
-        setErrorMessage(getErrorMessage(error, "Could not load ISP Admin summary."));
-      }
-    }
-
-    loadSummary();
-  }, []);
-
-  function handleLogout() {
-    clearSession();
-    onLogout();
-  }
-
-  return (
-    <main className="dashboard-page">
-      <header className="dashboard-header">
-        <div>
-          <p className="eyebrow">PulseFi ISP Admin</p>
-          <h1>Welcome, {adminName}</h1>
-          <p className="muted">ISP Admin dashboard foundation.</p>
-        </div>
-
-        <button className="secondary-button" onClick={handleLogout}>
-          Logout
-        </button>
-      </header>
-
-      {errorMessage && <div className="error-box">{errorMessage}</div>}
-
-      {!summary && !errorMessage && <p>Loading ISP summary...</p>}
-
-      {summary && (
-        <>
-          <div className="selected-strip">
-            <strong>ISP ID:</strong> {summary.isp_id}
-          </div>
-
-          <section className="summary-grid">
-            <article className="summary-card">
-              <span>Users</span>
-              <strong>{summary.users.total}</strong>
-              <small>{summary.users.active} active</small>
-            </article>
-
-            <article className="summary-card">
-              <span>Plans</span>
-              <strong>{summary.plans.total}</strong>
-              <small>{summary.plans.active} active</small>
-            </article>
-
-            <article className="summary-card">
-              <span>Subscriptions</span>
-              <strong>{summary.subscriptions.total}</strong>
-              <small>{summary.subscriptions.active} active</small>
-            </article>
-
-            <article className="summary-card">
-              <span>Routers</span>
-              <strong>{summary.routers.total}</strong>
-              <small>{summary.routers.active} active</small>
-            </article>
-          </section>
-        </>
-      )}
-    </main>
-  );
-}
-
 function PlatformAdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [summary, setSummary] = useState<PlatformAdminSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const adminName = localStorage.getItem("pulsefi_admin_name") ?? "Admin";
+  const adminName = getAdminName("Admin");
 
   async function loadSummary() {
     try {
@@ -892,7 +810,27 @@ function PlatformAdminDashboard({ onLogout }: { onLogout: () => void }) {
   }
 
   useEffect(() => {
-    loadSummary();
+    let isCancelled = false;
+
+    async function loadInitialSummary() {
+      try {
+        const data = await getPlatformAdminSummary();
+
+        if (!isCancelled) {
+          setSummary(data);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setErrorMessage(getErrorMessage(error, "Could not load summary."));
+        }
+      }
+    }
+
+    loadInitialSummary();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   function handleLogout() {
@@ -927,9 +865,7 @@ function PlatformAdminDashboard({ onLogout }: { onLogout: () => void }) {
 
 export default function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    Boolean(localStorage.getItem("pulsefi_access_token"))
-  );
+  const [isLoggedIn, setIsLoggedIn] = useState(hasSession());
 
   useEffect(() => {
     function handlePopState() {
@@ -948,7 +884,7 @@ export default function App() {
     return <LoginPage onLogin={() => setIsLoggedIn(true)} />;
   }
 
-  const role = localStorage.getItem("pulsefi_admin_role");
+  const role = getAdminRole();
 
   if (role === "isp_admin") {
     return <ISPAdminDashboard onLogout={() => setIsLoggedIn(false)} />;

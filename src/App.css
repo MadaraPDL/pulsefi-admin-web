@@ -44,7 +44,8 @@ body {
 
 .table-card {
   margin-top: 18px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   border-radius: 18px;
   box-shadow: none;
   border: 1px solid #d8e2ec;
@@ -107,6 +108,30 @@ h3 {
   gap: 18px;
 }
 
+.app-user-invitation-grid {
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+}
+
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chip {
+  border: 1px solid #d8e2ec;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: #edf2f7;
+  color: #334155;
+}
+
+.active-filter {
+  border-color: #2274a5;
+  background: #2274a5;
+  color: white;
+}
+
 .selected-strip {
   margin-top: 18px;
   border-radius: 16px;
@@ -155,6 +180,10 @@ button:disabled {
   padding: 8px 12px;
   border-radius: 10px;
   font-size: 13px;
+}
+
+.danger-button {
+  background: #a52222;
 }
 
 .error-box,
@@ -289,6 +318,26 @@ th {
 }
 
 .status-suspended {
+  background: #fff4db;
+  color: #8a5a00;
+}
+
+.status-pending {
+  background: #e8f6ff;
+  color: #12496b;
+}
+
+.status-accepted {
+  background: #e8fff1;
+  color: #126b39;
+}
+
+.status-revoked {
+  background: #ffe9e9;
+  color: #8a1f1f;
+}
+
+.status-expired {
   background: #fff4db;
   color: #8a5a00;
 }
