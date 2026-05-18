@@ -6,6 +6,7 @@ import { clearSession, getAdminName } from "../auth/session";
 import { AppUserInvitationManagement } from "../components/AppUserInvitationManagement";
 import { AppUserManagement } from "../components/AppUserManagement";
 import { SubscriptionPlanManagement } from "../components/SubscriptionPlanManagement";
+import { UserSubscriptionManagement } from "../components/UserSubscriptionManagement";
 
 export default function ISPAdminDashboard({
   onLogout,
@@ -91,6 +92,7 @@ export default function ISPAdminDashboard({
 
       <SubscriptionPlanManagement />
       <AppUserManagement />
+      <UserSubscriptionManagement />
       <AppUserInvitationManagement />
     </main>
   );

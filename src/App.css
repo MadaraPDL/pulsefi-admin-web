@@ -496,3 +496,14 @@ textarea {
 .checkbox-row input {
   width: auto;
 }
+
+.subscriptions-management-grid {
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+}
+
+.filter-select {
+  border: 1px solid #d8e2ec;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font: inherit;
+}

@@ -229,3 +229,99 @@ export async function updateSubscriptionPlan(
     body: JSON.stringify(payload),
   });
 }
+
+export type UserSubscriptionStatus =
+  | "pending"
+  | "active"
+  | "suspended"
+  | "expired"
+  | "cancelled";
+
+export type UserSubscriptionFilter = UserSubscriptionStatus | "all";
+
+export type UserSubscription = {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  subscription_label: string | null;
+  assigned_by_admin_id: string | null;
+  start_date: string;
+  end_date: string | null;
+  status: UserSubscriptionStatus;
+  auto_renew: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CreateUserSubscriptionRequest = {
+  user_id: string;
+  plan_id: string;
+  subscription_label?: string | null;
+  start_date: string;
+  end_date?: string | null;
+  status: UserSubscriptionStatus;
+  auto_renew: boolean;
+};
+
+export type UpdateUserSubscriptionRequest = {
+  plan_id?: string;
+  subscription_label?: string | null;
+  start_date?: string;
+  end_date?: string | null;
+  status?: UserSubscriptionStatus;
+  auto_renew?: boolean;
+};
+
+export async function createUserSubscription(
+  payload: CreateUserSubscriptionRequest
+): Promise<UserSubscription> {
+  return apiRequest<UserSubscription>("/isp-admin/subscriptions", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listUserSubscriptions(
+  status: UserSubscriptionStatus | null = null,
+  userId: string | null = null,
+  limit = 50,
+  offset = 0
+): Promise<UserSubscription[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  if (userId) {
+    params.set("user_id", userId);
+  }
+
+  return apiRequest<UserSubscription[]>(
+    `/isp-admin/subscriptions?${params.toString()}`
+  );
+}
+
+export async function getUserSubscription(
+  subscriptionId: string
+): Promise<UserSubscription> {
+  return apiRequest<UserSubscription>(
+    `/isp-admin/subscriptions/${subscriptionId}`
+  );
+}
+
+export async function updateUserSubscription(
+  subscriptionId: string,
+  payload: UpdateUserSubscriptionRequest
+): Promise<UserSubscription> {
+  return apiRequest<UserSubscription>(
+    `/isp-admin/subscriptions/${subscriptionId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }
+  );
+}
