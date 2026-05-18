@@ -86,7 +86,10 @@ function UsageRecordsTable({ records }: { records: ISPAdminUsageRecord[] }) {
 
           {records.length === 0 && (
             <tr>
-              <td colSpan={5}>No usage records found.</td>
+              <td colSpan={5}>
+                No usage records yet. Seed or import usage data to review ISP
+                traffic here.
+              </td>
             </tr>
           )}
         </tbody>
@@ -124,7 +127,10 @@ function DeviceConnectionTable({
 
           {logs.length === 0 && (
             <tr>
-              <td colSpan={4}>No device connection logs found.</td>
+              <td colSpan={4}>
+                No device connection logs yet. Router or device events will
+                appear here after they are recorded.
+              </td>
             </tr>
           )}
         </tbody>
@@ -166,7 +172,10 @@ function RouterActionLogTable({
 
           {logs.length === 0 && (
             <tr>
-              <td colSpan={4}>No router action logs found.</td>
+              <td colSpan={4}>
+                No router action logs match this filter. Policy actions appear
+                here after execution.
+              </td>
             </tr>
           )}
         </tbody>

@@ -61,6 +61,46 @@ http://127.0.0.1:8000/api/v1
 
 Use `.env.development.local` for local overrides and keep `.env*` files with secrets uncommitted.
 
+## Admin Demo Flow
+
+1. Start the backend from `C:\PulseFi\backend`:
+
+   ```powershell
+   .\venv\Scripts\python.exe -m uvicorn app.main:app --reload
+   ```
+
+2. Start the real admin app from `C:\PulseFi\pulsefi-admin-web`:
+
+   ```powershell
+   npm run dev
+   ```
+
+3. For local development, set the API base URL in `.env.development.local`:
+
+   ```text
+   VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
+   ```
+
+   Keep `.env*` files uncommitted.
+
+4. If DEBUG local auth rate limits block repeated demo logins, reset them:
+
+   ```powershell
+   curl.exe -X POST http://127.0.0.1:8000/api/v1/auth/rate-limit/reset
+   ```
+
+5. Login as Platform Admin, open Overview, create or update an ISP in ISPs, then create an ISP Admin invitation. The local DEBUG invitation token appears only when the backend returns it.
+
+6. Login as ISP Admin, then review Overview, Users, Invitations, Plans, Subscriptions, Routers, Intelligence, Monitoring, Operations, and Network Activity.
+
+7. Test MFA verification and MFA setup with accounts that require those flows, then refresh the page to confirm session restore through `GET /api/v1/auth/me`.
+
+8. Run the design preview only when needed:
+
+   ```powershell
+   npm run dev:design
+   ```
+
 ## Checks
 
 ```powershell

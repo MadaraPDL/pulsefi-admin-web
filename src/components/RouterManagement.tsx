@@ -687,7 +687,10 @@ export function RouterManagement() {
 
               {routers.length === 0 && (
                 <tr>
-                  <td colSpan={8}>No routers found.</td>
+                  <td colSpan={8}>
+                    No routers match this filter. Assign a subscription first,
+                    then add a router record without collecting passwords.
+                  </td>
                 </tr>
               )}
             </tbody>

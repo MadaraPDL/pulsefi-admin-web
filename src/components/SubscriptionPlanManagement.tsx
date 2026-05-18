@@ -589,7 +589,10 @@ export function SubscriptionPlanManagement() {
 
               {plans.length === 0 && (
                 <tr>
-                  <td colSpan={7}>No subscription plans found.</td>
+                  <td colSpan={7}>
+                    No subscription plans match this filter. Create a plan above
+                    before assigning subscriptions.
+                  </td>
                 </tr>
               )}
             </tbody>

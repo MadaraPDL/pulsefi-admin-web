@@ -99,7 +99,7 @@ function PlatformSidebar({
           onClick={() => onNavigate("isps")}
         >
           <span className="material-symbols-outlined">add</span>
-          Quick Action
+          New ISP
         </button>
       </div>
 
@@ -562,8 +562,8 @@ function ISPManagement({
     <section className="stitch-content-card">
       <div className="stitch-panel-title-row">
         <div>
-          <h2>Recent ISP Activity</h2>
-          <p>Manage ISP records, admin invitations, and ISP status.</p>
+          <h2>ISP Management</h2>
+          <p>Create ISP records, select an ISP, and invite the first ISP Admin.</p>
         </div>
 
         <button className="stitch-view-link" type="button" onClick={loadISPs}>
@@ -804,7 +804,10 @@ function ISPManagement({
 
               {isps.length === 0 && (
                 <tr>
-                  <td colSpan={5}>No ISPs found.</td>
+                  <td colSpan={5}>
+                    No ISPs yet. Create an ISP record above to start the admin
+                    demo flow.
+                  </td>
                 </tr>
               )}
             </tbody>

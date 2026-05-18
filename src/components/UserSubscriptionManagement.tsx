@@ -696,7 +696,10 @@ export function UserSubscriptionManagement() {
 
               {subscriptions.length === 0 && (
                 <tr>
-                  <td colSpan={8}>No subscriptions found.</td>
+                  <td colSpan={8}>
+                    No subscriptions match this filter. Add App Users and plans,
+                    then assign a subscription above.
+                  </td>
                 </tr>
               )}
             </tbody>

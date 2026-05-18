@@ -294,7 +294,10 @@ export function ISPAdminOperationsCenter() {
 
                   {reports.length === 0 && (
                     <tr>
-                      <td colSpan={3}>No reports found.</td>
+                      <td colSpan={3}>
+                        No reports yet. Generate a report above to populate this
+                        list.
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -340,7 +343,10 @@ export function ISPAdminOperationsCenter() {
 
                   {requests.length === 0 && (
                     <tr>
-                      <td colSpan={5}>No plan change requests found.</td>
+                      <td colSpan={5}>
+                        No plan change requests match this filter. Customer
+                        requests appear here when App Users submit them.
+                      </td>
                     </tr>
                   )}
                 </tbody>

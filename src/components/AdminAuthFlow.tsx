@@ -186,7 +186,7 @@ function AdminLoginPage({
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="Password"
                   autoComplete="current-password"
                   required
                 />

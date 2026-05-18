@@ -331,7 +331,10 @@ export function AppUserInvitationManagement() {
 
               {invitations.length === 0 && (
                 <tr>
-                  <td colSpan={6}>No App User invitations found.</td>
+                  <td colSpan={6}>
+                    No App User invitations match this filter. Create an
+                    invitation above to add a customer account.
+                  </td>
                 </tr>
               )}
             </tbody>

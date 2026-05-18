@@ -193,7 +193,8 @@ export function PlatformISPAdminInvitationManagement({
 
       {!selectedISP && (
         <div className="stitch-selected-strip">
-          Select an ISP from the table before reviewing ISP Admin invitations.
+          Select an ISP in the ISPs section to review or revoke its ISP Admin
+          invitations.
         </div>
       )}
 
@@ -283,7 +284,10 @@ export function PlatformISPAdminInvitationManagement({
 
                   {invitations.length === 0 && (
                     <tr>
-                      <td colSpan={6}>No ISP Admin invitations found.</td>
+                      <td colSpan={6}>
+                        No ISP Admin invitations match this filter. Use the ISPs
+                        section to create an invitation for the selected ISP.
+                      </td>
                     </tr>
                   )}
                 </tbody>

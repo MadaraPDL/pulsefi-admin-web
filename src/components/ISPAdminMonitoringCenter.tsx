@@ -108,7 +108,10 @@ function AlertList({ alerts }: { alerts: ISPAdminAlert[] }) {
       <div className="stitch-empty-state">
         <span className="material-symbols-outlined">notifications_off</span>
         <h3>No alerts found</h3>
-        <p>There are no recent alerts for this ISP yet.</p>
+        <p>
+          There are no recent alerts for this ISP yet. Refresh after seeded
+          monitoring data is available.
+        </p>
       </div>
     );
   }
@@ -142,7 +145,7 @@ function AlertList({ alerts }: { alerts: ISPAdminAlert[] }) {
               <p>{alert.message}</p>
 
               <small>
-                {alert.alert_type} · {alert.status} ·{" "}
+                {alert.alert_type} - {alert.status} -{" "}
                 {formatDateTime(alert.created_at)}
               </small>
             </div>

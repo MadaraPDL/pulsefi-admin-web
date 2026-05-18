@@ -332,7 +332,10 @@ export function AppUserManagement() {
 
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={7}>No App Users found.</td>
+                  <td colSpan={7}>
+                    No App Users match this filter. Create an App User
+                    invitation first, then accepted accounts appear here.
+                  </td>
                 </tr>
               )}
             </tbody>
