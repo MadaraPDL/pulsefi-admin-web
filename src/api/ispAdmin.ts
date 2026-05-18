@@ -325,3 +325,90 @@ export async function updateUserSubscription(
     }
   );
 }
+
+export type RouterStatus = "active" | "inactive" | "maintenance";
+
+export type RouterFilter = RouterStatus | "all";
+
+export type ISPAdminRouter = {
+  id: string;
+  isp_id: string;
+  user_subscription_id: string | null;
+  assigned_by_admin_id: string | null;
+  router_name: string | null;
+  router_model: string | null;
+  router_ip: string | null;
+  mac_address: string | null;
+  api_endpoint: string | null;
+  username: string | null;
+  status: RouterStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CreateRouterRequest = {
+  user_subscription_id: string;
+  router_name?: string | null;
+  router_model?: string | null;
+  router_ip?: string | null;
+  mac_address?: string | null;
+  api_endpoint?: string | null;
+  username?: string | null;
+  status: RouterStatus;
+};
+
+export type UpdateRouterRequest = {
+  user_subscription_id?: string;
+  router_name?: string | null;
+  router_model?: string | null;
+  router_ip?: string | null;
+  mac_address?: string | null;
+  api_endpoint?: string | null;
+  username?: string | null;
+  status?: RouterStatus;
+};
+
+export async function createRouter(
+  payload: CreateRouterRequest
+): Promise<ISPAdminRouter> {
+  return apiRequest<ISPAdminRouter>("/isp-admin/routers", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listRouters(
+  status: RouterStatus | null = null,
+  userSubscriptionId: string | null = null,
+  limit = 50,
+  offset = 0
+): Promise<ISPAdminRouter[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  if (userSubscriptionId) {
+    params.set("user_subscription_id", userSubscriptionId);
+  }
+
+  return apiRequest<ISPAdminRouter[]>(`/isp-admin/routers?${params.toString()}`);
+}
+
+export async function getRouter(routerId: string): Promise<ISPAdminRouter> {
+  return apiRequest<ISPAdminRouter>(`/isp-admin/routers/${routerId}`);
+}
+
+export async function updateRouter(
+  routerId: string,
+  payload: UpdateRouterRequest
+): Promise<ISPAdminRouter> {
+  return apiRequest<ISPAdminRouter>(`/isp-admin/routers/${routerId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

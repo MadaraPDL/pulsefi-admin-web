@@ -7,6 +7,7 @@ import { AppUserInvitationManagement } from "../components/AppUserInvitationMana
 import { AppUserManagement } from "../components/AppUserManagement";
 import { SubscriptionPlanManagement } from "../components/SubscriptionPlanManagement";
 import { UserSubscriptionManagement } from "../components/UserSubscriptionManagement";
+import { RouterManagement } from "../components/RouterManagement";
 
 export default function ISPAdminDashboard({
   onLogout,
@@ -93,6 +94,7 @@ export default function ISPAdminDashboard({
       <SubscriptionPlanManagement />
       <AppUserManagement />
       <UserSubscriptionManagement />
+      <RouterManagement />
       <AppUserInvitationManagement />
     </main>
   );

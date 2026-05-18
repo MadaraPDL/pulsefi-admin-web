@@ -507,3 +507,7 @@ textarea {
   padding: 8px 12px;
   font: inherit;
 }
+
+.routers-management-grid {
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+}
