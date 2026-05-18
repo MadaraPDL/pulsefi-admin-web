@@ -473,3 +473,26 @@ textarea {
 .auth-card h1 {
   color: #102033 !important;
 }
+
+.plans-management-grid {
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+}
+
+.create-form textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #d8e2ec;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-row input {
+  width: auto;
+}

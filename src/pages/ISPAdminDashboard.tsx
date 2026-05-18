@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { getErrorMessage } from "../api/errors";
 import { getISPAdminSummary } from "../api/ispAdmin";
 import type { ISPAdminSummary } from "../api/ispAdmin";
 import { clearSession, getAdminName } from "../auth/session";
 import { AppUserInvitationManagement } from "../components/AppUserInvitationManagement";
 import { AppUserManagement } from "../components/AppUserManagement";
+import { SubscriptionPlanManagement } from "../components/SubscriptionPlanManagement";
 
 export default function ISPAdminDashboard({
   onLogout,
@@ -88,6 +89,7 @@ export default function ISPAdminDashboard({
         </>
       )}
 
+      <SubscriptionPlanManagement />
       <AppUserManagement />
       <AppUserInvitationManagement />
     </main>

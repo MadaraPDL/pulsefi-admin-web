@@ -153,3 +153,79 @@ export async function updateISPAdminAppUser(
     body: JSON.stringify(payload),
   });
 }
+
+export type SubscriptionPlanActiveFilter = "all" | "active" | "inactive";
+
+export type SubscriptionPlan = {
+  id: string;
+  isp_id: string;
+  plan_name: string;
+  monthly_price: string | number;
+  data_limit_gb: string | number;
+  speed_limit_mbps: string | number | null;
+  description: string | null;
+  is_active: boolean;
+  created_by_admin_id: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CreateSubscriptionPlanRequest = {
+  plan_name: string;
+  monthly_price: string | number;
+  data_limit_gb: string | number;
+  speed_limit_mbps?: string | number | null;
+  description?: string | null;
+  is_active: boolean;
+};
+
+export type UpdateSubscriptionPlanRequest = {
+  plan_name?: string;
+  monthly_price?: string | number;
+  data_limit_gb?: string | number;
+  speed_limit_mbps?: string | number | null;
+  description?: string | null;
+  is_active?: boolean;
+};
+
+export async function createSubscriptionPlan(
+  payload: CreateSubscriptionPlanRequest
+): Promise<SubscriptionPlan> {
+  return apiRequest<SubscriptionPlan>("/isp-admin/plans", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listSubscriptionPlans(
+  isActive: boolean | null = null,
+  limit = 50,
+  offset = 0
+): Promise<SubscriptionPlan[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (isActive !== null) {
+    params.set("is_active", String(isActive));
+  }
+
+  return apiRequest<SubscriptionPlan[]>(`/isp-admin/plans?${params.toString()}`);
+}
+
+export async function getSubscriptionPlan(
+  planId: string
+): Promise<SubscriptionPlan> {
+  return apiRequest<SubscriptionPlan>(`/isp-admin/plans/${planId}`);
+}
+
+export async function updateSubscriptionPlan(
+  planId: string,
+  payload: UpdateSubscriptionPlanRequest
+): Promise<SubscriptionPlan> {
+  return apiRequest<SubscriptionPlan>(`/isp-admin/plans/${planId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
