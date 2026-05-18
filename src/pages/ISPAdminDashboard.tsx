@@ -4,6 +4,7 @@ import { getISPAdminSummary } from "../api/ispAdmin";
 import type { ISPAdminSummary } from "../api/ispAdmin";
 import { clearSession, getAdminName } from "../auth/session";
 import { AppUserInvitationManagement } from "../components/AppUserInvitationManagement";
+import { AppUserManagement } from "../components/AppUserManagement";
 
 export default function ISPAdminDashboard({
   onLogout,
@@ -87,6 +88,7 @@ export default function ISPAdminDashboard({
         </>
       )}
 
+      <AppUserManagement />
       <AppUserInvitationManagement />
     </main>
   );

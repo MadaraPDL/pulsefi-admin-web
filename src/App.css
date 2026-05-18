@@ -112,6 +112,37 @@ h3 {
   grid-template-columns: repeat(2, minmax(280px, 1fr));
 }
 
+.app-user-management-grid {
+  grid-template-columns: minmax(240px, 0.8fr) minmax(320px, 1.2fr);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail-item {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d8e2ec;
+  border-radius: 12px;
+  background: white;
+}
+
+.detail-item span {
+  color: #62758b;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.detail-item strong {
+  overflow-wrap: anywhere;
+}
+
 .filter-bar {
   display: flex;
   flex-wrap: wrap;
@@ -357,6 +388,10 @@ th {
   .section-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
   }
 }
 

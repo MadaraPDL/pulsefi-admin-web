@@ -27,6 +27,10 @@ export type AppUserInvitationStatus =
 
 export type AppUserInvitationFilter = AppUserInvitationStatus | "all";
 
+export type AppUserStatus = "active" | "inactive" | "suspended";
+
+export type AppUserFilter = AppUserStatus | "all";
+
 export type CreateAppUserInvitationRequest = {
   email: string;
   full_name?: string | null;
@@ -51,6 +55,29 @@ export type AppUserInvitation = {
 export type RevokeAppUserInvitationResponse = {
   message: string;
   invitation: AppUserInvitation;
+};
+
+export type AppUser = {
+  id: string;
+  isp_id: string;
+  full_name: string;
+  email: string;
+  username: string | null;
+  phone_number: string | null;
+  status: AppUserStatus;
+  created_by_admin_id: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  email_verified_at: string | null;
+  mfa_enabled: boolean;
+  mfa_required: boolean;
+  preferred_mfa_method: string | null;
+};
+
+export type UpdateAppUserRequest = {
+  full_name?: string;
+  phone_number?: string | null;
+  status?: AppUserStatus;
 };
 
 export async function getISPAdminSummary(): Promise<ISPAdminSummary> {
@@ -94,4 +121,35 @@ export async function revokeAppUserInvitation(
       method: "PATCH",
     }
   );
+}
+
+export async function listISPAdminAppUsers(
+  status: AppUserStatus | null = null,
+  limit = 50,
+  offset = 0
+): Promise<AppUser[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  return apiRequest<AppUser[]>(`/isp-admin/users?${params.toString()}`);
+}
+
+export async function getISPAdminAppUser(userId: string): Promise<AppUser> {
+  return apiRequest<AppUser>(`/isp-admin/users/${userId}`);
+}
+
+export async function updateISPAdminAppUser(
+  userId: string,
+  payload: UpdateAppUserRequest
+): Promise<AppUser> {
+  return apiRequest<AppUser>(`/isp-admin/users/${userId}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 }
