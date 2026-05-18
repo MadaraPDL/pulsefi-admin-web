@@ -204,10 +204,9 @@ function LoginPage({ onLogin }: { onLogin: () => void }) {
 }
 
 function AcceptInvitationPage() {
-  const searchParams = new URLSearchParams(window.location.search);
-  const tokenFromUrl = searchParams.get("token") ?? "";
-
-  const [token, setToken] = useState(tokenFromUrl);
+  const [token, setToken] = useState(
+    () => new URLSearchParams(window.location.search).get("token") ?? ""
+  );
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [preferredMfaMethod, setPreferredMfaMethod] =
@@ -216,6 +215,23 @@ function AcceptInvitationPage() {
     useState<AcceptInvitationResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+
+    if (!searchParams.has("token")) {
+      return;
+    }
+
+    searchParams.delete("token");
+
+    const cleanSearch = searchParams.toString();
+    const cleanUrl = `${window.location.pathname}${
+      cleanSearch ? `?${cleanSearch}` : ""
+    }${window.location.hash}`;
+
+    window.history.replaceState({}, "", cleanUrl);
+  }, []);
 
   async function handleAcceptInvitation(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -233,6 +249,7 @@ function AcceptInvitationPage() {
 
       setAcceptedInvitation(response);
       setPassword("");
+      goToLogin();
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not accept invitation."));
     } finally {
@@ -241,7 +258,7 @@ function AcceptInvitationPage() {
   }
 
   function goToLogin() {
-    window.history.pushState({}, "", "/");
+    window.history.replaceState({}, "", "/");
     window.dispatchEvent(new PopStateEvent("popstate"));
   }
 
