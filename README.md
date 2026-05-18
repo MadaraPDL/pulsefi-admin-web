@@ -1,73 +1,43 @@
-# React + TypeScript + Vite
+# PulseFi Admin Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite admin dashboard for PulseFi.
 
-Currently, two official plugins are available:
+## Modes
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `npm run dev` starts the real admin web app.
+- `npm run dev:design` starts the temporary design preview hub.
+- `src/App.tsx` selects the design preview only when `import.meta.env.MODE === "design"`.
 
-## React Compiler
+The production admin web app accepts only backend admin roles:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `platform_admin`
+- `isp_admin`
 
-## Expanding the ESLint configuration
+App User screens in the design hub are reference-only for the future React Native mobile app.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Step 27C Status
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Completed locally:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Shared admin login sends `account_type: "admin"`.
+- Existing tokens are restored by calling `GET /api/v1/auth/me` on page load.
+- Invalid/expired tokens and App User tokens clear the admin session.
+- Platform Admin routes to the Platform Admin dashboard.
+- ISP Admin routes to the ISP Admin dashboard.
+- MFA verification uses `POST /api/v1/auth/mfa/verify`.
+- MFA setup confirmation uses `POST /api/v1/auth/mfa/setup/confirm`.
+- Session is saved only after the backend returns a valid admin token.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Checks
+
+```powershell
+npm run lint
+npm run build
+npm run build -- --mode design
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Backend local rate-limit reset while `DEBUG=True`:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+curl.exe -X POST http://127.0.0.1:8000/api/v1/auth/rate-limit/reset
 ```

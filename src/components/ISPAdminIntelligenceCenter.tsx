@@ -4,8 +4,10 @@ import {
   generatePredictionForSubscription,
   generateRecommendationForPrediction,
   listUserSubscriptions,
+  runISPAdminIntelligence,
 } from "../api/ispAdmin";
 import type {
+  ISPAdminIntelligenceRunResponse,
   ISPAdminPredictionGenerationResponse,
   ISPAdminRecommendationGenerationResponse,
   UserSubscription,
@@ -62,12 +64,15 @@ export function ISPAdminIntelligenceCenter() {
     useState<ISPAdminPredictionGenerationResponse | null>(null);
   const [recommendationResult, setRecommendationResult] =
     useState<ISPAdminRecommendationGenerationResponse | null>(null);
+  const [automationResult, setAutomationResult] =
+    useState<ISPAdminIntelligenceRunResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(true);
   const [isGeneratingPrediction, setIsGeneratingPrediction] = useState(false);
   const [isGeneratingRecommendation, setIsGeneratingRecommendation] =
     useState(false);
+  const [isRunningAutomation, setIsRunningAutomation] = useState(false);
 
   async function loadSubscriptions() {
     setIsLoadingSubscriptions(true);
@@ -98,6 +103,28 @@ export function ISPAdminIntelligenceCenter() {
     // loadSubscriptions intentionally stays local to avoid extra renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function handleRunAutomation() {
+    setErrorMessage("");
+    setSuccessMessage("");
+    setAutomationResult(null);
+    setIsRunningAutomation(true);
+
+    try {
+      const result = await runISPAdminIntelligence();
+      setAutomationResult(result);
+      setSuccessMessage(
+        `Intelligence run complete: ${result.predictions_created} predictions and ${result.recommendations_created} recommendations.`
+      );
+      await loadSubscriptions();
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, "Could not run automatic intelligence.")
+      );
+    } finally {
+      setIsRunningAutomation(false);
+    }
+  }
 
   async function handleGeneratePrediction() {
     if (!selectedSubscriptionId) {
@@ -175,6 +202,69 @@ export function ISPAdminIntelligenceCenter() {
 
       {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
       {successMessage && <div className="stitch-success-box">{successMessage}</div>}
+
+      <section className="stitch-intelligence-automation-panel">
+        <div>
+          <span className="stitch-automation-kicker">Automatic intelligence</span>
+          <h3>Run predictions and recommendations for this ISP</h3>
+          <p>
+            This checks active subscriptions under the current ISP, skips
+            subscriptions without enough usage data, and generates recommendations
+            for successful predictions.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => void handleRunAutomation()}
+          disabled={isRunningAutomation}
+        >
+          {isRunningAutomation ? "Running..." : "Run intelligence now"}
+        </button>
+
+        {automationResult && (
+          <div className="stitch-intelligence-run-summary">
+            <div>
+              <span>Checked</span>
+              <strong>{automationResult.subscriptions_checked}</strong>
+            </div>
+            <div>
+              <span>Predictions</span>
+              <strong>{automationResult.predictions_created}</strong>
+            </div>
+            <div>
+              <span>Recommendations</span>
+              <strong>{automationResult.recommendations_created}</strong>
+            </div>
+            <div>
+              <span>Skipped</span>
+              <strong>{automationResult.skipped}</strong>
+            </div>
+            <div>
+              <span>Failed</span>
+              <strong>{automationResult.failed}</strong>
+            </div>
+          </div>
+        )}
+
+        {automationResult && automationResult.items.length > 0 && (
+          <details className="stitch-intelligence-run-details">
+            <summary>View run details</summary>
+
+            <div>
+              {automationResult.items.map((item) => (
+                <article key={item.subscription_id}>
+                  <span className={`status-pill status-${item.status}`}>
+                    {item.status}
+                  </span>
+                  <code>{item.subscription_id}</code>
+                  <p>{item.message ?? "No message."}</p>
+                </article>
+              ))}
+            </div>
+          </details>
+        )}
+      </section>
 
       <section className="stitch-intelligence-grid">
         <div className="stitch-intelligence-panel">

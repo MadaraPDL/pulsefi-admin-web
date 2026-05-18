@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { AdminAuthFlow } from "./components/AdminAuthFlow";
+import { restoreAdminSession } from "./api/adminAuth";
 import type { AdminAuthenticatedResult } from "./api/adminAuth";
 import {
   clearSession,
+  getAccessToken,
   getAdminRole,
   hasSession,
   saveSession,
@@ -12,9 +14,13 @@ import AcceptInvitationPage from "./pages/AcceptInvitationPage";
 import ISPAdminDashboard from "./pages/ISPAdminDashboard";
 import PlatformAdminDashboard from "./pages/PlatformAdminDashboard";
 
+type AuthStatus = "checking" | "logged_out" | "authenticated";
+
 export default function RealApp() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
-  const [isLoggedIn, setIsLoggedIn] = useState(hasSession());
+  const [authStatus, setAuthStatus] = useState<AuthStatus>(
+    hasSession() ? "checking" : "logged_out"
+  );
 
   useEffect(() => {
     function handlePopState() {
@@ -25,21 +31,67 @@ export default function RealApp() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  useEffect(() => {
+    if (currentPath === "/accept-invitation") {
+      return;
+    }
+
+    const accessToken = getAccessToken();
+
+    if (!accessToken) {
+      clearSession();
+      return;
+    }
+
+    const sessionToken = accessToken;
+
+    let isCancelled = false;
+
+    async function restoreSession() {
+      setAuthStatus("checking");
+
+      try {
+        const result = await restoreAdminSession(sessionToken);
+
+        if (!isCancelled) {
+          saveSession(result.session);
+          setAuthStatus("authenticated");
+        }
+      } catch {
+        clearSession();
+
+        if (!isCancelled) {
+          setAuthStatus("logged_out");
+        }
+      }
+    }
+
+    void restoreSession();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentPath]);
+
   function handleAuthenticated(result: AdminAuthenticatedResult) {
     saveSession(result.session);
-    setIsLoggedIn(true);
+    setAuthStatus("authenticated");
   }
 
   function handleLogout() {
     clearSession();
-    setIsLoggedIn(false);
+    setAuthStatus("logged_out");
   }
 
   if (currentPath === "/accept-invitation") {
     return <AcceptInvitationPage />;
   }
 
-  if (!isLoggedIn) {
+  if (authStatus === "checking") {
+    return <SessionRestorePage />;
+  }
+
+  if (authStatus === "logged_out") {
     return <AdminAuthFlow onAuthenticated={handleAuthenticated} />;
   }
 
@@ -55,4 +107,21 @@ export default function RealApp() {
 
   clearSession();
   return <AdminAuthFlow onAuthenticated={handleAuthenticated} />;
+}
+
+function SessionRestorePage() {
+  return (
+    <main className="stitch-auth-page">
+      <div className="stitch-auth-wrap">
+        <section className="stitch-login-card">
+          <div className="stitch-auth-heading">
+            <h1>Checking session</h1>
+            <p>Verifying your admin session with PulseFi.</p>
+          </div>
+
+          <p className="stitch-loading-text">Loading admin dashboard...</p>
+        </section>
+      </div>
+    </main>
+  );
 }

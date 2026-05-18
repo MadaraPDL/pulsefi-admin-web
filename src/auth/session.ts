@@ -20,6 +20,10 @@ export function hasSession() {
   return Boolean(localStorage.getItem(ACCESS_TOKEN_KEY));
 }
 
+export function getAccessToken() {
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
 export function getAdminName(fallback: string) {
   return localStorage.getItem(ADMIN_NAME_KEY) ?? fallback;
 }

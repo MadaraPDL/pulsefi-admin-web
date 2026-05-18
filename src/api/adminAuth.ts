@@ -113,6 +113,37 @@ export async function getCurrentAdmin(
   });
 }
 
+function buildAuthenticatedResultFromCurrentAdmin(
+  currentAdmin: CurrentAdminResponse,
+  accessToken: string
+): AdminAuthenticatedResult {
+  if (currentAdmin.account_type !== "admin") {
+    throw new Error("This login page is only for admin accounts.");
+  }
+
+  const role = normalizeAdminRole(currentAdmin.role);
+
+  if (!role) {
+    throw new Error("Admin role was not found from /auth/me.");
+  }
+
+  return {
+    kind: "authenticated",
+    accessToken,
+    role,
+    identifier: currentAdmin.email,
+    session: {
+      access_token: accessToken,
+      token_type: "bearer",
+      account_type: "admin",
+      account_id: currentAdmin.account_id,
+      full_name: currentAdmin.full_name,
+      email: currentAdmin.email,
+      role,
+    },
+  };
+}
+
 async function buildAuthenticatedResult(
   session: AuthTokenResponse,
   identifier: string
@@ -142,6 +173,14 @@ async function buildAuthenticatedResult(
       role,
     },
   };
+}
+
+export async function restoreAdminSession(
+  accessToken: string
+): Promise<AdminAuthenticatedResult> {
+  const currentAdmin = await getCurrentAdmin(accessToken);
+
+  return buildAuthenticatedResultFromCurrentAdmin(currentAdmin, accessToken);
 }
 
 export async function loginAdmin(

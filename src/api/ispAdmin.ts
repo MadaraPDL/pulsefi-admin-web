@@ -788,3 +788,30 @@ export async function generateRecommendationForPrediction(
     }
   );
 }
+
+
+export type ISPAdminIntelligenceRunItem = {
+  subscription_id: string;
+  status: string;
+  prediction_id: string | null;
+  recommendation_id: string | null;
+  message: string | null;
+};
+
+export type ISPAdminIntelligenceRunResponse = {
+  subscriptions_checked: number;
+  predictions_created: number;
+  recommendations_created: number;
+  skipped: number;
+  failed: number;
+  items: ISPAdminIntelligenceRunItem[];
+};
+
+export async function runISPAdminIntelligence(): Promise<ISPAdminIntelligenceRunResponse> {
+  return apiRequest<ISPAdminIntelligenceRunResponse>(
+    "/isp-admin/intelligence/run",
+    {
+      method: "POST",
+    }
+  );
+}
