@@ -1,61 +1,80 @@
-﻿export type AdminRole = "platform_admin" | "isp_admin";
+import { apiRequest } from "./client";
+import {
+  confirmMFASetup,
+  loginAsAdmin,
+  verifyMFA,
+} from "./auth";
+import type {
+  AuthTokenResponse,
+  MFARequiredResponse,
+  MFASetupRequiredResponse,
+} from "./auth";
+
+export type AdminRole = "platform_admin" | "isp_admin";
+
+export type CurrentAdminResponse = {
+  account_type: "admin" | "app_user";
+  account_id: string;
+  full_name: string;
+  email: string;
+  username: string | null;
+  role: string | null;
+  status: string;
+  email_verified_at: string | null;
+  mfa_enabled: boolean;
+  mfa_required: boolean;
+  preferred_mfa_method: string | null;
+};
+
+export type AdminAuthenticatedResult = {
+  kind: "authenticated";
+  accessToken: string;
+  role: AdminRole;
+  identifier: string;
+  session: AuthTokenResponse;
+};
 
 export type AdminLoginResult =
+  | AdminAuthenticatedResult
   | {
-      kind: "authenticated";
-      accessToken: string;
-      role: AdminRole;
+      kind: "mfa_required";
+      challenge: MFARequiredResponse;
       identifier: string;
     }
   | {
-      kind: "mfa_required";
-      challengeToken?: string;
-      method?: string;
-      expiresAt?: string;
+      kind: "mfa_setup_required";
+      setup: MFASetupRequiredResponse;
+      identifier: string;
     };
 
-type ApiErrorDetail = {
-  msg?: string;
-  message?: string;
-};
+function isMFASetupRequiredResponse(
+  response: unknown
+): response is MFASetupRequiredResponse {
+  return (
+    typeof response === "object" &&
+    response !== null &&
+    "mfa_setup_required" in response
+  );
+}
 
-type LoginResponse = {
-  access_token?: string;
-  token?: string;
-  role?: string;
-  admin_role?: string;
-  account_type?: string;
-  mfa_required?: boolean;
-  challenge_token?: string;
-  mfa_challenge_token?: string;
-  method?: string;
-  mfa_method?: string;
-  expires_at?: string;
-  detail?: unknown;
-  message?: string;
-  details?: ApiErrorDetail[];
-};
+function isMFARequiredResponse(response: unknown): response is MFARequiredResponse {
+  return (
+    typeof response === "object" &&
+    response !== null &&
+    "mfa_required" in response
+  );
+}
 
-type MeResponse = {
-  id?: string;
-  email?: string;
-  username?: string | null;
-  role?: string;
-  admin_role?: string;
-  account_type?: string;
-  detail?: unknown;
-  message?: string;
-  details?: ApiErrorDetail[];
-};
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000/api/v1";
-
-async function readJson<T>(response: Response): Promise<T> {
-  try {
-    return (await response.json()) as T;
-  } catch {
-    return {} as T;
+function normalizeAdminRole(value: unknown): AdminRole | null {
+  if (value === "platform_admin") {
+    return "platform_admin";
   }
+
+  if (value === "isp_admin") {
+    return "isp_admin";
+  }
+
+  return null;
 }
 
 function decodeJwtPayload(token: string): Record<string, unknown> {
@@ -67,131 +86,111 @@ function decodeJwtPayload(token: string): Record<string, unknown> {
 
   try {
     const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const decoded = window.atob(normalizedPayload);
+    const paddedPayload = normalizedPayload.padEnd(
+      Math.ceil(normalizedPayload.length / 4) * 4,
+      "="
+    );
+    const decoded = window.atob(paddedPayload);
     return JSON.parse(decoded) as Record<string, unknown>;
   } catch {
     return {};
   }
 }
 
-function normalizeAdminRole(value: unknown): AdminRole | null {
-  if (
-    value === "platform_admin" ||
-    value === "platform" ||
-    value === "platform-admin"
-  ) {
-    return "platform_admin";
-  }
+function getRoleFromTokenOrResponse(session: AuthTokenResponse): AdminRole | null {
+  const payload = decodeJwtPayload(session.access_token);
 
-  if (
-    value === "isp_admin" ||
-    value === "isp" ||
-    value === "isp-admin"
-  ) {
-    return "isp_admin";
-  }
-
-  return null;
+  return normalizeAdminRole(session.role) ?? normalizeAdminRole(payload.role);
 }
 
-function getErrorMessage(status: number, data: LoginResponse | MeResponse): string {
-  if (typeof data.detail === "string") {
-    return `${status}: ${data.detail}`;
-  }
-
-  if (typeof data.message === "string") {
-    return `${status}: ${data.message}`;
-  }
-
-  const firstDetail = data.details?.[0]?.msg ?? data.details?.[0]?.message;
-
-  if (firstDetail) {
-    return `${status}: ${firstDetail}`;
-  }
-
-  return `${status}: Login failed.`;
-}
-
-async function getCurrentAdminRole(accessToken: string): Promise<AdminRole | null> {
-  const response = await fetch(`${API_BASE_URL}/auth/me`, {
-    method: "GET",
+export async function getCurrentAdmin(
+  accessToken: string
+): Promise<CurrentAdminResponse> {
+  return apiRequest<CurrentAdminResponse>("/auth/me", {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-
-  const data = await readJson<MeResponse>(response);
-
-  if (!response.ok) {
-    throw new Error(getErrorMessage(response.status, data));
-  }
-
-  return normalizeAdminRole(data.role) ?? normalizeAdminRole(data.admin_role);
 }
 
-function getRoleFromTokenOrResponse(token: string, response: LoginResponse): AdminRole | null {
-  const payload = decodeJwtPayload(token);
-
-  return (
-    normalizeAdminRole(response.role) ??
-    normalizeAdminRole(response.admin_role) ??
-    normalizeAdminRole(payload.role) ??
-    normalizeAdminRole(payload.admin_role)
-  );
-}
-
-export async function loginAdmin(identifier: string, password: string): Promise<AdminLoginResult> {
-  const response = await fetch(`${API_BASE_URL}/auth/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      identifier,
-      password,
-      account_type: "admin",
-    }),
-  });
-
-  const data = await readJson<LoginResponse>(response);
-
-  if (!response.ok) {
-    throw new Error(getErrorMessage(response.status, data));
-  }
-
-  if (data.mfa_required) {
-    return {
-      kind: "mfa_required",
-      challengeToken: data.challenge_token ?? data.mfa_challenge_token,
-      method: data.method ?? data.mfa_method,
-      expiresAt: data.expires_at,
-    };
-  }
-
-  const accessToken = data.access_token ?? data.token;
-
-  if (!accessToken) {
-    throw new Error("Login succeeded but no access token was returned.");
-  }
-
-  const payload = decodeJwtPayload(accessToken);
-  const accountType = data.account_type ?? payload.account_type;
-
-  if (accountType !== "admin") {
+async function buildAuthenticatedResult(
+  session: AuthTokenResponse,
+  identifier: string
+): Promise<AdminAuthenticatedResult> {
+  if (session.account_type !== "admin") {
     throw new Error("This login page is only for admin accounts.");
   }
 
-  const roleFromLogin = getRoleFromTokenOrResponse(accessToken, data);
-  const role = roleFromLogin ?? (await getCurrentAdminRole(accessToken));
+  const roleFromTokenOrResponse = getRoleFromTokenOrResponse(session);
+  const currentAdmin = roleFromTokenOrResponse
+    ? null
+    : await getCurrentAdmin(session.access_token);
+  const role =
+    roleFromTokenOrResponse ?? normalizeAdminRole(currentAdmin?.role);
 
   if (!role) {
-    throw new Error("Admin role was not found from login or /auth/me.");
+    throw new Error("Admin role was not found from login response or /auth/me.");
   }
 
   return {
     kind: "authenticated",
-    accessToken,
+    accessToken: session.access_token,
     role,
     identifier,
+    session: {
+      ...session,
+      role,
+    },
   };
+}
+
+export async function loginAdmin(
+  identifier: string,
+  password: string
+): Promise<AdminLoginResult> {
+  const response = await loginAsAdmin(identifier, password);
+
+  if (isMFASetupRequiredResponse(response)) {
+    return {
+      kind: "mfa_setup_required",
+      setup: response,
+      identifier,
+    };
+  }
+
+  if (isMFARequiredResponse(response)) {
+    return {
+      kind: "mfa_required",
+      challenge: response,
+      identifier,
+    };
+  }
+
+  return buildAuthenticatedResult(response, identifier);
+}
+
+export async function verifyAdminMFA(
+  challengeToken: string,
+  code: string,
+  identifier: string
+): Promise<AdminAuthenticatedResult> {
+  const session = await verifyMFA({
+    challenge_token: challengeToken,
+    code,
+  });
+
+  return buildAuthenticatedResult(session, identifier);
+}
+
+export async function confirmAdminMFASetup(
+  mfaSetupToken: string,
+  code: string,
+  identifier: string
+): Promise<AdminAuthenticatedResult> {
+  const session = await confirmMFASetup({
+    mfa_setup_token: mfaSetupToken,
+    code,
+  });
+
+  return buildAuthenticatedResult(session, identifier);
 }

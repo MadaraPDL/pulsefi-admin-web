@@ -1,11 +1,18 @@
-﻿import PulseFiDesignPreviewApp from "./PulseFiDesignPreviewApp";
+import { lazy, Suspense } from "react";
 import RealApp from "./App.real";
 
-const showDesignPreview = import.meta.env.MODE === "design";
+const PulseFiDesignPreviewApp =
+  import.meta.env.MODE === "design"
+    ? lazy(() => import("./PulseFiDesignPreviewApp"))
+    : null;
 
 export default function App() {
-  if (showDesignPreview) {
-    return <PulseFiDesignPreviewApp />;
+  if (PulseFiDesignPreviewApp) {
+    return (
+      <Suspense fallback={null}>
+        <PulseFiDesignPreviewApp />
+      </Suspense>
+    );
   }
 
   return <RealApp />;

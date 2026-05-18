@@ -24,7 +24,19 @@ export type MFASetupRequiredResponse = {
   authenticator_uri: string;
 };
 
-export type LoginResponse = AuthTokenResponse | MFASetupRequiredResponse;
+export type MFARequiredResponse = {
+  mfa_required: true;
+  challenge_token: string;
+  method: MFAMethod;
+  expires_at: string;
+  message: string;
+  dev_email_code?: string | null;
+};
+
+export type LoginResponse =
+  | AuthTokenResponse
+  | MFARequiredResponse
+  | MFASetupRequiredResponse;
 
 export type AcceptInvitationRequest = {
   token: string;
@@ -38,6 +50,11 @@ export type AcceptInvitationResponse = {
   account_type: AccountType;
   account_id: string;
   email: string;
+};
+
+export type MFAVerifyRequest = {
+  challenge_token: string;
+  code: string;
 };
 
 export type MFASetupConfirmRequest = {
@@ -63,6 +80,15 @@ export async function acceptInvitation(
   payload: AcceptInvitationRequest
 ): Promise<AcceptInvitationResponse> {
   return apiRequest<AcceptInvitationResponse>("/auth/invitations/accept", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function verifyMFA(
+  payload: MFAVerifyRequest
+): Promise<AuthTokenResponse> {
+  return apiRequest<AuthTokenResponse>("/auth/mfa/verify", {
     method: "POST",
     body: JSON.stringify(payload),
   });
