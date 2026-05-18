@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
@@ -178,7 +178,7 @@ export function AppUserManagement() {
             View ISP-scoped App Users and update support-managed account fields.
           </p>
         </div>
-        <button className="secondary-button" onClick={loadUsers}>
+        <button type="button" className="secondary-button" onClick={loadUsers}>
           Refresh
         </button>
       </div>
