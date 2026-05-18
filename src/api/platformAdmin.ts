@@ -1,4 +1,4 @@
-﻿import { apiRequest } from "./client";
+import { apiRequest } from "./client";
 
 export type PlatformAdminSummary = {
   total_isps: number;
@@ -52,6 +52,14 @@ export type CreateISPAdminInvitationRequest = {
   expires_in_days: number;
 };
 
+export type ISPAdminInvitationStatus =
+  | "pending"
+  | "accepted"
+  | "revoked"
+  | "expired";
+
+export type ISPAdminInvitationFilter = ISPAdminInvitationStatus | "all";
+
 export type ISPAdminInvitation = {
   id: string;
   email: string;
@@ -65,6 +73,11 @@ export type ISPAdminInvitation = {
   revoked_at: string | null;
   created_at: string;
   dev_invitation_token: string | null;
+};
+
+export type RevokeISPAdminInvitationResponse = {
+  message: string;
+  invitation: ISPAdminInvitation;
 };
 
 export async function getPlatformAdminSummary(): Promise<PlatformAdminSummary> {
@@ -101,6 +114,39 @@ export async function createISPAdminInvitation(
     {
       method: "POST",
       body: JSON.stringify(payload),
+    }
+  );
+}
+
+
+export async function listISPAdminInvitations(
+  ispId: string,
+  status: ISPAdminInvitationStatus | null = null,
+  limit = 50,
+  offset = 0
+): Promise<ISPAdminInvitation[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  return apiRequest<ISPAdminInvitation[]>(
+    `/platform-admin/isps/${ispId}/admin-invitations?${params.toString()}`
+  );
+}
+
+export async function revokeISPAdminInvitation(
+  ispId: string,
+  invitationId: string
+): Promise<RevokeISPAdminInvitationResponse> {
+  return apiRequest<RevokeISPAdminInvitationResponse>(
+    `/platform-admin/isps/${ispId}/admin-invitations/${invitationId}/revoke`,
+    {
+      method: "PATCH",
     }
   );
 }

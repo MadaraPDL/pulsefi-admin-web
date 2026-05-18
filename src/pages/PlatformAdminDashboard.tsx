@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { FormEvent } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   createISP,
@@ -17,28 +17,279 @@ import type {
   UpdateISPRequest,
 } from "../api/platformAdmin";
 import { clearSession, getAdminName } from "../auth/session";
+import { PlatformISPAdminInvitationManagement } from "../components/PlatformISPAdminInvitationManagement";
+
+type PlatformSection =
+  | "dashboard"
+  | "isps"
+  | "admins"
+  | "invitations"
+  | "system_health"
+  | "settings";
+
+const platformSectionCopy: Record<
+  PlatformSection,
+  { title: string; subtitle: string }
+> = {
+  dashboard: {
+    title: "Platform Overview",
+    subtitle: "Signed in as Platform Admin",
+  },
+  isps: {
+    title: "ISP Management",
+    subtitle: "Create, update, and review ISP records.",
+  },
+  admins: {
+    title: "Admin Management",
+    subtitle: "Review platform and ISP admin access.",
+  },
+  invitations: {
+    title: "Invitations",
+    subtitle: "Track admin invitation workflows.",
+  },
+  system_health: {
+    title: "System Health",
+    subtitle: "Monitor API, security, and platform status.",
+  },
+  settings: {
+    title: "Settings",
+    subtitle: "Platform configuration area.",
+  },
+};
+
+function PlatformSidebar({
+  activeSection,
+  onNavigate,
+  onLogout,
+}: {
+  activeSection: PlatformSection;
+  onNavigate: (section: PlatformSection) => void;
+  onLogout: () => void;
+}) {
+  const navItems: Array<{
+    id: PlatformSection;
+    label: string;
+    icon: string;
+  }> = [
+    { id: "dashboard", label: "Dashboard", icon: "dashboard" },
+    { id: "isps", label: "ISPs", icon: "router" },
+    { id: "admins", label: "Admins", icon: "admin_panel_settings" },
+    { id: "invitations", label: "Invitations", icon: "mail" },
+    { id: "system_health", label: "System Health", icon: "monitor_heart" },
+    { id: "settings", label: "Settings", icon: "settings" },
+  ];
+
+  return (
+    <nav className="stitch-sidebar" aria-label="Platform Admin navigation">
+      <div className="stitch-sidebar-head">
+        <div className="stitch-profile-row">
+          <div className="stitch-profile-avatar">
+            <span className="material-symbols-outlined">person</span>
+          </div>
+
+          <div>
+            <h1>PulseFi</h1>
+            <p>Platform Owner</p>
+          </div>
+        </div>
+
+        <button
+          className="stitch-quick-action"
+          type="button"
+          onClick={() => onNavigate("isps")}
+        >
+          <span className="material-symbols-outlined">add</span>
+          Quick Action
+        </button>
+      </div>
+
+      <ul className="stitch-nav-list">
+        {navItems.map((item) => (
+          <li key={item.label}>
+            <button
+              className={
+                item.id === activeSection
+                  ? "stitch-sidebar-link stitch-sidebar-link-active"
+                  : "stitch-sidebar-link"
+              }
+              type="button"
+              onClick={() => onNavigate(item.id)}
+            >
+              <span className="material-symbols-outlined">{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <div className="stitch-sidebar-bottom">
+        <button className="stitch-sidebar-link" type="button">
+          <span className="material-symbols-outlined">help</span>
+          <span>Support</span>
+        </button>
+
+        <button className="stitch-sidebar-link" type="button" onClick={onLogout}>
+          <span className="material-symbols-outlined">logout</span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function PlatformTopBar({
+  adminName,
+  activeSection,
+}: {
+  adminName: string;
+  activeSection: PlatformSection;
+}) {
+  const copy = platformSectionCopy[activeSection];
+  return (
+    <header className="stitch-topbar">
+      <div className="stitch-topbar-left">
+        <div>
+          <h2>{copy.title}</h2>
+          <p>{copy.subtitle} · {adminName}</p>
+        </div>
+
+        <label className="stitch-dashboard-search">
+          <span className="material-symbols-outlined">search</span>
+          <input placeholder="Search platform..." />
+        </label>
+      </div>
+
+      <div className="stitch-topbar-actions">
+        <button type="button" aria-label="Notifications">
+          <span className="material-symbols-outlined">notifications</span>
+        </button>
+
+        <button type="button" aria-label="Settings">
+          <span className="material-symbols-outlined">settings</span>
+        </button>
+      </div>
+    </header>
+  );
+}
+
+function PlatformShell({
+  adminName,
+  activeSection,
+  onNavigate,
+  onLogout,
+  children,
+}: {
+  adminName: string;
+  activeSection: PlatformSection;
+  onNavigate: (section: PlatformSection) => void;
+  onLogout: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <div className="stitch-dashboard-shell">
+      <PlatformSidebar
+        activeSection={activeSection}
+        onNavigate={onNavigate}
+        onLogout={onLogout}
+      />
+      <PlatformTopBar adminName={adminName} activeSection={activeSection} />
+
+      <main className="stitch-dashboard-main">{children}</main>
+    </div>
+  );
+}
 
 function SummaryCards({ summary }: { summary: PlatformAdminSummary }) {
+  const cards = [
+    {
+      label: "Total ISPs",
+      icon: "router",
+      value: summary.total_isps,
+      detail: `${summary.active_isps} Active`,
+      secondDetail: `${summary.total_isps - summary.active_isps} Inactive`,
+    },
+    {
+      label: "ISP Admins",
+      icon: "admin_panel_settings",
+      value: summary.total_isp_admins,
+      detail: `${summary.active_isp_admins} Active`,
+      secondDetail: "Platform managed",
+    },
+    {
+      label: "App Users",
+      icon: "group",
+      value: summary.total_app_users,
+      detail: `${summary.active_app_users} Active`,
+      secondDetail: "Across all ISPs",
+    },
+    {
+      label: "System Health",
+      icon: "monitor_heart",
+      value: "Healthy",
+      detail: "Local checks OK",
+      secondDetail: "API connected",
+    },
+  ];
+
   return (
-    <section className="summary-grid">
-      <article className="summary-card">
-        <span>Total ISPs</span>
-        <strong>{summary.total_isps}</strong>
-        <small>{summary.active_isps} active</small>
-      </article>
+    <section className="stitch-kpi-grid">
+      {cards.map((card) => (
+        <article className="stitch-kpi-card" key={card.label}>
+          <div className="stitch-kpi-top">
+            <span>{card.label}</span>
+            <span className="material-symbols-outlined">{card.icon}</span>
+          </div>
 
-      <article className="summary-card">
-        <span>ISP Admins</span>
-        <strong>{summary.total_isp_admins}</strong>
-        <small>{summary.active_isp_admins} active</small>
-      </article>
-
-      <article className="summary-card">
-        <span>App Users</span>
-        <strong>{summary.total_app_users}</strong>
-        <small>{summary.active_app_users} active</small>
-      </article>
+          <div>
+            <strong>{card.value}</strong>
+            <div className="stitch-kpi-meta">
+              <span>{card.detail}</span>
+              <span>{card.secondDetail}</span>
+            </div>
+          </div>
+        </article>
+      ))}
     </section>
+  );
+}
+
+function PlatformAlerts() {
+  return (
+    <aside className="stitch-alerts-panel">
+      <div className="stitch-panel-title-row">
+        <h2>Platform Alerts</h2>
+        <span className="stitch-critical-pill">2 Critical</span>
+      </div>
+
+      <div className="stitch-alert-list">
+        <article className="stitch-alert-item stitch-alert-warning">
+          <span className="material-symbols-outlined">warning</span>
+          <div>
+            <h3>API Latency Spike</h3>
+            <p>Average response time exceeded the local monitoring target.</p>
+            <small>15 mins ago</small>
+          </div>
+        </article>
+
+        <article className="stitch-alert-item stitch-alert-warning">
+          <span className="material-symbols-outlined">storage</span>
+          <div>
+            <h3>Storage Capacity Warning</h3>
+            <p>Database capacity monitor placeholder for production telemetry.</p>
+            <small>1 hour ago</small>
+          </div>
+        </article>
+
+        <article className="stitch-alert-item stitch-alert-info">
+          <span className="material-symbols-outlined">verified_user</span>
+          <div>
+            <h3>Admin MFA Active</h3>
+            <p>Admin sessions are routed by backend role and MFA state.</p>
+            <small>Security checkpoint</small>
+          </div>
+        </article>
+      </div>
+    </aside>
   );
 }
 
@@ -227,32 +478,27 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
   }
 
   return (
-    <section className="panel">
-      <div className="section-header">
+    <section className="stitch-content-card">
+      <div className="stitch-panel-title-row">
         <div>
-          <p className="eyebrow">Platform Management</p>
-          <h2>ISPs and ISP Admin Invitations</h2>
-          <p className="muted">
-            Create the ISP record first, then invite the ISP Admin by email.
-          </p>
+          <h2>Recent ISP Activity</h2>
+          <p>Manage ISP records, admin invitations, and ISP status.</p>
         </div>
-        <button className="secondary-button" onClick={loadISPs}>
+
+        <button className="stitch-view-link" type="button" onClick={loadISPs}>
           Refresh
         </button>
       </div>
 
-      <div className="selected-strip">
+      <div className="stitch-selected-strip">
         <strong>Selected ISP:</strong>{" "}
         {selectedISP ? selectedISP.name : "None selected yet"}
       </div>
 
-      <div className="management-grid">
-        <form className="create-form" onSubmit={handleCreateISP}>
+      <div className="stitch-management-grid">
+        <form className="stitch-management-form" onSubmit={handleCreateISP}>
           <h3>Create ISP record</h3>
-          <p className="muted">
-            This creates the company/ISP container. Admin login is created by
-            invitation.
-          </p>
+          <p>This creates the company/ISP container.</p>
 
           <label>
             ISP name
@@ -297,15 +543,12 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
           </button>
         </form>
 
-        <form className="create-form" onSubmit={handleInviteISPAdmin}>
+        <form className="stitch-management-form" onSubmit={handleInviteISPAdmin}>
           <h3>Invite ISP Admin</h3>
-          <p className="muted">
-            The invited admin accepts the link and creates their login
-            information.
-          </p>
+          <p>The invited admin accepts the link and creates their login.</p>
 
           {!selectedISP && (
-            <p className="warning-text">Select an ISP from the table first.</p>
+            <p className="stitch-warning-text">Select an ISP from the table first.</p>
           )}
 
           <label>
@@ -343,12 +586,12 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
           </label>
 
           <button disabled={!selectedISP || isInviting}>
-            {isInviting ? "Creating invitation..." : "Create ISP Admin invitation"}
+            {isInviting ? "Creating invitation..." : "Create invitation"}
           </button>
 
           {latestInvitation?.dev_invitation_token && (
-            <div className="dev-token-box">
-              <strong>Local DEBUG invitation token:</strong>
+            <div className="stitch-dev-box">
+              <strong>Local DEBUG invitation token</strong>
               <code>{latestInvitation.dev_invitation_token}</code>
               <small>
                 In production, this is sent by email. Locally, use this token
@@ -358,11 +601,11 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
           )}
         </form>
 
-        <form className="create-form" onSubmit={handleUpdateISP}>
+        <form className="stitch-management-form" onSubmit={handleUpdateISP}>
           <h3>Edit selected ISP</h3>
 
           {!selectedISP && (
-            <p className="muted">Select an ISP from the table to edit it.</p>
+            <p>Select an ISP from the table to edit it.</p>
           )}
 
           {selectedISP && (
@@ -423,23 +666,26 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
         </form>
       </div>
 
-      {errorMessage && <div className="error-box">{errorMessage}</div>}
-      {successMessage && <div className="success-box">{successMessage}</div>}
+      <PlatformISPAdminInvitationManagement selectedISP={selectedISP} />
 
-      {isLoading && <p>Loading ISPs...</p>}
+      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
+      {successMessage && <div className="stitch-success-box">{successMessage}</div>}
+
+      {isLoading && <p className="stitch-loading-text">Loading ISPs...</p>}
 
       {!isLoading && (
-        <div className="table-card">
+        <div className="stitch-table-wrap">
           <table>
             <thead>
               <tr>
-                <th>Name</th>
+                <th>ISP</th>
                 <th>Contact</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>Action</th>
               </tr>
             </thead>
+
             <tbody>
               {isps.map((isp) => (
                 <tr
@@ -449,7 +695,12 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
                   }
                   onClick={() => chooseISP(isp)}
                 >
-                  <td>{isp.name}</td>
+                  <td>
+                    <span className="stitch-table-icon">
+                      <span className="material-symbols-outlined">router</span>
+                    </span>
+                    {isp.name}
+                  </td>
                   <td>{isp.contact_email ?? "-"}</td>
                   <td>
                     <span className={`status-pill status-${isp.status}`}>
@@ -485,6 +736,24 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
   );
 }
 
+function PlatformPlaceholder({
+  icon,
+  title,
+  description,
+}: {
+  icon: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <section className="stitch-content-card stitch-placeholder-card">
+      <span className="material-symbols-outlined">{icon}</span>
+      <h2>{title}</h2>
+      <p>{description}</p>
+    </section>
+  );
+}
+
 export default function PlatformAdminDashboard({
   onLogout,
 }: {
@@ -492,6 +761,8 @@ export default function PlatformAdminDashboard({
 }) {
   const [summary, setSummary] = useState<PlatformAdminSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [activeSection, setActiveSection] =
+    useState<PlatformSection>("dashboard");
 
   const adminName = getAdminName("Admin");
 
@@ -534,26 +805,67 @@ export default function PlatformAdminDashboard({
   }
 
   return (
-    <main className="dashboard-page">
-      <header className="dashboard-header">
-        <div>
-          <p className="eyebrow">PulseFi Platform</p>
-          <h1>Welcome, {adminName}</h1>
-          <p className="muted">Platform Admin dashboard foundation.</p>
-        </div>
+    <PlatformShell
+      activeSection={activeSection}
+      adminName={adminName}
+      onNavigate={setActiveSection}
+      onLogout={handleLogout}
+    >
+      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
 
-        <button className="secondary-button" onClick={handleLogout}>
-          Logout
-        </button>
-      </header>
+      {!summary && !errorMessage && (
+        <p className="stitch-loading-text">Loading summary...</p>
+      )}
 
-      {errorMessage && <div className="error-box">{errorMessage}</div>}
+      {activeSection === "dashboard" && (
+        <>
+          {summary && <SummaryCards summary={summary} />}
 
-      {!summary && !errorMessage && <p>Loading summary...</p>}
+          <section className="stitch-bento-grid">
+            <ISPManagement onDataChanged={loadSummary} />
+            <PlatformAlerts />
+          </section>
+        </>
+      )}
 
-      {summary && <SummaryCards summary={summary} />}
+      {activeSection === "isps" && (
+        <ISPManagement onDataChanged={loadSummary} />
+      )}
 
-      <ISPManagement onDataChanged={loadSummary} />
-    </main>
+      {activeSection === "admins" && (
+        <PlatformPlaceholder
+          icon="admin_panel_settings"
+          title="Admin Management"
+          description="This section will list Platform Admins and ISP Admins once the dedicated admin-management API is connected."
+        />
+      )}
+
+      {activeSection === "invitations" && (
+        <PlatformPlaceholder
+          icon="mail"
+          title="Invitation Center"
+          description="This section will show invitation history, pending invitations, accepted invitations, and revoked invitation records."
+        />
+      )}
+
+      {activeSection === "system_health" && (
+        <section className="stitch-bento-grid">
+          <PlatformPlaceholder
+            icon="monitor_heart"
+            title="System Health"
+            description="This section will connect to live platform health, API, database, and job status checks later."
+          />
+          <PlatformAlerts />
+        </section>
+      )}
+
+      {activeSection === "settings" && (
+        <PlatformPlaceholder
+          icon="settings"
+          title="Platform Settings"
+          description="This section will hold platform-level settings after the backend settings contract is added."
+        />
+      )}
+    </PlatformShell>
   );
 }
