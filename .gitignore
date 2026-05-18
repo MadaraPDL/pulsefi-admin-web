@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 .env.local
 .env
+
+.env.design
+.env.local
+.env.development.local
+.env.design.local

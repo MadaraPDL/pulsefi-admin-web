@@ -1,18 +1,20 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import {
+  assertAdminSession,
+  buildAdminAuthenticatedResult,
   confirmAdminMFASetup,
-  loginAdmin,
+  isMFARequiredResponse,
+  isMFASetupRequiredResponse,
+  loginAsAdmin,
   verifyAdminMFA,
 } from "../api/adminAuth";
 import type {
   AdminAuthenticatedResult,
-  AdminLoginResult,
-} from "../api/adminAuth";
-import type {
+  AdminLoginResponse,
   MFARequiredResponse,
   MFASetupRequiredResponse,
-} from "../api/auth";
+} from "../api/adminAuth";
 import { getErrorMessage } from "../api/errors";
 
 type AuthStep =
@@ -54,26 +56,27 @@ export function AdminAuthFlow({
 }) {
   const [step, setStep] = useState<AuthStep>({ kind: "login" });
 
-  function handleLoginResult(result: AdminLoginResult) {
-    if (result.kind === "mfa_required") {
+  function handleLoginResponse(response: AdminLoginResponse, identifier: string) {
+    if (isMFARequiredResponse(response)) {
       setStep({
         kind: "mfa_required",
-        challenge: result.challenge,
-        identifier: result.identifier,
+        challenge: response,
+        identifier,
       });
       return;
     }
 
-    if (result.kind === "mfa_setup_required") {
+    if (isMFASetupRequiredResponse(response)) {
       setStep({
         kind: "mfa_setup_required",
-        setup: result.setup,
-        identifier: result.identifier,
+        setup: response,
+        identifier,
       });
       return;
     }
 
-    onAuthenticated(result);
+    const session = assertAdminSession(response);
+    onAuthenticated(buildAdminAuthenticatedResult(session, identifier));
   }
 
   if (step.kind === "mfa_required") {
@@ -98,13 +101,13 @@ export function AdminAuthFlow({
     );
   }
 
-  return <AdminLoginPage onLoginResult={handleLoginResult} />;
+  return <AdminLoginPage onLoginResponse={handleLoginResponse} />;
 }
 
 function AdminLoginPage({
-  onLoginResult,
+  onLoginResponse,
 }: {
-  onLoginResult: (result: AdminLoginResult) => void;
+  onLoginResponse: (response: AdminLoginResponse, identifier: string) => void;
 }) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -118,8 +121,8 @@ function AdminLoginPage({
     setIsSubmitting(true);
 
     try {
-      const result = await loginAdmin(identifier, password);
-      onLoginResult(result);
+      const response = await loginAsAdmin(identifier, password);
+      onLoginResponse(response, identifier);
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not sign in."));
     } finally {
@@ -245,12 +248,12 @@ function MFAVerifyPage({
     setIsSubmitting(true);
 
     try {
-      const result = await verifyAdminMFA(
-        challenge.challenge_token,
-        code.trim().replace(/\s/g, ""),
-        identifier
-      );
-      onAuthenticated(result);
+      const session = await verifyAdminMFA({
+        challenge_token: challenge.challenge_token,
+        code: code.trim().replace(/\s/g, ""),
+      });
+
+      onAuthenticated(buildAdminAuthenticatedResult(session, identifier));
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not verify MFA code."));
     } finally {
@@ -364,12 +367,12 @@ function MFASetupPage({
     setIsSubmitting(true);
 
     try {
-      const result = await confirmAdminMFASetup(
-        setup.mfa_setup_token,
-        code.trim().replace(/\s/g, ""),
-        identifier
-      );
-      onAuthenticated(result);
+      const session = await confirmAdminMFASetup({
+        mfa_setup_token: setup.mfa_setup_token,
+        code: code.trim().replace(/\s/g, ""),
+      });
+
+      onAuthenticated(buildAdminAuthenticatedResult(session, identifier));
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not confirm MFA setup."));
     } finally {

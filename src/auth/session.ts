@@ -1,10 +1,10 @@
-import type { AuthTokenResponse } from "../api/auth";
+import type { AdminSession } from "../api/adminAuth";
 
 const ACCESS_TOKEN_KEY = "pulsefi_access_token";
 const ADMIN_NAME_KEY = "pulsefi_admin_name";
 const ADMIN_ROLE_KEY = "pulsefi_admin_role";
 
-export function saveSession(session: AuthTokenResponse) {
+export function saveSession(session: AdminSession) {
   localStorage.setItem(ACCESS_TOKEN_KEY, session.access_token);
   localStorage.setItem(ADMIN_NAME_KEY, session.full_name);
   localStorage.setItem(ADMIN_ROLE_KEY, session.role ?? "");
