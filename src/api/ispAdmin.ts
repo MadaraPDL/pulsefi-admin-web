@@ -1,4 +1,4 @@
-﻿import { apiRequest } from "./client";
+import { apiRequest } from "./client";
 
 export type StatusCounts = {
   total: number;
@@ -411,4 +411,380 @@ export async function updateRouter(
     method: "PATCH",
     body: JSON.stringify(payload),
   });
+}
+
+
+export type ISPAdminAnalyticsSummary = {
+  isp_id: string;
+  generated_at: string;
+  period_start: string | null;
+  period_end: string | null;
+
+  total_users: number;
+  active_users: number;
+
+  total_subscriptions: number;
+  active_subscriptions: number;
+
+  total_routers: number;
+  active_routers: number;
+
+  pending_plan_change_requests: number;
+  approved_plan_change_requests: number;
+  rejected_plan_change_requests: number;
+
+  total_alerts: number;
+  unread_alerts: number;
+  critical_alerts: number;
+
+  total_recommendations: number;
+  new_recommendations: number;
+  accepted_recommendations: number;
+
+  total_usage_mb: string | number;
+  total_usage_gb: string | number;
+};
+
+export type ISPAdminAlert = {
+  id: string;
+  user_id: string;
+  user_subscription_id: string;
+  device_id: string | null;
+  connection_log_id: string | null;
+  usage_id: string | null;
+  prediction_id: string | null;
+  alert_type: string;
+  severity: string;
+  title: string;
+  message: string;
+  status: string;
+  read_at: string | null;
+  created_at: string;
+};
+
+export type ISPAdminAlertListParams = {
+  user_id?: string;
+  user_subscription_id?: string;
+  device_id?: string;
+  alert_type?: string;
+  severity?: string;
+  status?: string;
+  start_at?: string;
+  end_at?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export async function getISPAdminAnalyticsSummary(
+  periodStart: string | null = null,
+  periodEnd: string | null = null
+): Promise<ISPAdminAnalyticsSummary> {
+  const params = new URLSearchParams();
+
+  if (periodStart) {
+    params.set("period_start", periodStart);
+  }
+
+  if (periodEnd) {
+    params.set("period_end", periodEnd);
+  }
+
+  const query = params.toString();
+
+  return apiRequest<ISPAdminAnalyticsSummary>(
+    `/isp-admin/analytics/summary${query ? `?${query}` : ""}`
+  );
+}
+
+export async function listISPAdminAlerts(
+  filters: ISPAdminAlertListParams = {}
+): Promise<ISPAdminAlert[]> {
+  const params = new URLSearchParams({
+    limit: String(filters.limit ?? 10),
+    offset: String(filters.offset ?? 0),
+  });
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && value !== null && key !== "limit" && key !== "offset") {
+      params.set(key, String(value));
+    }
+  }
+
+  return apiRequest<ISPAdminAlert[]>(`/isp-admin/alerts?${params.toString()}`);
+}
+
+
+export type ISPAdminReportType =
+  | "usage_report"
+  | "device_report"
+  | "alert_report"
+  | "recommendation_report"
+  | "network_performance_report";
+
+export type ISPAdminReport = {
+  id: string;
+  isp_id: string;
+  generated_by_admin_id: string | null;
+  report_type: ISPAdminReportType | string;
+  title: string;
+  period_start: string | null;
+  period_end: string | null;
+  report_data: Record<string, unknown> | null;
+  file_url: string | null;
+  created_at: string;
+};
+
+export type CreateISPAdminReportRequest = {
+  report_type: ISPAdminReportType;
+  title?: string | null;
+  period_start?: string | null;
+  period_end?: string | null;
+};
+
+export type PlanChangeRequestStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "cancelled"
+  | "completed";
+
+export type PlanChangeReviewDecision = "approve" | "reject";
+
+export type ISPAdminPlanChangeRequest = {
+  id: string;
+  user_id: string;
+  user_subscription_id: string;
+  current_plan_id: string;
+  requested_plan_id: string;
+  recommendation_id: string | null;
+  request_type: string;
+  reason: string | null;
+  status: PlanChangeRequestStatus | string;
+  requested_at: string;
+  reviewed_by_admin_id: string | null;
+  reviewed_at: string | null;
+  admin_response: string | null;
+  updated_at: string;
+};
+
+export async function listISPAdminReports(
+  reportType: ISPAdminReportType | null = null,
+  limit = 20,
+  offset = 0
+): Promise<ISPAdminReport[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (reportType) {
+    params.set("report_type", reportType);
+  }
+
+  return apiRequest<ISPAdminReport[]>(`/isp-admin/reports?${params.toString()}`);
+}
+
+export async function createISPAdminReport(
+  payload: CreateISPAdminReportRequest
+): Promise<ISPAdminReport> {
+  return apiRequest<ISPAdminReport>("/isp-admin/reports", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listPlanChangeRequests(
+  status: PlanChangeRequestStatus | null = null,
+  limit = 20,
+  offset = 0
+): Promise<ISPAdminPlanChangeRequest[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  return apiRequest<ISPAdminPlanChangeRequest[]>(
+    `/isp-admin/plan-change-requests?${params.toString()}`
+  );
+}
+
+export async function reviewPlanChangeRequest(
+  requestId: string,
+  decision: PlanChangeReviewDecision,
+  adminResponse: string | null
+): Promise<ISPAdminPlanChangeRequest> {
+  return apiRequest<ISPAdminPlanChangeRequest>(
+    `/isp-admin/plan-change-requests/${requestId}/review`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        decision,
+        admin_response: adminResponse,
+      }),
+    }
+  );
+}
+
+
+export type ISPAdminUsageRecord = {
+  id: string;
+  user_id: string;
+  user_subscription_id: string;
+  router_id: string;
+  device_id: string | null;
+  upload_mb: string | number;
+  download_mb: string | number;
+  total_mb: string | number | null;
+  record_start: string;
+  record_end: string;
+  source: string | null;
+  created_at: string;
+};
+
+export type ISPAdminDeviceConnectionLog = {
+  id: string;
+  device_id: string;
+  router_id: string;
+  event_type: string;
+  ip_address: string | null;
+  details: string | null;
+  event_time: string;
+};
+
+export type RouterActionLogStatus = "pending" | "success" | "failed";
+
+export type ISPAdminRouterActionLog = {
+  id: string;
+  router_id: string;
+  policy_id: string | null;
+  action_type: string;
+  command_payload: Record<string, unknown> | null;
+  response_payload: Record<string, unknown> | null;
+  status: RouterActionLogStatus | string;
+  error_message: string | null;
+  executed_at: string;
+};
+
+export async function listISPAdminUsageRecords(
+  limit = 10,
+  offset = 0
+): Promise<ISPAdminUsageRecord[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  return apiRequest<ISPAdminUsageRecord[]>(
+    `/isp-admin/usage-records?${params.toString()}`
+  );
+}
+
+export async function listISPAdminDeviceConnectionLogs(
+  limit = 10,
+  offset = 0
+): Promise<ISPAdminDeviceConnectionLog[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  return apiRequest<ISPAdminDeviceConnectionLog[]>(
+    `/isp-admin/device-connection-logs?${params.toString()}`
+  );
+}
+
+export async function listISPAdminRouterActionLogs(
+  status: RouterActionLogStatus | null = null,
+  limit = 10,
+  offset = 0
+): Promise<ISPAdminRouterActionLog[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  return apiRequest<ISPAdminRouterActionLog[]>(
+    `/isp-admin/router-action-logs?${params.toString()}`
+  );
+}
+
+
+export type ISPAdminPrediction = {
+  id: string;
+  user_id: string;
+  user_subscription_id: string;
+  plan_id: string | null;
+  prediction_date: string;
+  period_start: string;
+  period_end: string;
+  predicted_usage_gb: string | number;
+  confidence_score: string | number | null;
+  risk_level: string;
+  model_version: string | null;
+  created_at: string;
+};
+
+export type ISPAdminPredictionGenerationResponse = {
+  prediction: ISPAdminPrediction;
+  days_elapsed: number;
+  total_cycle_days: number;
+  observed_usage_gb: string | number;
+  average_daily_usage_gb: string | number;
+};
+
+export type ISPAdminRecommendation = {
+  id: string;
+  user_id: string;
+  user_subscription_id: string;
+  current_plan_id: string | null;
+  recommendation_plan_id: string | null;
+  prediction_id: string | null;
+  recommendation_type: string;
+  recommendation_text: string;
+  reason: string | null;
+  confidence_score: string | number | null;
+  status: string;
+  created_at: string;
+};
+
+export type ISPAdminRecommendationGenerationResponse = {
+  recommendation: ISPAdminRecommendation;
+  created: boolean;
+  predicted_usage_gb: string | number;
+  current_plan_limit_gb: string | number;
+  recommended_plan_limit_gb: string | number | null;
+};
+
+export async function generatePredictionForSubscription(
+  subscriptionId: string,
+  predictionDate: string | null = null
+): Promise<ISPAdminPredictionGenerationResponse> {
+  return apiRequest<ISPAdminPredictionGenerationResponse>(
+    `/isp-admin/predictions/subscriptions/${subscriptionId}/generate`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        prediction_date: predictionDate,
+      }),
+    }
+  );
+}
+
+export async function generateRecommendationForPrediction(
+  predictionId: string
+): Promise<ISPAdminRecommendationGenerationResponse> {
+  return apiRequest<ISPAdminRecommendationGenerationResponse>(
+    `/isp-admin/recommendations/predictions/${predictionId}/generate`,
+    {
+      method: "POST",
+    }
+  );
 }

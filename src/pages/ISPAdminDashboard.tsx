@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { getErrorMessage } from "../api/errors";
 import { getISPAdminSummary } from "../api/ispAdmin";
@@ -9,9 +9,17 @@ import { AppUserManagement } from "../components/AppUserManagement";
 import { SubscriptionPlanManagement } from "../components/SubscriptionPlanManagement";
 import { UserSubscriptionManagement } from "../components/UserSubscriptionManagement";
 import { RouterManagement } from "../components/RouterManagement";
+import { ISPAdminMonitoringCenter } from "../components/ISPAdminMonitoringCenter";
+import { ISPAdminOperationsCenter } from "../components/ISPAdminOperationsCenter";
+import { ISPAdminNetworkActivityCenter } from "../components/ISPAdminNetworkActivityCenter";
+import { ISPAdminIntelligenceCenter } from "../components/ISPAdminIntelligenceCenter";
 
 type ISPSection =
   | "dashboard"
+  | "monitoring"
+  | "operations"
+  | "network"
+  | "intelligence"
   | "users"
   | "plans"
   | "subscriptions"
@@ -22,6 +30,22 @@ const ispSectionCopy: Record<ISPSection, { title: string; subtitle: string }> = 
   dashboard: {
     title: "ISP Overview",
     subtitle: "Monitor users, subscriptions, routers, and ISP activity.",
+  },
+  monitoring: {
+    title: "Monitoring Center",
+    subtitle: "Review analytics, alerts, usage totals, and ISP activity signals.",
+  },
+  operations: {
+    title: "Operations Center",
+    subtitle: "Generate reports and review customer plan change requests.",
+  },
+  network: {
+    title: "Network Activity",
+    subtitle: "Review usage records, device events, and router policy action logs.",
+  },
+  intelligence: {
+    title: "Intelligence Center",
+    subtitle: "Generate usage predictions and plan recommendations.",
   },
   users: {
     title: "App Users",
@@ -60,6 +84,10 @@ function ISPSidebar({
     icon: string;
   }> = [
     { id: "dashboard", label: "Dashboard", icon: "dashboard" },
+    { id: "monitoring", label: "Monitoring", icon: "monitoring" },
+    { id: "operations", label: "Operations", icon: "assignment_turned_in" },
+    { id: "network", label: "Network", icon: "lan" },
+    { id: "intelligence", label: "Intelligence", icon: "psychology" },
     { id: "users", label: "Users", icon: "group" },
     { id: "plans", label: "Plans", icon: "package_2" },
     { id: "subscriptions", label: "Subscriptions", icon: "assignment" },
@@ -84,7 +112,7 @@ function ISPSidebar({
         <button
           className="stitch-quick-action"
           type="button"
-          onClick={() => onNavigate("users")}
+          onClick={() => onNavigate("monitoring")}
         >
           <span className="material-symbols-outlined">person_add</span>
           Quick Action
@@ -351,6 +379,10 @@ export default function ISPAdminDashboard({
 
           <section className="stitch-bento-grid">
             <SectionCard>
+              <ISPAdminMonitoringCenter />
+              <ISPAdminOperationsCenter />
+              <ISPAdminNetworkActivityCenter />
+              <ISPAdminIntelligenceCenter />
               <SubscriptionPlanManagement />
               <AppUserManagement />
               <RouterManagement />
@@ -359,6 +391,30 @@ export default function ISPAdminDashboard({
             <ISPInsightsPanel summary={summary} />
           </section>
         </>
+      )}
+
+      {activeSection === "monitoring" && (
+        <SectionCard>
+          <ISPAdminMonitoringCenter />
+        </SectionCard>
+      )}
+
+      {activeSection === "operations" && (
+        <SectionCard>
+          <ISPAdminOperationsCenter />
+        </SectionCard>
+      )}
+
+      {activeSection === "network" && (
+        <SectionCard>
+          <ISPAdminNetworkActivityCenter />
+        </SectionCard>
+      )}
+
+      {activeSection === "intelligence" && (
+        <SectionCard>
+          <ISPAdminIntelligenceCenter />
+        </SectionCard>
       )}
 
       {activeSection === "users" && (

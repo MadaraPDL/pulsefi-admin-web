@@ -2503,3 +2503,597 @@ body:has(.stitch-auth-page) {
     padding: 16px;
   }
 }
+
+/* ---------- ISP Admin Monitoring Center ---------- */
+
+.stitch-monitoring-center {
+  display: block;
+}
+
+.stitch-monitoring-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 24px 0;
+}
+
+.stitch-monitoring-meta span {
+  border: 1px solid #3c494e;
+  border-radius: 999px;
+  background: #20201f;
+  color: #bbc9cf;
+  padding: 7px 12px;
+  font-size: 12px;
+}
+
+.stitch-monitoring-meta strong {
+  color: #e5e2e1 !important;
+}
+
+.stitch-monitoring-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 24px;
+}
+
+.stitch-monitoring-card {
+  min-height: 136px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #3c494e;
+  border-radius: 12px;
+  background: #20201f;
+  padding: 18px;
+}
+
+.stitch-monitoring-card span {
+  color: #bbc9cf;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.stitch-monitoring-card strong {
+  display: block;
+  margin: 18px 0 8px;
+  color: #e5e2e1 !important;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.stitch-monitoring-card small {
+  color: #bbc9cf;
+  font-size: 12px;
+}
+
+.stitch-monitoring-card > .material-symbols-outlined {
+  font-size: 28px;
+}
+
+.stitch-monitoring-info > .material-symbols-outlined {
+  color: #00d1ff !important;
+}
+
+.stitch-monitoring-warning {
+  border-color: rgba(255, 204, 102, 0.35);
+}
+
+.stitch-monitoring-warning > .material-symbols-outlined {
+  color: #ffcc66 !important;
+}
+
+.stitch-monitoring-critical {
+  border-color: rgba(255, 107, 107, 0.36);
+}
+
+.stitch-monitoring-critical > .material-symbols-outlined {
+  color: #ff8a8a !important;
+}
+
+.stitch-monitoring-split {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.1fr);
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+
+.stitch-monitoring-panel {
+  border: 1px solid #3c494e;
+  border-radius: 12px;
+  background: #20201f;
+  overflow: hidden;
+}
+
+.stitch-monitoring-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #3c494e;
+  padding: 18px;
+}
+
+.stitch-monitoring-panel-header h3 {
+  margin: 0;
+  color: #e5e2e1 !important;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.stitch-monitoring-stat-list {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.stitch-monitoring-stat-list div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  border: 1px solid #344147;
+  border-radius: 10px;
+  background: #1c1b1b;
+  padding: 13px;
+}
+
+.stitch-monitoring-stat-list span {
+  color: #bbc9cf;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.stitch-monitoring-stat-list strong {
+  color: #e5e2e1 !important;
+  font-size: 18px;
+}
+
+.stitch-monitoring-stat-list small {
+  grid-column: 1 / -1;
+  color: #8fa1aa;
+  font-size: 11px;
+}
+
+.stitch-monitoring-alert-list {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.stitch-alert-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stitch-alert-title-row h3 {
+  margin: 0 0 6px;
+}
+
+.status-critical {
+  border: 1px solid rgba(255, 107, 107, 0.3) !important;
+  background: rgba(255, 107, 107, 0.12) !important;
+  color: #ff8a8a !important;
+}
+
+.status-warning {
+  border: 1px solid rgba(255, 204, 102, 0.3) !important;
+  background: rgba(255, 204, 102, 0.12) !important;
+  color: #ffcc66 !important;
+}
+
+.status-info {
+  border: 1px solid rgba(0, 209, 255, 0.28) !important;
+  background: rgba(0, 209, 255, 0.12) !important;
+  color: #4cd6ff !important;
+}
+
+.stitch-empty-state {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 34px 18px;
+  text-align: center;
+}
+
+.stitch-empty-state .material-symbols-outlined {
+  color: #00d1ff !important;
+  font-size: 34px;
+}
+
+.stitch-empty-state h3 {
+  margin: 0;
+  color: #e5e2e1 !important;
+}
+
+.stitch-empty-state p {
+  max-width: 360px;
+  margin: 0;
+  color: #bbc9cf !important;
+}
+
+.stitch-monitoring-filter-bar {
+  margin: 0 !important;
+}
+
+@media (max-width: 1280px) {
+  .stitch-monitoring-card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stitch-monitoring-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .stitch-monitoring-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stitch-monitoring-panel-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* ---------- Monitoring alert severity chip positioning ---------- */
+
+.stitch-monitoring-alert-list .stitch-alert-item {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  align-items: flex-start !important;
+}
+
+.stitch-monitoring-alert-list .stitch-alert-item > .material-symbols-outlined {
+  margin-top: 2px;
+}
+
+.stitch-alert-title-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin-bottom: 8px !important;
+}
+
+.stitch-alert-title-row h3 {
+  margin: 0 !important;
+  line-height: 1.25 !important;
+}
+
+.stitch-alert-title-row .status-pill {
+  min-height: 24px !important;
+  margin: 0 !important;
+  border-radius: 7px !important;
+  padding: 4px 9px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  text-transform: lowercase !important;
+}
+
+.stitch-monitoring-alert-list .stitch-alert-item p {
+  margin-top: 0 !important;
+}
+
+.stitch-monitoring-alert-list .stitch-alert-item small {
+  display: block;
+  margin-top: 14px;
+}
+
+/* ---------- ISP Admin Operations Center ---------- */
+
+.stitch-operations-center {
+  display: block;
+}
+
+.stitch-operations-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(320px, 1.2fr);
+  gap: 16px;
+  padding: 24px;
+}
+
+.stitch-operations-panel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  border: 1px solid #3c494e;
+  border-radius: 12px;
+  background: #20201f;
+  padding: 18px;
+}
+
+.stitch-operations-panel h3,
+.stitch-operations-table-panel h3 {
+  margin: 0;
+  color: #e5e2e1 !important;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.stitch-operations-panel p {
+  margin: 0;
+  color: #bbc9cf !important;
+  line-height: 1.5;
+}
+
+.stitch-operations-panel label {
+  display: grid;
+  gap: 8px;
+  color: #bbc9cf !important;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.stitch-operations-panel input,
+.stitch-operations-panel select,
+.stitch-review-actions textarea {
+  border: 1px solid #3c494e !important;
+  border-radius: 8px !important;
+  background: #353535 !important;
+  color: #e5e2e1 !important;
+}
+
+.stitch-operations-panel button:not(.filter-chip) {
+  border: 0;
+  border-radius: 8px;
+  background: #00d1ff;
+  color: #071113;
+  padding: 10px 14px;
+  font-weight: 900;
+}
+
+.stitch-operations-split {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.85fr) minmax(420px, 1.15fr);
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+
+.stitch-operations-table-panel {
+  border: 1px solid #3c494e;
+  border-radius: 12px;
+  background: #20201f;
+  overflow: hidden;
+}
+
+.stitch-operations-table-panel .stitch-table-wrap {
+  width: calc(100% - 32px) !important;
+  margin: 16px !important;
+}
+
+.stitch-operations-filter-bar {
+  margin: 0 !important;
+}
+
+.stitch-review-actions {
+  display: grid;
+  gap: 10px;
+  min-width: 260px;
+}
+
+.stitch-review-actions textarea {
+  min-height: 72px;
+  padding: 10px 12px;
+  resize: vertical;
+}
+
+.stitch-review-actions > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.status-approved,
+.status-completed {
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: #34d399 !important;
+}
+
+.status-rejected,
+.status-cancelled {
+  border: 1px solid rgba(255, 107, 107, 0.3) !important;
+  background: rgba(255, 107, 107, 0.12) !important;
+  color: #ff8a8a !important;
+}
+
+@media (max-width: 1280px) {
+  .stitch-operations-grid,
+  .stitch-operations-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- ISP Admin Network Activity Center ---------- */
+
+.stitch-network-activity-center {
+  display: block;
+}
+
+.stitch-network-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 24px;
+}
+
+.stitch-network-panel {
+  border: 1px solid #3c494e;
+  border-radius: 12px;
+  background: #20201f;
+  overflow: hidden;
+}
+
+.stitch-network-panel-wide {
+  grid-column: 1 / -1;
+}
+
+.stitch-network-panel .stitch-table-wrap {
+  width: calc(100% - 32px) !important;
+  margin: 16px !important;
+}
+
+.stitch-network-filter-bar {
+  margin: 0 !important;
+}
+
+.stitch-network-filter-bar .filter-chip {
+  min-height: 32px !important;
+  padding: 6px 10px !important;
+  font-size: 11px !important;
+}
+
+.stitch-network-panel td .muted {
+  color: #8fa1aa !important;
+  font-size: 12px;
+}
+
+@media (max-width: 1180px) {
+  .stitch-network-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- ISP Admin Intelligence Center ---------- */
+
+.stitch-intelligence-center {
+  display: block;
+}
+
+.stitch-intelligence-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(260px, 0.85fr);
+  gap: 16px;
+  padding: 24px;
+}
+
+.stitch-intelligence-panel {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  border: 1px solid #3c494e;
+  border-radius: 12px;
+  background: #20201f;
+  padding: 18px;
+}
+
+.stitch-intelligence-panel h3,
+.stitch-intelligence-result-card h3 {
+  margin: 0;
+  color: #e5e2e1 !important;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.stitch-intelligence-panel p {
+  margin: 0;
+  color: #bbc9cf !important;
+  line-height: 1.5;
+}
+
+.stitch-intelligence-panel label {
+  display: grid;
+  gap: 8px;
+  color: #bbc9cf !important;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.stitch-intelligence-panel input,
+.stitch-intelligence-panel select {
+  min-height: 42px;
+  border: 1px solid #3c494e !important;
+  border-radius: 8px !important;
+  background: #353535 !important;
+  color: #e5e2e1 !important;
+  padding: 8px 12px;
+}
+
+.stitch-intelligence-panel button {
+  border: 0;
+  border-radius: 8px;
+  background: #00d1ff;
+  color: #071113;
+  padding: 10px 14px;
+  font-weight: 900;
+}
+
+.stitch-intelligence-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+
+.stitch-intelligence-result-card {
+  border: 1px solid #3c494e;
+  border-radius: 12px;
+  background: #20201f;
+  overflow: hidden;
+}
+
+.stitch-intelligence-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 18px;
+}
+
+.stitch-intelligence-detail-grid div {
+  border: 1px solid #344147;
+  border-radius: 10px;
+  background: #1c1b1b;
+  padding: 14px;
+}
+
+.stitch-intelligence-detail-grid span {
+  display: block;
+  color: #8fa1aa;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.stitch-intelligence-detail-grid strong {
+  display: block;
+  margin-top: 8px;
+  color: #e5e2e1 !important;
+  font-size: 17px;
+}
+
+.stitch-recommendation-box {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.stitch-recommendation-box h3 {
+  font-size: 18px !important;
+}
+
+.stitch-recommendation-box p {
+  margin: 0;
+  color: #bbc9cf !important;
+  line-height: 1.6;
+}
+
+@media (max-width: 1180px) {
+  .stitch-intelligence-grid,
+  .stitch-intelligence-results {
+    grid-template-columns: 1fr;
+  }
+}
