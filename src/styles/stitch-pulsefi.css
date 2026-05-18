@@ -3372,3 +3372,105 @@ body:has(.stitch-auth-page) {
   background: rgba(255, 255, 255, 0.04);
   border-radius: 999px;
 }
+
+/* Step 27E: selected-section dashboard polish and contained long lists */
+.stitch-overview-route-panel {
+  align-self: start;
+}
+
+.stitch-overview-route-list {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+}
+
+.stitch-overview-route-row {
+  width: 100%;
+  min-height: 82px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: #e5e2e1 !important;
+  padding: 14px !important;
+  text-align: left;
+  box-shadow: none !important;
+}
+
+.stitch-overview-route-row:hover {
+  border-color: rgba(0, 209, 255, 0.3) !important;
+  background: rgba(0, 209, 255, 0.07) !important;
+}
+
+.stitch-overview-route-row > .material-symbols-outlined {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #3c494e;
+  border-radius: 10px;
+  background: #20201f;
+  color: #4cd6ff;
+}
+
+.stitch-overview-route-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.stitch-overview-route-copy strong {
+  color: #e5e2e1;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.stitch-overview-route-copy span {
+  color: #bbc9cf;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.stitch-overview-route-meta {
+  max-width: 160px;
+  overflow: hidden;
+  border: 1px solid #3c494e;
+  border-radius: 999px;
+  color: #4cd6ff;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stitch-section-stack .table-card,
+.stitch-dashboard-main .table-card,
+.stitch-table-wrap {
+  max-height: clamp(320px, 52vh, 560px);
+  overflow: auto !important;
+  overscroll-behavior: contain;
+}
+
+.stitch-section-stack .table-card thead th,
+.stitch-dashboard-main .table-card thead th,
+.stitch-table-wrap thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+@media (max-width: 720px) {
+  .stitch-overview-route-row {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .stitch-overview-route-meta {
+    grid-column: 2;
+    width: max-content;
+    max-width: 100%;
+  }
+}

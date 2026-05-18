@@ -40,6 +40,15 @@ Completed locally:
 - Normal `npm run dev` still loads the real admin app.
 - `npm run dev:design` still loads the design preview only.
 
+## Step 27E Status
+
+Completed locally:
+
+- ISP Admin dashboard now opens with a short Overview and keeps Users, Plans, Subscriptions, Routers, Intelligence, Invitations, Monitoring, Operations, and Network Activity as selected sections.
+- Platform Admin dashboard now separates Overview, ISPs, ISP Admin Invitations, and ISP Admin Accounts without adding new backend routes.
+- Long dashboard tables, recommendation history, and report lists use contained scroll areas so panel controls stay reachable.
+- Real admin mode still relies on backend admin roles only; design preview remains `dev:design` only.
+
 ## API Configuration
 
 The API base URL must come from `VITE_API_BASE_URL` when set.

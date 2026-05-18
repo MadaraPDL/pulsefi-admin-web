@@ -83,16 +83,16 @@ function ISPSidebar({
     label: string;
     icon: string;
   }> = [
-    { id: "dashboard", label: "Dashboard", icon: "dashboard" },
-    { id: "monitoring", label: "Monitoring", icon: "monitoring" },
-    { id: "operations", label: "Operations", icon: "assignment_turned_in" },
-    { id: "network", label: "Network", icon: "lan" },
-    { id: "intelligence", label: "Intelligence", icon: "psychology" },
+    { id: "dashboard", label: "Overview", icon: "dashboard" },
     { id: "users", label: "Users", icon: "group" },
     { id: "plans", label: "Plans", icon: "package_2" },
     { id: "subscriptions", label: "Subscriptions", icon: "assignment" },
     { id: "routers", label: "Routers", icon: "router" },
+    { id: "intelligence", label: "Intelligence", icon: "psychology" },
     { id: "invitations", label: "Invitations", icon: "mail" },
+    { id: "monitoring", label: "Monitoring", icon: "monitoring" },
+    { id: "operations", label: "Operations", icon: "assignment_turned_in" },
+    { id: "network", label: "Network", icon: "lan" },
   ];
 
   return (
@@ -112,10 +112,10 @@ function ISPSidebar({
         <button
           className="stitch-quick-action"
           type="button"
-          onClick={() => onNavigate("monitoring")}
+          onClick={() => onNavigate("invitations")}
         >
           <span className="material-symbols-outlined">person_add</span>
-          Quick Action
+          Invite User
         </button>
       </div>
 
@@ -168,7 +168,7 @@ function ISPTopBar({
         <div>
           <h2>{copy.title}</h2>
           <p>
-            {copy.subtitle} · {adminName}
+            {copy.subtitle} - {adminName}
           </p>
         </div>
 
@@ -308,16 +308,123 @@ function ISPInsightsPanel({ summary }: { summary: ISPAdminSummary }) {
         <article className="stitch-alert-item stitch-alert-info">
           <span className="material-symbols-outlined">monitoring</span>
           <div>
-            <h3>Usage Analytics Pending</h3>
+            <h3>Intelligence Ready</h3>
             <p>
-              Usage records, alerts, and predictions will become the next
-              network-data dashboard layer.
+              Analytics, reports, predictions, and recommendations are now
+              available from the Intelligence tab.
             </p>
-            <small>Future step</small>
+            <small>Step 27D connected</small>
           </div>
         </article>
       </div>
     </aside>
+  );
+}
+
+function ISPOverviewRoutes({
+  onNavigate,
+}: {
+  onNavigate: (section: ISPSection) => void;
+}) {
+  const routes: Array<{
+    section: ISPSection;
+    icon: string;
+    title: string;
+    description: string;
+    meta: string;
+  }> = [
+    {
+      section: "users",
+      icon: "group",
+      title: "Users",
+      description: "Review ISP-scoped customer accounts and support fields.",
+      meta: "Accounts",
+    },
+    {
+      section: "plans",
+      icon: "package_2",
+      title: "Plans",
+      description: "Create and update internet bundles for this ISP.",
+      meta: "Catalog",
+    },
+    {
+      section: "subscriptions",
+      icon: "assignment",
+      title: "Subscriptions",
+      description: "Assign plans and manage customer subscription state.",
+      meta: "Assignments",
+    },
+    {
+      section: "routers",
+      icon: "router",
+      title: "Routers",
+      description: "Register router metadata without collecting passwords.",
+      meta: "CPE",
+    },
+    {
+      section: "intelligence",
+      icon: "psychology",
+      title: "Intelligence",
+      description: "Open analytics, recommendations, reports, and generation flows.",
+      meta: "AI",
+    },
+    {
+      section: "invitations",
+      icon: "mail",
+      title: "Invitations",
+      description: "Create and track App User invitations for this ISP.",
+      meta: "Access",
+    },
+    {
+      section: "monitoring",
+      icon: "monitoring",
+      title: "Monitoring",
+      description: "Review ISP activity signals, usage totals, and alerts.",
+      meta: "Signals",
+    },
+    {
+      section: "operations",
+      icon: "assignment_turned_in",
+      title: "Operations",
+      description: "Generate reports and review plan-change requests.",
+      meta: "Workflows",
+    },
+    {
+      section: "network",
+      icon: "lan",
+      title: "Network Activity",
+      description: "Inspect usage records, device events, and router policy logs.",
+      meta: "Network",
+    },
+  ];
+
+  return (
+    <section className="stitch-content-card stitch-overview-route-panel">
+      <div className="stitch-panel-title-row">
+        <div>
+          <h2>Dashboard Sections</h2>
+          <p>Choose one area at a time to keep the dashboard focused.</p>
+        </div>
+      </div>
+
+      <div className="stitch-overview-route-list">
+        {routes.map((route) => (
+          <button
+            className="stitch-overview-route-row"
+            key={route.section}
+            type="button"
+            onClick={() => onNavigate(route.section)}
+          >
+            <span className="material-symbols-outlined">{route.icon}</span>
+            <span className="stitch-overview-route-copy">
+              <strong>{route.title}</strong>
+              <span>{route.description}</span>
+            </span>
+            <span className="stitch-overview-route-meta">{route.meta}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -378,15 +485,7 @@ export default function ISPAdminDashboard({
           <ISPSummaryCards summary={summary} />
 
           <section className="stitch-bento-grid">
-            <SectionCard>
-              <ISPAdminMonitoringCenter />
-              <ISPAdminOperationsCenter />
-              <ISPAdminNetworkActivityCenter />
-              <ISPAdminIntelligenceCenter />
-              <SubscriptionPlanManagement />
-              <AppUserManagement />
-              <RouterManagement />
-            </SectionCard>
+            <ISPOverviewRoutes onNavigate={setActiveSection} />
 
             <ISPInsightsPanel summary={summary} />
           </section>

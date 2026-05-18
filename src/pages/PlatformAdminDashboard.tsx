@@ -40,12 +40,12 @@ const platformSectionCopy: Record<
     subtitle: "Create, update, and review ISP records.",
   },
   admins: {
-    title: "Admin Management",
-    subtitle: "Review platform and ISP admin access.",
+    title: "ISP Admin Accounts",
+    subtitle: "Review admin-account surfaces supported by the backend.",
   },
   invitations: {
-    title: "Invitations",
-    subtitle: "Track admin invitation workflows.",
+    title: "ISP Admin Invitations",
+    subtitle: "Track ISP Admin invitation workflows.",
   },
   system_health: {
     title: "System Health",
@@ -71,10 +71,10 @@ function PlatformSidebar({
     label: string;
     icon: string;
   }> = [
-    { id: "dashboard", label: "Dashboard", icon: "dashboard" },
+    { id: "dashboard", label: "Overview", icon: "dashboard" },
     { id: "isps", label: "ISPs", icon: "router" },
-    { id: "admins", label: "Admins", icon: "admin_panel_settings" },
-    { id: "invitations", label: "Invitations", icon: "mail" },
+    { id: "invitations", label: "ISP Admin Invitations", icon: "mail" },
+    { id: "admins", label: "ISP Admin Accounts", icon: "admin_panel_settings" },
     { id: "system_health", label: "System Health", icon: "monitor_heart" },
     { id: "settings", label: "Settings", icon: "settings" },
   ];
@@ -150,7 +150,7 @@ function PlatformTopBar({
       <div className="stitch-topbar-left">
         <div>
           <h2>{copy.title}</h2>
-          <p>{copy.subtitle} · {adminName}</p>
+          <p>{copy.subtitle} - {adminName}</p>
         </div>
 
         <label className="stitch-dashboard-search">
@@ -293,9 +293,90 @@ function PlatformAlerts() {
   );
 }
 
-function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }) {
+function PlatformOverviewRoutes({
+  selectedISP,
+  onNavigate,
+}: {
+  selectedISP: ISP | null;
+  onNavigate: (section: PlatformSection) => void;
+}) {
+  const routes: Array<{
+    section: PlatformSection;
+    icon: string;
+    title: string;
+    description: string;
+    meta: string;
+  }> = [
+    {
+      section: "isps",
+      icon: "router",
+      title: "ISPs",
+      description: "Create ISP records, select an ISP, and update status.",
+      meta: selectedISP ? `Selected: ${selectedISP.name}` : "Select ISP",
+    },
+    {
+      section: "invitations",
+      icon: "mail",
+      title: "ISP Admin Invitations",
+      description: "Review and revoke invitations for the selected ISP.",
+      meta: selectedISP ? "Scoped" : "Needs ISP",
+    },
+    {
+      section: "admins",
+      icon: "admin_panel_settings",
+      title: "ISP Admin Accounts",
+      description: "Reserved for account listing once the backend route exists.",
+      meta: "No route yet",
+    },
+    {
+      section: "system_health",
+      icon: "monitor_heart",
+      title: "System Health",
+      description: "View platform health placeholders and admin-session signals.",
+      meta: "Status",
+    },
+  ];
+
+  return (
+    <section className="stitch-content-card stitch-overview-route-panel">
+      <div className="stitch-panel-title-row">
+        <div>
+          <h2>Platform Sections</h2>
+          <p>Use one section at a time for a cleaner admin workflow.</p>
+        </div>
+      </div>
+
+      <div className="stitch-overview-route-list">
+        {routes.map((route) => (
+          <button
+            className="stitch-overview-route-row"
+            key={route.section}
+            type="button"
+            onClick={() => onNavigate(route.section)}
+          >
+            <span className="material-symbols-outlined">{route.icon}</span>
+            <span className="stitch-overview-route-copy">
+              <strong>{route.title}</strong>
+              <span>{route.description}</span>
+            </span>
+            <span className="stitch-overview-route-meta">{route.meta}</span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ISPManagement({
+  onDataChanged,
+  selectedISP,
+  onSelectedISPChange,
+}: {
+  onDataChanged: () => Promise<void>;
+  selectedISP: ISP | null;
+  onSelectedISPChange: (isp: ISP | null) => void;
+}) {
   const [isps, setIsps] = useState<ISP[]>([]);
-  const [selectedISP, setSelectedISP] = useState<ISP | null>(null);
 
   const [name, setName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -364,7 +445,7 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
   }, []);
 
   function chooseISP(isp: ISP) {
-    setSelectedISP(isp);
+    onSelectedISPChange(isp);
     setEditName(isp.name);
     setEditContactEmail(isp.contact_email ?? "");
     setEditPhoneNumber(isp.phone_number ?? "");
@@ -666,8 +747,6 @@ function ISPManagement({ onDataChanged }: { onDataChanged: () => Promise<void> }
         </form>
       </div>
 
-      <PlatformISPAdminInvitationManagement selectedISP={selectedISP} />
-
       {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
       {successMessage && <div className="stitch-success-box">{successMessage}</div>}
 
@@ -763,6 +842,7 @@ export default function PlatformAdminDashboard({
   const [errorMessage, setErrorMessage] = useState("");
   const [activeSection, setActiveSection] =
     useState<PlatformSection>("dashboard");
+  const [selectedISP, setSelectedISP] = useState<ISP | null>(null);
 
   const adminName = getAdminName("Admin");
 
@@ -822,30 +902,33 @@ export default function PlatformAdminDashboard({
           {summary && <SummaryCards summary={summary} />}
 
           <section className="stitch-bento-grid">
-            <ISPManagement onDataChanged={loadSummary} />
+            <PlatformOverviewRoutes
+              selectedISP={selectedISP}
+              onNavigate={setActiveSection}
+            />
             <PlatformAlerts />
           </section>
         </>
       )}
 
       {activeSection === "isps" && (
-        <ISPManagement onDataChanged={loadSummary} />
+        <ISPManagement
+          onDataChanged={loadSummary}
+          selectedISP={selectedISP}
+          onSelectedISPChange={setSelectedISP}
+        />
       )}
 
       {activeSection === "admins" && (
         <PlatformPlaceholder
           icon="admin_panel_settings"
-          title="Admin Management"
-          description="This section will list Platform Admins and ISP Admins once the dedicated admin-management API is connected."
+          title="ISP Admin Accounts"
+          description="This section will list ISP Admin accounts once a dedicated backend route exists."
         />
       )}
 
       {activeSection === "invitations" && (
-        <PlatformPlaceholder
-          icon="mail"
-          title="Invitation Center"
-          description="This section will show invitation history, pending invitations, accepted invitations, and revoked invitation records."
-        />
+        <PlatformISPAdminInvitationManagement selectedISP={selectedISP} />
       )}
 
       {activeSection === "system_health" && (

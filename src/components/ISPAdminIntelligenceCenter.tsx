@@ -179,37 +179,40 @@ function RecommendationList({
   return (
     <div className="stitch-intelligence-list">
       <div className="recommendations-scroll-list">
-{recommendations.map((recommendation) => (
-        <article className="stitch-intelligence-list-item" key={recommendation.id}>
-          <div>
-            <span
-              className={`status-pill ${getRecommendationStatusClass(
-                recommendation.status
-              )}`}
-            >
-              {recommendation.status}
-            </span>
-            <strong>{recommendation.recommendation_text}</strong>
-            <p>{recommendation.reason ?? "No reason returned."}</p>
-          </div>
+        {recommendations.map((recommendation) => (
+          <article
+            className="stitch-intelligence-list-item"
+            key={recommendation.id}
+          >
+            <div>
+              <span
+                className={`status-pill ${getRecommendationStatusClass(
+                  recommendation.status
+                )}`}
+              >
+                {recommendation.status}
+              </span>
+              <strong>{recommendation.recommendation_text}</strong>
+              <p>{recommendation.reason ?? "No reason returned."}</p>
+            </div>
 
-          <dl>
-            <div>
-              <dt>Type</dt>
-              <dd>{formatLabel(recommendation.recommendation_type)}</dd>
-            </div>
-            <div>
-              <dt>Confidence</dt>
-              <dd>{formatNumber(recommendation.confidence_score)}</dd>
-            </div>
-            <div>
-              <dt>Created</dt>
-              <dd>{formatDateTime(recommendation.created_at)}</dd>
-            </div>
-          </dl>
-        </article>
-      ))}
-</div>
+            <dl>
+              <div>
+                <dt>Type</dt>
+                <dd>{formatLabel(recommendation.recommendation_type)}</dd>
+              </div>
+              <div>
+                <dt>Confidence</dt>
+                <dd>{formatNumber(recommendation.confidence_score)}</dd>
+              </div>
+              <div>
+                <dt>Created</dt>
+                <dd>{formatDateTime(recommendation.created_at)}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }
@@ -226,7 +229,7 @@ function ReportList({ reports }: { reports: ISPAdminReport[] }) {
   }
 
   return (
-    <div className="stitch-table-wrap">
+    <div className="stitch-table-wrap intelligence-scroll-list">
       <table>
         <thead>
           <tr>
