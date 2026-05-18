@@ -584,6 +584,10 @@ export async function listISPAdminReports(
   return apiRequest<ISPAdminReport[]>(`/isp-admin/reports?${params.toString()}`);
 }
 
+export async function getISPAdminReport(reportId: string): Promise<ISPAdminReport> {
+  return apiRequest<ISPAdminReport>(`/isp-admin/reports/${reportId}`);
+}
+
 export async function createISPAdminReport(
   payload: CreateISPAdminReportRequest
 ): Promise<ISPAdminReport> {
@@ -755,6 +759,16 @@ export type ISPAdminRecommendation = {
   created_at: string;
 };
 
+export type ISPAdminRecommendationStatus = "new" | "accepted";
+
+export type ISPAdminRecommendationListParams = {
+  status?: ISPAdminRecommendationStatus | string | null;
+  user_id?: string | null;
+  subscription_id?: string | null;
+  limit?: number;
+  offset?: number;
+};
+
 export type ISPAdminRecommendationGenerationResponse = {
   recommendation: ISPAdminRecommendation;
   created: boolean;
@@ -762,6 +776,39 @@ export type ISPAdminRecommendationGenerationResponse = {
   current_plan_limit_gb: string | number;
   recommended_plan_limit_gb: string | number | null;
 };
+
+export async function listRecommendations(
+  filters: ISPAdminRecommendationListParams = {}
+): Promise<ISPAdminRecommendation[]> {
+  const params = new URLSearchParams({
+    limit: String(filters.limit ?? 20),
+    offset: String(filters.offset ?? 0),
+  });
+
+  if (filters.status) {
+    params.set("status", filters.status);
+  }
+
+  if (filters.user_id) {
+    params.set("user_id", filters.user_id);
+  }
+
+  if (filters.subscription_id) {
+    params.set("subscription_id", filters.subscription_id);
+  }
+
+  return apiRequest<ISPAdminRecommendation[]>(
+    `/isp-admin/recommendations?${params.toString()}`
+  );
+}
+
+export async function getRecommendation(
+  recommendationId: string
+): Promise<ISPAdminRecommendation> {
+  return apiRequest<ISPAdminRecommendation>(
+    `/isp-admin/recommendations/${recommendationId}`
+  );
+}
 
 export async function generatePredictionForSubscription(
   subscriptionId: string,

@@ -28,6 +28,30 @@ Completed locally:
 - MFA setup confirmation uses `POST /api/v1/auth/mfa/setup/confirm`.
 - Session is saved only after the backend returns a valid admin token.
 
+## Step 27D Status
+
+Completed locally:
+
+- ISP Admin Intelligence Center loads analytics summary, recommendations, reports, and active subscriptions from real backend endpoints.
+- ISP Admin can generate a prediction from an active subscription.
+- ISP Admin can generate a recommendation from a prediction.
+- Recommendation history uses `GET /api/v1/isp-admin/recommendations`.
+- Recent reports use `GET /api/v1/isp-admin/reports`.
+- Normal `npm run dev` still loads the real admin app.
+- `npm run dev:design` still loads the design preview only.
+
+## API Configuration
+
+The API base URL must come from `VITE_API_BASE_URL` when set.
+
+Local fallback:
+
+```text
+http://127.0.0.1:8000/api/v1
+```
+
+Use `.env.development.local` for local overrides and keep `.env*` files with secrets uncommitted.
+
 ## Checks
 
 ```powershell

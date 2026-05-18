@@ -3,15 +3,33 @@ import { getErrorMessage } from "../api/errors";
 import {
   generatePredictionForSubscription,
   generateRecommendationForPrediction,
+  getISPAdminAnalyticsSummary,
+  listISPAdminReports,
+  listRecommendations,
   listUserSubscriptions,
   runISPAdminIntelligence,
 } from "../api/ispAdmin";
 import type {
+  ISPAdminAnalyticsSummary,
   ISPAdminIntelligenceRunResponse,
   ISPAdminPredictionGenerationResponse,
+  ISPAdminRecommendation,
   ISPAdminRecommendationGenerationResponse,
+  ISPAdminRecommendationStatus,
+  ISPAdminReport,
   UserSubscription,
 } from "../api/ispAdmin";
+
+type RecommendationFilter = ISPAdminRecommendationStatus | "all";
+
+const recommendationFilters: {
+  label: string;
+  value: RecommendationFilter;
+}[] = [
+  { label: "All", value: "all" },
+  { label: "New", value: "new" },
+  { label: "Accepted", value: "accepted" },
+];
 
 function formatNumber(value: string | number | null) {
   if (value === null) {
@@ -42,6 +60,24 @@ function formatDate(value: string | null) {
   return date.toLocaleDateString();
 }
 
+function formatDateTime(value: string | null) {
+  if (!value) {
+    return "-";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleString();
+}
+
+function formatLabel(value: string) {
+  return value.replaceAll("_", " ");
+}
+
 function getRiskClass(riskLevel: string) {
   const normalized = riskLevel.toLowerCase();
 
@@ -56,9 +92,176 @@ function getRiskClass(riskLevel: string) {
   return "status-info";
 }
 
+function getRecommendationStatusClass(statusValue: string) {
+  if (statusValue === "accepted") {
+    return "status-approved";
+  }
+
+  return "status-info";
+}
+
+function AnalyticsSnapshot({
+  analytics,
+}: {
+  analytics: ISPAdminAnalyticsSummary | null;
+}) {
+  if (!analytics) {
+    return (
+      <div className="stitch-empty-state">
+        <span className="material-symbols-outlined">query_stats</span>
+        <h3>No analytics loaded</h3>
+        <p>Analytics will appear after the dashboard connects to the backend.</p>
+      </div>
+    );
+  }
+
+  const cards = [
+    {
+      label: "Usage",
+      value: `${formatNumber(analytics.total_usage_gb)} GB`,
+      detail: `${formatNumber(analytics.total_usage_mb)} MB`,
+      icon: "monitoring",
+    },
+    {
+      label: "Recommendations",
+      value: analytics.total_recommendations,
+      detail: `${analytics.new_recommendations} new`,
+      icon: "tips_and_updates",
+    },
+    {
+      label: "Plan Requests",
+      value: analytics.pending_plan_change_requests,
+      detail: `${analytics.approved_plan_change_requests} approved`,
+      icon: "compare_arrows",
+    },
+    {
+      label: "Alerts",
+      value: analytics.total_alerts,
+      detail: `${analytics.critical_alerts} critical`,
+      icon: "notifications_active",
+    },
+  ];
+
+  return (
+    <section className="stitch-monitoring-card-grid">
+      {cards.map((card) => (
+        <article className="stitch-monitoring-card stitch-monitoring-info" key={card.label}>
+          <div>
+            <span>{card.label}</span>
+            <strong>{card.value}</strong>
+            <small>{card.detail}</small>
+          </div>
+
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {card.icon}
+          </span>
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function RecommendationList({
+  recommendations,
+}: {
+  recommendations: ISPAdminRecommendation[];
+}) {
+  if (recommendations.length === 0) {
+    return (
+      <div className="stitch-empty-state">
+        <span className="material-symbols-outlined">tips_and_updates</span>
+        <h3>No recommendations found</h3>
+        <p>Generate recommendations from predictions to build ISP history.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="stitch-intelligence-list">
+      <div className="recommendations-scroll-list">
+{recommendations.map((recommendation) => (
+        <article className="stitch-intelligence-list-item" key={recommendation.id}>
+          <div>
+            <span
+              className={`status-pill ${getRecommendationStatusClass(
+                recommendation.status
+              )}`}
+            >
+              {recommendation.status}
+            </span>
+            <strong>{recommendation.recommendation_text}</strong>
+            <p>{recommendation.reason ?? "No reason returned."}</p>
+          </div>
+
+          <dl>
+            <div>
+              <dt>Type</dt>
+              <dd>{formatLabel(recommendation.recommendation_type)}</dd>
+            </div>
+            <div>
+              <dt>Confidence</dt>
+              <dd>{formatNumber(recommendation.confidence_score)}</dd>
+            </div>
+            <div>
+              <dt>Created</dt>
+              <dd>{formatDateTime(recommendation.created_at)}</dd>
+            </div>
+          </dl>
+        </article>
+      ))}
+</div>
+    </div>
+  );
+}
+
+function ReportList({ reports }: { reports: ISPAdminReport[] }) {
+  if (reports.length === 0) {
+    return (
+      <div className="stitch-empty-state">
+        <span className="material-symbols-outlined">assignment</span>
+        <h3>No reports found</h3>
+        <p>Generated reports from the Operations Center will appear here.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="stitch-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {reports.map((report) => (
+            <tr key={report.id}>
+              <td>{report.title}</td>
+              <td>{formatLabel(report.report_type)}</td>
+              <td>{formatDateTime(report.created_at)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export function ISPAdminIntelligenceCenter() {
+  const [analytics, setAnalytics] = useState<ISPAdminAnalyticsSummary | null>(
+    null
+  );
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
+  const [recommendations, setRecommendations] = useState<
+    ISPAdminRecommendation[]
+  >([]);
+  const [reports, setReports] = useState<ISPAdminReport[]>([]);
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState("");
+  const [recommendationFilter, setRecommendationFilter] =
+    useState<RecommendationFilter>("all");
   const [predictionDate, setPredictionDate] = useState("");
   const [predictionResult, setPredictionResult] =
     useState<ISPAdminPredictionGenerationResponse | null>(null);
@@ -68,41 +271,54 @@ export function ISPAdminIntelligenceCenter() {
     useState<ISPAdminIntelligenceRunResponse | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
-  const [isLoadingSubscriptions, setIsLoadingSubscriptions] = useState(true);
+  const [isLoadingData, setIsLoadingData] = useState(true);
   const [isGeneratingPrediction, setIsGeneratingPrediction] = useState(false);
   const [isGeneratingRecommendation, setIsGeneratingRecommendation] =
     useState(false);
   const [isRunningAutomation, setIsRunningAutomation] = useState(false);
 
-  async function loadSubscriptions() {
-    setIsLoadingSubscriptions(true);
+  async function loadIntelligenceData() {
+    setIsLoadingData(true);
     setErrorMessage("");
 
     try {
-      const data = await listUserSubscriptions("active", null, 50, 0);
-      setSubscriptions(data);
+      const [analyticsData, subscriptionData, recommendationData, reportData] =
+        await Promise.all([
+          getISPAdminAnalyticsSummary(),
+          listUserSubscriptions("active", null, 50, 0),
+          listRecommendations({
+            status: recommendationFilter === "all" ? null : recommendationFilter,
+            limit: 8,
+          }),
+          listISPAdminReports(null, 6, 0),
+        ]);
 
-      if (!selectedSubscriptionId && data.length > 0) {
-        setSelectedSubscriptionId(data[0].id);
+      setAnalytics(analyticsData);
+      setSubscriptions(subscriptionData);
+      setRecommendations(recommendationData);
+      setReports(reportData);
+
+      if (!selectedSubscriptionId && subscriptionData.length > 0) {
+        setSelectedSubscriptionId(subscriptionData[0].id);
       }
     } catch (error) {
       setErrorMessage(
-        getErrorMessage(error, "Could not load active subscriptions.")
+        getErrorMessage(error, "Could not load intelligence dashboard data.")
       );
     } finally {
-      setIsLoadingSubscriptions(false);
+      setIsLoadingData(false);
     }
   }
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      void loadSubscriptions();
+      void loadIntelligenceData();
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-    // loadSubscriptions intentionally stays local to avoid extra renders.
+    // loadIntelligenceData intentionally stays local to avoid extra renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [recommendationFilter]);
 
   async function handleRunAutomation() {
     setErrorMessage("");
@@ -116,7 +332,7 @@ export function ISPAdminIntelligenceCenter() {
       setSuccessMessage(
         `Intelligence run complete: ${result.predictions_created} predictions and ${result.recommendations_created} recommendations.`
       );
-      await loadSubscriptions();
+      await loadIntelligenceData();
     } catch (error) {
       setErrorMessage(
         getErrorMessage(error, "Could not run automatic intelligence.")
@@ -173,6 +389,7 @@ export function ISPAdminIntelligenceCenter() {
           ? "Recommendation generated successfully."
           : "Existing recommendation returned."
       );
+      await loadIntelligenceData();
     } catch (error) {
       setErrorMessage(
         getErrorMessage(error, "Could not generate recommendation.")
@@ -187,289 +404,336 @@ export function ISPAdminIntelligenceCenter() {
       <div className="stitch-panel-title-row">
         <div>
           <h2>Intelligence Center</h2>
-          <p>Generate usage predictions and plan recommendations.</p>
+          <p>Analytics, recommendations, reports, and generation workflows.</p>
         </div>
 
         <button
           className="stitch-view-link"
           type="button"
-          onClick={() => void loadSubscriptions()}
-          disabled={isLoadingSubscriptions}
+          onClick={() => void loadIntelligenceData()}
+          disabled={isLoadingData}
         >
-          Refresh subscriptions
+          Refresh
         </button>
       </div>
 
       {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
       {successMessage && <div className="stitch-success-box">{successMessage}</div>}
 
-      <section className="stitch-intelligence-automation-panel">
-        <div>
-          <span className="stitch-automation-kicker">Automatic intelligence</span>
-          <h3>Run predictions and recommendations for this ISP</h3>
-          <p>
-            This checks active subscriptions under the current ISP, skips
-            subscriptions without enough usage data, and generates recommendations
-            for successful predictions.
-          </p>
-        </div>
+      {isLoadingData && (
+        <p className="stitch-loading-text">Loading intelligence data...</p>
+      )}
 
-        <button
-          type="button"
-          onClick={() => void handleRunAutomation()}
-          disabled={isRunningAutomation}
-        >
-          {isRunningAutomation ? "Running..." : "Run intelligence now"}
-        </button>
+      {!isLoadingData && (
+        <>
+          <AnalyticsSnapshot analytics={analytics} />
 
-        {automationResult && (
-          <div className="stitch-intelligence-run-summary">
+          <section className="stitch-intelligence-automation-panel">
             <div>
-              <span>Checked</span>
-              <strong>{automationResult.subscriptions_checked}</strong>
-            </div>
-            <div>
-              <span>Predictions</span>
-              <strong>{automationResult.predictions_created}</strong>
-            </div>
-            <div>
-              <span>Recommendations</span>
-              <strong>{automationResult.recommendations_created}</strong>
-            </div>
-            <div>
-              <span>Skipped</span>
-              <strong>{automationResult.skipped}</strong>
-            </div>
-            <div>
-              <span>Failed</span>
-              <strong>{automationResult.failed}</strong>
-            </div>
-          </div>
-        )}
-
-        {automationResult && automationResult.items.length > 0 && (
-          <details className="stitch-intelligence-run-details">
-            <summary>View run details</summary>
-
-            <div>
-              {automationResult.items.map((item) => (
-                <article key={item.subscription_id}>
-                  <span className={`status-pill status-${item.status}`}>
-                    {item.status}
-                  </span>
-                  <code>{item.subscription_id}</code>
-                  <p>{item.message ?? "No message."}</p>
-                </article>
-              ))}
-            </div>
-          </details>
-        )}
-      </section>
-
-      <section className="stitch-intelligence-grid">
-        <div className="stitch-intelligence-panel">
-          <h3>Prediction input</h3>
-          <p>
-            Select an active subscription. The backend calculates prediction
-            using the subscription cycle and available usage records.
-          </p>
-
-          <label>
-            Active subscription
-            <select
-              value={selectedSubscriptionId}
-              onChange={(event) => {
-                setSelectedSubscriptionId(event.target.value);
-                setPredictionResult(null);
-                setRecommendationResult(null);
-              }}
-              disabled={isLoadingSubscriptions || subscriptions.length === 0}
-            >
-              {subscriptions.map((subscription) => (
-                <option value={subscription.id} key={subscription.id}>
-                  {subscription.subscription_label ??
-                    `Subscription ${subscription.id.slice(0, 8)}`}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            Prediction date optional
-            <input
-              type="date"
-              value={predictionDate}
-              onChange={(event) => setPredictionDate(event.target.value)}
-            />
-          </label>
-
-          <button
-            type="button"
-            onClick={() => void handleGeneratePrediction()}
-            disabled={
-              isGeneratingPrediction ||
-              isLoadingSubscriptions ||
-              subscriptions.length === 0
-            }
-          >
-            {isGeneratingPrediction ? "Generating..." : "Generate prediction"}
-          </button>
-
-          {subscriptions.length === 0 && !isLoadingSubscriptions && (
-            <p className="stitch-warning-text">
-              No active subscriptions found. Create or activate a subscription
-              before generating predictions.
-            </p>
-          )}
-        </div>
-
-        <div className="stitch-intelligence-panel">
-          <h3>Recommendation action</h3>
-          <p>
-            After generating a prediction, request a backend plan
-            recommendation from that prediction.
-          </p>
-
-          <button
-            type="button"
-            onClick={() => void handleGenerateRecommendation()}
-            disabled={!predictionResult || isGeneratingRecommendation}
-          >
-            {isGeneratingRecommendation
-              ? "Generating..."
-              : "Generate recommendation"}
-          </button>
-
-          {!predictionResult && (
-            <p className="stitch-warning-text">
-              Generate a prediction first to unlock recommendations.
-            </p>
-          )}
-        </div>
-      </section>
-
-      <section className="stitch-intelligence-results">
-        <article className="stitch-intelligence-result-card">
-          <div className="stitch-monitoring-panel-header">
-            <h3>Latest Prediction</h3>
-          </div>
-
-          {!predictionResult && (
-            <div className="stitch-empty-state">
-              <span className="material-symbols-outlined">query_stats</span>
-              <h3>No prediction generated</h3>
-              <p>Generate a prediction to preview usage risk and cycle data.</p>
-            </div>
-          )}
-
-          {predictionResult && (
-            <div className="stitch-intelligence-detail-grid">
-              <div>
-                <span>Predicted usage</span>
-                <strong>
-                  {formatNumber(predictionResult.prediction.predicted_usage_gb)} GB
-                </strong>
-              </div>
-
-              <div>
-                <span>Risk level</span>
-                <strong>
-                  <span
-                    className={`status-pill ${getRiskClass(
-                      predictionResult.prediction.risk_level
-                    )}`}
-                  >
-                    {predictionResult.prediction.risk_level}
-                  </span>
-                </strong>
-              </div>
-
-              <div>
-                <span>Observed usage</span>
-                <strong>
-                  {formatNumber(predictionResult.observed_usage_gb)} GB
-                </strong>
-              </div>
-
-              <div>
-                <span>Average daily</span>
-                <strong>
-                  {formatNumber(predictionResult.average_daily_usage_gb)} GB
-                </strong>
-              </div>
-
-              <div>
-                <span>Cycle progress</span>
-                <strong>
-                  {predictionResult.days_elapsed}/
-                  {predictionResult.total_cycle_days} days
-                </strong>
-              </div>
-
-              <div>
-                <span>Prediction date</span>
-                <strong>
-                  {formatDate(predictionResult.prediction.prediction_date)}
-                </strong>
-              </div>
-            </div>
-          )}
-        </article>
-
-        <article className="stitch-intelligence-result-card">
-          <div className="stitch-monitoring-panel-header">
-            <h3>Latest Recommendation</h3>
-          </div>
-
-          {!recommendationResult && (
-            <div className="stitch-empty-state">
-              <span className="material-symbols-outlined">tips_and_updates</span>
-              <h3>No recommendation generated</h3>
-              <p>Generate a recommendation after a successful prediction.</p>
-            </div>
-          )}
-
-          {recommendationResult && (
-            <div className="stitch-recommendation-box">
-              <span className="status-pill status-info">
-                {recommendationResult.recommendation.recommendation_type}
+              <span className="stitch-automation-kicker">
+                Automatic intelligence
               </span>
+              <h3>Run predictions and recommendations for this ISP</h3>
+              <p>
+                This checks active subscriptions under the current ISP, skips
+                subscriptions without enough usage data, and reuses existing
+                daily intelligence when it already exists.
+              </p>
+            </div>
 
-              <h3>{recommendationResult.recommendation.recommendation_text}</h3>
+            <button
+              type="button"
+              onClick={() => void handleRunAutomation()}
+              disabled={isRunningAutomation}
+            >
+              {isRunningAutomation ? "Running..." : "Run intelligence now"}
+            </button>
 
-              <p>{recommendationResult.recommendation.reason ?? "No reason returned."}</p>
-
-              <div className="stitch-intelligence-detail-grid">
+            {automationResult && (
+              <div className="stitch-intelligence-run-summary">
                 <div>
-                  <span>Predicted usage</span>
-                  <strong>
-                    {formatNumber(recommendationResult.predicted_usage_gb)} GB
-                  </strong>
+                  <span>Checked</span>
+                  <strong>{automationResult.subscriptions_checked}</strong>
                 </div>
-
                 <div>
-                  <span>Current limit</span>
-                  <strong>
-                    {formatNumber(recommendationResult.current_plan_limit_gb)} GB
-                  </strong>
+                  <span>Predictions</span>
+                  <strong>{automationResult.predictions_created}</strong>
                 </div>
-
                 <div>
-                  <span>Recommended limit</span>
-                  <strong>
-                    {formatNumber(recommendationResult.recommended_plan_limit_gb)} GB
-                  </strong>
+                  <span>Recommendations</span>
+                  <strong>{automationResult.recommendations_created}</strong>
                 </div>
-
                 <div>
-                  <span>Status</span>
-                  <strong>{recommendationResult.recommendation.status}</strong>
+                  <span>Skipped</span>
+                  <strong>{automationResult.skipped}</strong>
+                </div>
+                <div>
+                  <span>Failed</span>
+                  <strong>{automationResult.failed}</strong>
                 </div>
               </div>
+            )}
+
+            {automationResult && automationResult.items.length > 0 && (
+              <details className="stitch-intelligence-run-details">
+                <summary>View run details</summary>
+
+                <div>
+                  {automationResult.items.map((item) => (
+                    <article key={item.subscription_id}>
+                      <span className={`status-pill status-${item.status}`}>
+                        {item.status}
+                      </span>
+                      <code>{item.subscription_id}</code>
+                      <p>{item.message ?? "No message."}</p>
+                    </article>
+                  ))}
+                </div>
+              </details>
+            )}
+          </section>
+
+          <section className="stitch-intelligence-grid">
+            <div className="stitch-intelligence-panel">
+              <h3>Prediction input</h3>
+              <p>Select an active subscription and let the backend calculate usage risk.</p>
+
+              <label>
+                Active subscription
+                <select
+                  value={selectedSubscriptionId}
+                  onChange={(event) => {
+                    setSelectedSubscriptionId(event.target.value);
+                    setPredictionResult(null);
+                    setRecommendationResult(null);
+                  }}
+                  disabled={subscriptions.length === 0}
+                >
+                  {subscriptions.map((subscription) => (
+                    <option value={subscription.id} key={subscription.id}>
+                      {subscription.subscription_label ??
+                        `Subscription ${subscription.id.slice(0, 8)}`}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Prediction date optional
+                <input
+                  type="date"
+                  value={predictionDate}
+                  onChange={(event) => setPredictionDate(event.target.value)}
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={() => void handleGeneratePrediction()}
+                disabled={isGeneratingPrediction || subscriptions.length === 0}
+              >
+                {isGeneratingPrediction ? "Generating..." : "Generate prediction"}
+              </button>
+
+              {subscriptions.length === 0 && (
+                <p className="stitch-warning-text">
+                  No active subscriptions found. Create or activate a subscription
+                  before generating predictions.
+                </p>
+              )}
             </div>
-          )}
-        </article>
-      </section>
+
+            <div className="stitch-intelligence-panel">
+              <h3>Recommendation action</h3>
+              <p>Generate a plan recommendation from the latest prediction result.</p>
+
+              <button
+                type="button"
+                onClick={() => void handleGenerateRecommendation()}
+                disabled={!predictionResult || isGeneratingRecommendation}
+              >
+                {isGeneratingRecommendation
+                  ? "Generating..."
+                  : "Generate recommendation"}
+              </button>
+
+              {!predictionResult && (
+                <p className="stitch-warning-text">
+                  Generate a prediction first to unlock recommendations.
+                </p>
+              )}
+            </div>
+          </section>
+
+          <section className="stitch-intelligence-results">
+            <article className="stitch-intelligence-result-card">
+              <div className="stitch-monitoring-panel-header">
+                <h3>Latest Prediction</h3>
+              </div>
+
+              {!predictionResult && (
+                <div className="stitch-empty-state">
+                  <span className="material-symbols-outlined">query_stats</span>
+                  <h3>No prediction generated</h3>
+                  <p>Generate a prediction to preview usage risk and cycle data.</p>
+                </div>
+              )}
+
+              {predictionResult && (
+                <div className="stitch-intelligence-detail-grid">
+                  <div>
+                    <span>Predicted usage</span>
+                    <strong>
+                      {formatNumber(predictionResult.prediction.predicted_usage_gb)} GB
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Risk level</span>
+                    <strong>
+                      <span
+                        className={`status-pill ${getRiskClass(
+                          predictionResult.prediction.risk_level
+                        )}`}
+                      >
+                        {predictionResult.prediction.risk_level}
+                      </span>
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Observed usage</span>
+                    <strong>
+                      {formatNumber(predictionResult.observed_usage_gb)} GB
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Average daily</span>
+                    <strong>
+                      {formatNumber(predictionResult.average_daily_usage_gb)} GB
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Cycle progress</span>
+                    <strong>
+                      {predictionResult.days_elapsed}/
+                      {predictionResult.total_cycle_days} days
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Prediction date</span>
+                    <strong>
+                      {formatDate(predictionResult.prediction.prediction_date)}
+                    </strong>
+                  </div>
+                </div>
+              )}
+            </article>
+
+            <article className="stitch-intelligence-result-card">
+              <div className="stitch-monitoring-panel-header">
+                <h3>Latest Recommendation</h3>
+              </div>
+
+              {!recommendationResult && (
+                <div className="stitch-empty-state">
+                  <span className="material-symbols-outlined">
+                    tips_and_updates
+                  </span>
+                  <h3>No recommendation generated</h3>
+                  <p>Generate a recommendation after a successful prediction.</p>
+                </div>
+              )}
+
+              {recommendationResult && (
+                <div className="stitch-recommendation-box recommendations-scroll-list">
+                  <span className="status-pill status-info">
+                    {formatLabel(
+                      recommendationResult.recommendation.recommendation_type
+                    )}
+                  </span>
+
+                  <h3>{recommendationResult.recommendation.recommendation_text}</h3>
+
+                  <p>
+                    {recommendationResult.recommendation.reason ??
+                      "No reason returned."}
+                  </p>
+
+                  <div className="stitch-intelligence-detail-grid">
+                    <div>
+                      <span>Predicted usage</span>
+                      <strong>
+                        {formatNumber(recommendationResult.predicted_usage_gb)} GB
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Current limit</span>
+                      <strong>
+                        {formatNumber(recommendationResult.current_plan_limit_gb)} GB
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Recommended limit</span>
+                      <strong>
+                        {formatNumber(
+                          recommendationResult.recommended_plan_limit_gb
+                        )}{" "}
+                        GB
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span>Status</span>
+                      <strong>{recommendationResult.recommendation.status}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </article>
+          </section>
+
+          <section className="stitch-intelligence-history-grid">
+            <article className="stitch-intelligence-result-card">
+              <div className="stitch-monitoring-panel-header">
+                <h3>Recommendation History</h3>
+
+                <div className="filter-bar stitch-intelligence-filter-bar">
+                  {recommendationFilters.map((filter) => (
+                    <button
+                      key={filter.value}
+                      className={`filter-chip ${
+                        recommendationFilter === filter.value
+                          ? "active-filter"
+                          : ""
+                      }`}
+                      type="button"
+                      onClick={() => setRecommendationFilter(filter.value)}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <RecommendationList recommendations={recommendations} />
+            </article>
+
+            <article className="stitch-intelligence-result-card">
+              <div className="stitch-monitoring-panel-header">
+                <h3>Recent Reports</h3>
+              </div>
+
+              <ReportList reports={reports} />
+            </article>
+          </section>
+        </>
+      )}
     </section>
   );
 }

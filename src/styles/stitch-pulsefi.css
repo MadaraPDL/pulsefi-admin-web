@@ -3038,6 +3038,13 @@ body:has(.stitch-auth-page) {
   padding: 0 24px 24px;
 }
 
+.stitch-intelligence-history-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  gap: 16px;
+  padding: 0 24px 24px;
+}
+
 .stitch-intelligence-result-card {
   border: 1px solid #3c494e;
   border-radius: 12px;
@@ -3091,9 +3098,73 @@ body:has(.stitch-auth-page) {
   line-height: 1.6;
 }
 
+.stitch-intelligence-filter-bar {
+  justify-content: flex-end;
+}
+
+.stitch-intelligence-list {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.stitch-intelligence-list-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.7fr);
+  gap: 16px;
+  border: 1px solid #344147;
+  border-radius: 10px;
+  background: #1c1b1b;
+  padding: 14px;
+}
+
+.stitch-intelligence-list-item strong {
+  display: block;
+  margin-top: 10px;
+  color: #e5e2e1 !important;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.stitch-intelligence-list-item p {
+  margin: 8px 0 0;
+  color: #bbc9cf !important;
+  line-height: 1.45;
+}
+
+.stitch-intelligence-list-item dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.stitch-intelligence-list-item dl div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.stitch-intelligence-list-item dt {
+  color: #8fa1aa;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.stitch-intelligence-list-item dd {
+  margin: 0;
+  color: #e5e2e1;
+  font-weight: 800;
+  text-align: right;
+}
+
 @media (max-width: 1180px) {
   .stitch-intelligence-grid,
-  .stitch-intelligence-results {
+  .stitch-intelligence-results,
+  .stitch-intelligence-history-grid,
+  .stitch-intelligence-list-item {
     grid-template-columns: 1fr;
   }
 }
@@ -3245,4 +3316,59 @@ body:has(.stitch-auth-page) {
   .stitch-intelligence-run-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* Step 27D UI fix: keep recommendation history inside a scroll area */
+.intelligence-scroll-list,
+.recommendations-scroll-list {
+  max-height: clamp(360px, 55vh, 620px);
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.intelligence-scroll-list > * + *,
+.recommendations-scroll-list > * + * {
+  margin-top: 14px;
+}
+
+.intelligence-scroll-list::-webkit-scrollbar,
+.recommendations-scroll-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.intelligence-scroll-list::-webkit-scrollbar-thumb,
+.recommendations-scroll-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 209, 255, 0.35);
+  border-radius: 999px;
+}
+
+.intelligence-scroll-list::-webkit-scrollbar-track,
+.recommendations-scroll-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+/* Step 27D UI fix: scroll recommendation history inside the Intelligence Center */
+.recommendations-scroll-list {
+  max-height: clamp(360px, 55vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recommendations-scroll-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.recommendations-scroll-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 209, 255, 0.35);
+  border-radius: 999px;
+}
+
+.recommendations-scroll-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
 }
