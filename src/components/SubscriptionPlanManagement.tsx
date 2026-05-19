@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
@@ -337,7 +337,11 @@ export function SubscriptionPlanManagement() {
             Create ISP-scoped internet plans and update plan availability.
           </p>
         </div>
-        <button type="button" className="secondary-button" onClick={loadPlans}>
+        <button
+          type="button"
+          className="secondary-button pf-refresh-button"
+          onClick={loadPlans}
+        >
           Refresh
         </button>
       </div>
@@ -380,7 +384,7 @@ export function SubscriptionPlanManagement() {
             />
           </label>
 
-          <label>
+          <label className="pf-bandwidth-limit-field">
             Speed limit Mbps
             <input
               type="number"
@@ -471,7 +475,7 @@ export function SubscriptionPlanManagement() {
                 />
               </label>
 
-              <label>
+              <label className="pf-bandwidth-limit-field">
                 Speed limit Mbps
                 <input
                   type="number"

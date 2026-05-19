@@ -191,7 +191,10 @@ export function AppUserInvitationManagement() {
             Invite customers to create App User accounts scoped to your ISP.
           </p>
         </div>
-        <button className="secondary-button" onClick={loadInvitations}>
+        <button
+          className="secondary-button pf-refresh-button"
+          onClick={loadInvitations}
+        >
           Refresh
         </button>
       </div>

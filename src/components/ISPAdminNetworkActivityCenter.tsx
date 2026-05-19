@@ -57,11 +57,11 @@ function getLogStatusClass(status: string) {
 
 function UsageRecordsTable({ records }: { records: ISPAdminUsageRecord[] }) {
   return (
-    <div className="stitch-table-wrap">
-      <table>
+    <div className="pf-table-wrap">
+      <table className="pf-usage-records-table">
         <thead>
           <tr>
-            <th>Total</th>
+            <th className="pf-total-mb-heading">Total</th>
             <th>Upload</th>
             <th>Download</th>
             <th>Source</th>
@@ -72,7 +72,9 @@ function UsageRecordsTable({ records }: { records: ISPAdminUsageRecord[] }) {
         <tbody>
           {records.map((record) => (
             <tr key={record.id}>
-              <td>{formatMb(record.total_mb)}</td>
+              <td className="pf-total-mb-cell">
+                {formatMb(record.total_mb)}
+              </td>
               <td>{formatMb(record.upload_mb)}</td>
               <td>{formatMb(record.download_mb)}</td>
               <td>{record.source ?? "-"}</td>
@@ -104,8 +106,8 @@ function DeviceConnectionTable({
   logs: ISPAdminDeviceConnectionLog[];
 }) {
   return (
-    <div className="stitch-table-wrap">
-      <table>
+    <div className="pf-table-wrap">
+      <table className="pf-device-connection-log-table">
         <thead>
           <tr>
             <th>Event</th>
@@ -145,8 +147,8 @@ function RouterActionLogTable({
   logs: ISPAdminRouterActionLog[];
 }) {
   return (
-    <div className="stitch-table-wrap">
-      <table>
+    <div className="pf-table-wrap">
+      <table className="pf-router-action-log-table">
         <thead>
           <tr>
             <th>Action</th>
@@ -165,8 +167,8 @@ function RouterActionLogTable({
                   {log.status}
                 </span>
               </td>
-              <td>{log.error_message ?? "-"}</td>
-              <td>{formatDateTime(log.executed_at)}</td>
+              <td className="pf-log-message-cell">{log.error_message ?? "-"}</td>
+              <td className="pf-time-cell">{formatDateTime(log.executed_at)}</td>
             </tr>
           ))}
 
@@ -235,15 +237,15 @@ export function ISPAdminNetworkActivityCenter() {
   }, [routerActionStatus]);
 
   return (
-    <section className="stitch-content-card stitch-network-activity-center">
-      <div className="stitch-panel-title-row">
+    <section className="pf-content-card pf-network-activity-center">
+      <div className="pf-panel-title-row">
         <div>
           <h2>Network Activity Center</h2>
           <p>Review usage records, device events, and router policy actions.</p>
         </div>
 
         <button
-          className="stitch-view-link"
+          className="pf-view-link pf-refresh-button"
           type="button"
           onClick={() => void loadNetworkActivity()}
           disabled={isLoading}
@@ -252,35 +254,35 @@ export function ISPAdminNetworkActivityCenter() {
         </button>
       </div>
 
-      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
+      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
 
       {isLoading && (
-        <p className="stitch-loading-text">Loading network activity...</p>
+        <p className="pf-loading-text">Loading network activity...</p>
       )}
 
       {!isLoading && (
-        <section className="stitch-network-grid">
-          <article className="stitch-network-panel stitch-network-panel-wide">
-            <div className="stitch-monitoring-panel-header">
+        <section className="pf-network-grid">
+          <article className="pf-network-panel pf-network-panel-wide">
+            <div className="pf-monitoring-panel-header">
               <h3>Recent Usage Records</h3>
             </div>
 
             <UsageRecordsTable records={usageRecords} />
           </article>
 
-          <article className="stitch-network-panel">
-            <div className="stitch-monitoring-panel-header">
+          <article className="pf-network-panel">
+            <div className="pf-monitoring-panel-header">
               <h3>Device Connection Logs</h3>
             </div>
 
             <DeviceConnectionTable logs={connectionLogs} />
           </article>
 
-          <article className="stitch-network-panel">
-            <div className="stitch-monitoring-panel-header">
+          <article className="pf-network-panel">
+            <div className="pf-monitoring-panel-header">
               <h3>Router Action Logs</h3>
 
-              <div className="filter-bar stitch-network-filter-bar">
+              <div className="filter-bar pf-network-filter-bar">
                 {(["all", "pending", "success", "failed"] as const).map(
                   (status) => (
                     <button

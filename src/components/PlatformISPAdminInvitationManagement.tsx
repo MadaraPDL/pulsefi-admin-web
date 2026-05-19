@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   listISPAdminInvitations,
@@ -172,8 +172,8 @@ export function PlatformISPAdminInvitationManagement({
   }
 
   return (
-    <section className="stitch-platform-invitation-panel">
-      <div className="stitch-panel-title-row">
+    <section className="pf-platform-invitation-panel">
+      <div className="pf-panel-title-row">
         <div>
           <h2>ISP Admin Invitations</h2>
           <p>
@@ -182,7 +182,7 @@ export function PlatformISPAdminInvitationManagement({
         </div>
 
         <button
-          className="stitch-view-link"
+          className="pf-view-link pf-refresh-button"
           type="button"
           onClick={loadInvitations}
           disabled={!selectedISP || isLoading}
@@ -192,7 +192,7 @@ export function PlatformISPAdminInvitationManagement({
       </div>
 
       {!selectedISP && (
-        <div className="stitch-selected-strip">
+        <div className="pf-selected-strip">
           Select an ISP in the ISPs section to review or revoke its ISP Admin
           invitations.
         </div>
@@ -200,11 +200,11 @@ export function PlatformISPAdminInvitationManagement({
 
       {selectedISP && (
         <>
-          <div className="stitch-selected-strip">
+          <div className="pf-selected-strip">
             <strong>Invitation scope:</strong> {selectedISP.name}
           </div>
 
-          <div className="filter-bar stitch-platform-invitation-filters">
+          <div className="filter-bar pf-platform-invitation-filters">
             {invitationFilters.map((filter) => (
               <button
                 key={filter.value}
@@ -220,20 +220,20 @@ export function PlatformISPAdminInvitationManagement({
             ))}
           </div>
 
-          {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
+          {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
 
           {successMessage && (
-            <div className="stitch-success-box">{successMessage}</div>
+            <div className="pf-success-box">{successMessage}</div>
           )}
 
           {isLoading && (
-            <p className="stitch-loading-text">
+            <p className="pf-loading-text">
               Loading ISP Admin invitations...
             </p>
           )}
 
           {!isLoading && (
-            <div className="stitch-table-wrap">
+            <div className="pf-table-wrap">
               <table>
                 <thead>
                   <tr>

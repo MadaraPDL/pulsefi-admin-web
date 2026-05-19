@@ -81,10 +81,10 @@ function AnalyticsCards({ analytics }: { analytics: ISPAdminAnalyticsSummary }) 
   ];
 
   return (
-    <section className="stitch-monitoring-card-grid">
+    <section className="pf-monitoring-card-grid">
       {cards.map((card) => (
         <article
-          className={`stitch-monitoring-card stitch-monitoring-${card.tone}`}
+          className={`pf-monitoring-card pf-monitoring-${card.tone}`}
           key={card.label}
         >
           <div>
@@ -105,7 +105,7 @@ function AnalyticsCards({ analytics }: { analytics: ISPAdminAnalyticsSummary }) 
 function AlertList({ alerts }: { alerts: ISPAdminAlert[] }) {
   if (alerts.length === 0) {
     return (
-      <div className="stitch-empty-state">
+      <div className="pf-empty-state">
         <span className="material-symbols-outlined">notifications_off</span>
         <h3>No alerts found</h3>
         <p>
@@ -117,13 +117,13 @@ function AlertList({ alerts }: { alerts: ISPAdminAlert[] }) {
   }
 
   return (
-    <div className="stitch-monitoring-alert-list">
+    <div className="pf-monitoring-alert-list">
       {alerts.map((alert) => {
         const tone = getAlertTone(alert.severity);
 
         return (
           <article
-            className={`stitch-alert-item stitch-alert-${tone}`}
+            className={`pf-alert-item pf-alert-${tone}`}
             key={alert.id}
           >
             <span className="material-symbols-outlined" aria-hidden="true">
@@ -135,7 +135,7 @@ function AlertList({ alerts }: { alerts: ISPAdminAlert[] }) {
             </span>
 
             <div>
-              <div className="stitch-alert-title-row">
+              <div className="pf-alert-title-row">
                 <h3>{alert.title}</h3>
                 <span className={`status-pill status-${tone}`}>
                   {alert.severity}
@@ -206,15 +206,15 @@ export function ISPAdminMonitoringCenter() {
   }, [alertFilter]);
 
   return (
-    <section className="stitch-content-card stitch-monitoring-center">
-      <div className="stitch-panel-title-row">
+    <section className="pf-content-card pf-monitoring-center">
+      <div className="pf-panel-title-row">
         <div>
           <h2>Monitoring Center</h2>
           <p>Analytics, usage totals, alerts, and ISP activity signals.</p>
         </div>
 
         <button
-          className="stitch-view-link"
+          className="pf-view-link pf-refresh-button"
           type="button"
           onClick={() => void loadMonitoringData()}
           disabled={isLoading}
@@ -223,15 +223,15 @@ export function ISPAdminMonitoringCenter() {
         </button>
       </div>
 
-      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
+      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
 
       {isLoading && (
-        <p className="stitch-loading-text">Loading monitoring data...</p>
+        <p className="pf-loading-text">Loading monitoring data...</p>
       )}
 
       {!isLoading && analytics && (
         <>
-          <div className="stitch-monitoring-meta">
+          <div className="pf-monitoring-meta">
             <span>
               <strong>Generated:</strong> {formatDateTime(analytics.generated_at)}
             </span>
@@ -242,13 +242,13 @@ export function ISPAdminMonitoringCenter() {
 
           <AnalyticsCards analytics={analytics} />
 
-          <section className="stitch-monitoring-split">
-            <div className="stitch-monitoring-panel">
-              <div className="stitch-monitoring-panel-header">
+          <section className="pf-monitoring-split">
+            <div className="pf-monitoring-panel">
+              <div className="pf-monitoring-panel-header">
                 <h3>Operational Summary</h3>
               </div>
 
-              <div className="stitch-monitoring-stat-list">
+              <div className="pf-monitoring-stat-list">
                 <div>
                   <span>Users</span>
                   <strong>
@@ -282,11 +282,11 @@ export function ISPAdminMonitoringCenter() {
               </div>
             </div>
 
-            <div className="stitch-monitoring-panel">
-              <div className="stitch-monitoring-panel-header">
+            <div className="pf-monitoring-panel">
+              <div className="pf-monitoring-panel-header">
                 <h3>Recent Alerts</h3>
 
-                <div className="filter-bar stitch-monitoring-filter-bar">
+                <div className="filter-bar pf-monitoring-filter-bar">
                   {(["all", "critical", "unread"] as const).map((filter) => (
                     <button
                       key={filter}

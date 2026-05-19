@@ -96,10 +96,10 @@ function ISPSidebar({
   ];
 
   return (
-    <nav className="stitch-sidebar" aria-label="ISP Admin navigation">
-      <div className="stitch-sidebar-head">
-        <div className="stitch-profile-row">
-          <div className="stitch-profile-avatar">
+    <nav className="pf-sidebar" aria-label="ISP Admin navigation">
+      <div className="pf-sidebar-head">
+        <div className="pf-profile-row">
+          <div className="pf-profile-avatar">
             <span className="material-symbols-outlined">wifi</span>
           </div>
 
@@ -110,7 +110,7 @@ function ISPSidebar({
         </div>
 
         <button
-          className="stitch-quick-action"
+          className="pf-quick-action"
           type="button"
           onClick={() => onNavigate("invitations")}
         >
@@ -119,14 +119,14 @@ function ISPSidebar({
         </button>
       </div>
 
-      <ul className="stitch-nav-list">
+      <ul className="pf-nav-list">
         {navItems.map((item) => (
           <li key={item.label}>
             <button
               className={
                 item.id === activeSection
-                  ? "stitch-sidebar-link stitch-sidebar-link-active"
-                  : "stitch-sidebar-link"
+                  ? "pf-sidebar-link pf-sidebar-link-active"
+                  : "pf-sidebar-link"
               }
               type="button"
               onClick={() => onNavigate(item.id)}
@@ -138,13 +138,13 @@ function ISPSidebar({
         ))}
       </ul>
 
-      <div className="stitch-sidebar-bottom">
-        <button className="stitch-sidebar-link" type="button">
+      <div className="pf-sidebar-bottom">
+        <button className="pf-sidebar-link" type="button">
           <span className="material-symbols-outlined">help</span>
           <span>Support</span>
         </button>
 
-        <button className="stitch-sidebar-link" type="button" onClick={onLogout}>
+        <button className="pf-sidebar-link" type="button" onClick={onLogout}>
           <span className="material-symbols-outlined">logout</span>
           <span>Logout</span>
         </button>
@@ -163,8 +163,8 @@ function ISPTopBar({
   const copy = ispSectionCopy[activeSection];
 
   return (
-    <header className="stitch-topbar">
-      <div className="stitch-topbar-left">
+    <header className="pf-topbar">
+      <div className="pf-topbar-left">
         <div>
           <h2>{copy.title}</h2>
           <p>
@@ -172,13 +172,13 @@ function ISPTopBar({
           </p>
         </div>
 
-        <label className="stitch-dashboard-search">
+        <label className="pf-dashboard-search">
           <span className="material-symbols-outlined">search</span>
           <input placeholder="Search ISP data..." />
         </label>
       </div>
 
-      <div className="stitch-topbar-actions">
+      <div className="pf-topbar-actions">
         <button type="button" aria-label="Notifications">
           <span className="material-symbols-outlined">notifications</span>
         </button>
@@ -205,7 +205,7 @@ function ISPShell({
   children: ReactNode;
 }) {
   return (
-    <div className="stitch-dashboard-shell">
+    <div className="pf-dashboard-shell">
       <ISPSidebar
         activeSection={activeSection}
         onNavigate={onNavigate}
@@ -213,7 +213,7 @@ function ISPShell({
       />
       <ISPTopBar adminName={adminName} activeSection={activeSection} />
 
-      <main className="stitch-dashboard-main">{children}</main>
+      <main className="pf-dashboard-main">{children}</main>
     </div>
   );
 }
@@ -251,17 +251,17 @@ function ISPSummaryCards({ summary }: { summary: ISPAdminSummary }) {
   ];
 
   return (
-    <section className="stitch-kpi-grid">
+    <section className="pf-kpi-grid">
       {cards.map((card) => (
-        <article className="stitch-kpi-card" key={card.label}>
-          <div className="stitch-kpi-top">
+        <article className="pf-kpi-card" key={card.label}>
+          <div className="pf-kpi-top">
             <span>{card.label}</span>
             <span className="material-symbols-outlined">{card.icon}</span>
           </div>
 
           <div>
             <strong>{card.value}</strong>
-            <div className="stitch-kpi-meta">
+            <div className="pf-kpi-meta">
               <span>{card.detail}</span>
               <span>{card.secondDetail}</span>
             </div>
@@ -274,14 +274,14 @@ function ISPSummaryCards({ summary }: { summary: ISPAdminSummary }) {
 
 function ISPInsightsPanel({ summary }: { summary: ISPAdminSummary }) {
   return (
-    <aside className="stitch-alerts-panel">
-      <div className="stitch-panel-title-row">
+    <aside className="pf-alerts-panel">
+      <div className="pf-panel-title-row">
         <h2>ISP Insights</h2>
-        <span className="stitch-health-pill">Scoped</span>
+        <span className="pf-health-pill">Scoped</span>
       </div>
 
-      <div className="stitch-alert-list">
-        <article className="stitch-alert-item stitch-alert-info">
+      <div className="pf-alert-list">
+        <article className="pf-alert-item pf-alert-info">
           <span className="material-symbols-outlined">verified_user</span>
           <div>
             <h3>ISP Isolation Active</h3>
@@ -293,7 +293,7 @@ function ISPInsightsPanel({ summary }: { summary: ISPAdminSummary }) {
           </div>
         </article>
 
-        <article className="stitch-alert-item stitch-alert-warning">
+        <article className="pf-alert-item pf-alert-warning">
           <span className="material-symbols-outlined">router</span>
           <div>
             <h3>Router Credentials Reminder</h3>
@@ -305,7 +305,7 @@ function ISPInsightsPanel({ summary }: { summary: ISPAdminSummary }) {
           </div>
         </article>
 
-        <article className="stitch-alert-item stitch-alert-info">
+        <article className="pf-alert-item pf-alert-info">
           <span className="material-symbols-outlined">monitoring</span>
           <div>
             <h3>Intelligence Ready</h3>
@@ -399,28 +399,28 @@ function ISPOverviewRoutes({
   ];
 
   return (
-    <section className="stitch-content-card stitch-overview-route-panel">
-      <div className="stitch-panel-title-row">
+    <section className="pf-content-card pf-overview-route-panel">
+      <div className="pf-panel-title-row">
         <div>
           <h2>Dashboard Sections</h2>
           <p>Choose one area at a time to keep the dashboard focused.</p>
         </div>
       </div>
 
-      <div className="stitch-overview-route-list">
+      <div className="pf-overview-route-list">
         {routes.map((route) => (
           <button
-            className="stitch-overview-route-row"
+            className="pf-overview-route-row"
             key={route.section}
             type="button"
             onClick={() => onNavigate(route.section)}
           >
             <span className="material-symbols-outlined">{route.icon}</span>
-            <span className="stitch-overview-route-copy">
+            <span className="pf-overview-route-copy">
               <strong>{route.title}</strong>
               <span>{route.description}</span>
             </span>
-            <span className="stitch-overview-route-meta">{route.meta}</span>
+            <span className="pf-overview-route-meta">{route.meta}</span>
           </button>
         ))}
       </div>
@@ -429,7 +429,7 @@ function ISPOverviewRoutes({
 }
 
 function SectionCard({ children }: { children: ReactNode }) {
-  return <div className="stitch-section-stack">{children}</div>;
+  return <div className="pf-section-stack">{children}</div>;
 }
 
 export default function ISPAdminDashboard({
@@ -470,21 +470,21 @@ export default function ISPAdminDashboard({
       onNavigate={setActiveSection}
       onLogout={handleLogout}
     >
-      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
+      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
 
       {!summary && !errorMessage && (
-        <p className="stitch-loading-text">Loading ISP summary...</p>
+        <p className="pf-loading-text">Loading ISP summary...</p>
       )}
 
       {summary && activeSection === "dashboard" && (
         <>
-          <div className="stitch-selected-strip">
+          <div className="pf-selected-strip">
             <strong>ISP ID:</strong> {summary.isp_id}
           </div>
 
           <ISPSummaryCards summary={summary} />
 
-          <section className="stitch-bento-grid">
+          <section className="pf-bento-grid">
             <ISPOverviewRoutes onNavigate={setActiveSection} />
 
             <ISPInsightsPanel summary={summary} />

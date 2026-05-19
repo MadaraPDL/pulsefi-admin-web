@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
@@ -392,7 +392,7 @@ export function UserSubscriptionManagement() {
         </div>
         <button
           type="button"
-          className="secondary-button"
+          className="secondary-button pf-refresh-button"
           onClick={loadSubscriptions}
         >
           Refresh

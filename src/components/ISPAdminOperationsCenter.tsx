@@ -84,14 +84,14 @@ function RequestReviewActions({
   }
 
   return (
-    <div className="stitch-review-actions">
+    <div className="pf-review-actions">
       <textarea
         value={adminResponse}
         onChange={(event) => setAdminResponse(event.target.value)}
         placeholder="Optional response to the user"
       />
 
-      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
+      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
 
       <div>
         <button
@@ -185,15 +185,15 @@ export function ISPAdminOperationsCenter() {
   }
 
   return (
-    <section className="stitch-content-card stitch-operations-center">
-      <div className="stitch-panel-title-row">
+    <section className="pf-content-card pf-operations-center">
+      <div className="pf-panel-title-row">
         <div>
           <h2>Operations Center</h2>
           <p>Generate reports and review user plan change requests.</p>
         </div>
 
         <button
-          className="stitch-view-link"
+          className="pf-view-link pf-refresh-button"
           type="button"
           onClick={() => void loadOperationsData()}
           disabled={isLoading}
@@ -202,11 +202,11 @@ export function ISPAdminOperationsCenter() {
         </button>
       </div>
 
-      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
-      {successMessage && <div className="stitch-success-box">{successMessage}</div>}
+      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
+      {successMessage && <div className="pf-success-box">{successMessage}</div>}
 
-      <section className="stitch-operations-grid">
-        <div className="stitch-operations-panel">
+      <section className="pf-operations-grid">
+        <div className="pf-operations-panel">
           <h3>Generate report</h3>
           <p>Create a stored report using backend-generated ISP data.</p>
 
@@ -244,11 +244,11 @@ export function ISPAdminOperationsCenter() {
           </button>
         </div>
 
-        <div className="stitch-operations-panel">
+        <div className="pf-operations-panel">
           <h3>Plan request filter</h3>
           <p>Review pending requests or inspect previous decisions.</p>
 
-          <div className="filter-bar stitch-operations-filter-bar">
+          <div className="filter-bar pf-operations-filter-bar">
             {requestFilters.map((filter) => (
               <button
                 key={filter.value}
@@ -265,16 +265,16 @@ export function ISPAdminOperationsCenter() {
         </div>
       </section>
 
-      {isLoading && <p className="stitch-loading-text">Loading operations...</p>}
+      {isLoading && <p className="pf-loading-text">Loading operations...</p>}
 
       {!isLoading && (
-        <section className="stitch-operations-split">
-          <div className="stitch-operations-table-panel">
-            <div className="stitch-monitoring-panel-header">
+        <section className="pf-operations-split">
+          <div className="pf-operations-table-panel">
+            <div className="pf-monitoring-panel-header">
               <h3>Recent reports</h3>
             </div>
 
-            <div className="stitch-table-wrap">
+            <div className="pf-table-wrap">
               <table>
                 <thead>
                   <tr>
@@ -305,12 +305,12 @@ export function ISPAdminOperationsCenter() {
             </div>
           </div>
 
-          <div className="stitch-operations-table-panel">
-            <div className="stitch-monitoring-panel-header">
+          <div className="pf-operations-table-panel">
+            <div className="pf-monitoring-panel-header">
               <h3>Plan change requests</h3>
             </div>
 
-            <div className="stitch-table-wrap">
+            <div className="pf-table-wrap">
               <table>
                 <thead>
                   <tr>

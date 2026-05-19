@@ -107,7 +107,7 @@ function AnalyticsSnapshot({
 }) {
   if (!analytics) {
     return (
-      <div className="stitch-empty-state">
+      <div className="pf-empty-state">
         <span className="material-symbols-outlined">query_stats</span>
         <h3>No analytics loaded</h3>
         <p>Analytics will appear after the dashboard connects to the backend.</p>
@@ -143,9 +143,9 @@ function AnalyticsSnapshot({
   ];
 
   return (
-    <section className="stitch-monitoring-card-grid">
+    <section className="pf-monitoring-card-grid">
       {cards.map((card) => (
-        <article className="stitch-monitoring-card stitch-monitoring-info" key={card.label}>
+        <article className="pf-monitoring-card pf-monitoring-info" key={card.label}>
           <div>
             <span>{card.label}</span>
             <strong>{card.value}</strong>
@@ -168,7 +168,7 @@ function RecommendationList({
 }) {
   if (recommendations.length === 0) {
     return (
-      <div className="stitch-empty-state">
+      <div className="pf-empty-state">
         <span className="material-symbols-outlined">tips_and_updates</span>
         <h3>No recommendations found</h3>
         <p>Generate recommendations from predictions to build ISP history.</p>
@@ -177,11 +177,11 @@ function RecommendationList({
   }
 
   return (
-    <div className="stitch-intelligence-list">
+    <div className="pf-intelligence-list">
       <div className="recommendations-scroll-list">
         {recommendations.map((recommendation) => (
           <article
-            className="stitch-intelligence-list-item"
+            className="pf-intelligence-list-item"
             key={recommendation.id}
           >
             <div>
@@ -220,7 +220,7 @@ function RecommendationList({
 function ReportList({ reports }: { reports: ISPAdminReport[] }) {
   if (reports.length === 0) {
     return (
-      <div className="stitch-empty-state">
+      <div className="pf-empty-state">
         <span className="material-symbols-outlined">assignment</span>
         <h3>No reports found</h3>
         <p>Generated reports from the Operations Center will appear here.</p>
@@ -229,7 +229,7 @@ function ReportList({ reports }: { reports: ISPAdminReport[] }) {
   }
 
   return (
-    <div className="stitch-table-wrap intelligence-scroll-list">
+    <div className="pf-table-wrap intelligence-scroll-list">
       <table>
         <thead>
           <tr>
@@ -403,15 +403,15 @@ export function ISPAdminIntelligenceCenter() {
   }
 
   return (
-    <section className="stitch-content-card stitch-intelligence-center">
-      <div className="stitch-panel-title-row">
+    <section className="pf-content-card pf-intelligence-center">
+      <div className="pf-panel-title-row">
         <div>
           <h2>Intelligence Center</h2>
           <p>Analytics, recommendations, reports, and generation workflows.</p>
         </div>
 
         <button
-          className="stitch-view-link"
+          className="pf-view-link pf-refresh-button"
           type="button"
           onClick={() => void loadIntelligenceData()}
           disabled={isLoadingData}
@@ -420,20 +420,20 @@ export function ISPAdminIntelligenceCenter() {
         </button>
       </div>
 
-      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
-      {successMessage && <div className="stitch-success-box">{successMessage}</div>}
+      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
+      {successMessage && <div className="pf-success-box">{successMessage}</div>}
 
       {isLoadingData && (
-        <p className="stitch-loading-text">Loading intelligence data...</p>
+        <p className="pf-loading-text">Loading intelligence data...</p>
       )}
 
       {!isLoadingData && (
         <>
           <AnalyticsSnapshot analytics={analytics} />
 
-          <section className="stitch-intelligence-automation-panel">
+          <section className="pf-intelligence-automation-panel">
             <div>
-              <span className="stitch-automation-kicker">
+              <span className="pf-automation-kicker">
                 Automatic intelligence
               </span>
               <h3>Run predictions and recommendations for this ISP</h3>
@@ -453,7 +453,7 @@ export function ISPAdminIntelligenceCenter() {
             </button>
 
             {automationResult && (
-              <div className="stitch-intelligence-run-summary">
+              <div className="pf-intelligence-run-summary">
                 <div>
                   <span>Checked</span>
                   <strong>{automationResult.subscriptions_checked}</strong>
@@ -478,7 +478,7 @@ export function ISPAdminIntelligenceCenter() {
             )}
 
             {automationResult && automationResult.items.length > 0 && (
-              <details className="stitch-intelligence-run-details">
+              <details className="pf-intelligence-run-details">
                 <summary>View run details</summary>
 
                 <div>
@@ -496,8 +496,8 @@ export function ISPAdminIntelligenceCenter() {
             )}
           </section>
 
-          <section className="stitch-intelligence-grid">
-            <div className="stitch-intelligence-panel">
+          <section className="pf-intelligence-grid">
+            <div className="pf-intelligence-panel">
               <h3>Prediction input</h3>
               <p>Select an active subscription and let the backend calculate usage risk.</p>
 
@@ -539,14 +539,14 @@ export function ISPAdminIntelligenceCenter() {
               </button>
 
               {subscriptions.length === 0 && (
-                <p className="stitch-warning-text">
+                <p className="pf-warning-text">
                   No active subscriptions found. Create or activate a subscription
                   before generating predictions.
                 </p>
               )}
             </div>
 
-            <div className="stitch-intelligence-panel">
+            <div className="pf-intelligence-panel">
               <h3>Recommendation action</h3>
               <p>Generate a plan recommendation from the latest prediction result.</p>
 
@@ -561,21 +561,21 @@ export function ISPAdminIntelligenceCenter() {
               </button>
 
               {!predictionResult && (
-                <p className="stitch-warning-text">
+                <p className="pf-warning-text">
                   Generate a prediction first to unlock recommendations.
                 </p>
               )}
             </div>
           </section>
 
-          <section className="stitch-intelligence-results">
-            <article className="stitch-intelligence-result-card">
-              <div className="stitch-monitoring-panel-header">
+          <section className="pf-intelligence-results">
+            <article className="pf-intelligence-result-card">
+              <div className="pf-monitoring-panel-header">
                 <h3>Latest Prediction</h3>
               </div>
 
               {!predictionResult && (
-                <div className="stitch-empty-state">
+                <div className="pf-empty-state">
                   <span className="material-symbols-outlined">query_stats</span>
                   <h3>No prediction generated</h3>
                   <p>Generate a prediction to preview usage risk and cycle data.</p>
@@ -583,7 +583,7 @@ export function ISPAdminIntelligenceCenter() {
               )}
 
               {predictionResult && (
-                <div className="stitch-intelligence-detail-grid">
+                <div className="pf-intelligence-detail-grid">
                   <div>
                     <span>Predicted usage</span>
                     <strong>
@@ -636,13 +636,13 @@ export function ISPAdminIntelligenceCenter() {
               )}
             </article>
 
-            <article className="stitch-intelligence-result-card">
-              <div className="stitch-monitoring-panel-header">
+            <article className="pf-intelligence-result-card">
+              <div className="pf-monitoring-panel-header">
                 <h3>Latest Recommendation</h3>
               </div>
 
               {!recommendationResult && (
-                <div className="stitch-empty-state">
+                <div className="pf-empty-state">
                   <span className="material-symbols-outlined">
                     tips_and_updates
                   </span>
@@ -652,7 +652,7 @@ export function ISPAdminIntelligenceCenter() {
               )}
 
               {recommendationResult && (
-                <div className="stitch-recommendation-box recommendations-scroll-list">
+                <div className="pf-recommendation-box recommendations-scroll-list">
                   <span className="status-pill status-info">
                     {formatLabel(
                       recommendationResult.recommendation.recommendation_type
@@ -666,7 +666,7 @@ export function ISPAdminIntelligenceCenter() {
                       "No reason returned."}
                   </p>
 
-                  <div className="stitch-intelligence-detail-grid">
+                  <div className="pf-intelligence-detail-grid">
                     <div>
                       <span>Predicted usage</span>
                       <strong>
@@ -701,12 +701,12 @@ export function ISPAdminIntelligenceCenter() {
             </article>
           </section>
 
-          <section className="stitch-intelligence-history-grid">
-            <article className="stitch-intelligence-result-card">
-              <div className="stitch-monitoring-panel-header">
+          <section className="pf-intelligence-history-grid">
+            <article className="pf-intelligence-result-card">
+              <div className="pf-monitoring-panel-header">
                 <h3>Recommendation History</h3>
 
-                <div className="filter-bar stitch-intelligence-filter-bar">
+                <div className="filter-bar pf-intelligence-filter-bar">
                   {recommendationFilters.map((filter) => (
                     <button
                       key={filter.value}
@@ -727,8 +727,8 @@ export function ISPAdminIntelligenceCenter() {
               <RecommendationList recommendations={recommendations} />
             </article>
 
-            <article className="stitch-intelligence-result-card">
-              <div className="stitch-monitoring-panel-header">
+            <article className="pf-intelligence-result-card">
+              <div className="pf-monitoring-panel-header">
                 <h3>Recent Reports</h3>
               </div>
 

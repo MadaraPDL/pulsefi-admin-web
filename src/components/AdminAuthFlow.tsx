@@ -32,9 +32,9 @@ type AuthStep =
 
 function PulseFiLogo() {
   return (
-    <div className="stitch-logo" aria-label="PulseFi">
-      <div className="stitch-logo-mark">
-        <span className="stitch-logo-pulse">P</span>
+    <div className="pf-logo" aria-label="PulseFi">
+      <div className="pf-logo-mark">
+        <span className="pf-logo-pulse">P</span>
         <span>PulseFi</span>
       </div>
     </div>
@@ -131,30 +131,30 @@ function AdminLoginPage({
   }
 
   return (
-    <main className="stitch-auth-page">
-      <div className="stitch-auth-wrap">
+    <main className="pf-auth-page">
+      <div className="pf-auth-wrap">
         <PulseFiLogo />
 
-        <section className="stitch-login-card">
-          <div className="stitch-auth-heading">
+        <section className="pf-login-card">
+          <div className="pf-auth-heading">
             <h1>Admin Login</h1>
             <p>Sign in to access the control panel</p>
           </div>
 
-          <form onSubmit={handleLogin} className="stitch-auth-form">
-            <div className="stitch-field">
-              <label className="stitch-label" htmlFor="admin-identifier">
+          <form onSubmit={handleLogin} className="pf-auth-form">
+            <div className="pf-field">
+              <label className="pf-label" htmlFor="admin-identifier">
                 Email Address
               </label>
 
-              <div className="stitch-input-shell">
-                <span className="stitch-input-icon" aria-hidden="true">
+              <div className="pf-input-shell">
+                <span className="pf-input-icon" aria-hidden="true">
                   <span className="material-symbols-outlined">mail</span>
                 </span>
 
                 <input
                   id="admin-identifier"
-                  className="stitch-input"
+                  className="pf-input"
                   value={identifier}
                   onChange={(event) => setIdentifier(event.target.value)}
                   placeholder="admin@pulsefi.com"
@@ -164,25 +164,25 @@ function AdminLoginPage({
               </div>
             </div>
 
-            <div className="stitch-field">
-              <div className="stitch-label-row">
-                <label className="stitch-label" htmlFor="admin-password">
+            <div className="pf-field">
+              <div className="pf-label-row">
+                <label className="pf-label" htmlFor="admin-password">
                   Password
                 </label>
 
-                <button className="stitch-link-button" type="button">
+                <button className="pf-link-button" type="button">
                   Forgot password?
                 </button>
               </div>
 
-              <div className="stitch-input-shell">
-                <span className="stitch-input-icon" aria-hidden="true">
+              <div className="pf-input-shell">
+                <span className="pf-input-icon" aria-hidden="true">
                   <span className="material-symbols-outlined">lock</span>
                 </span>
 
                 <input
                   id="admin-password"
-                  className="stitch-input stitch-input-with-action"
+                  className="pf-input pf-input-with-action"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   type={showPassword ? "text" : "password"}
@@ -192,7 +192,7 @@ function AdminLoginPage({
                 />
 
                 <button
-                  className="stitch-password-toggle"
+                  className="pf-password-toggle"
                   type="button"
                   onClick={() => setShowPassword((current) => !current)}
                   aria-label={showPassword ? "Hide password" : "Show password"}
@@ -205,11 +205,11 @@ function AdminLoginPage({
             </div>
 
             {errorMessage && (
-              <div className="stitch-error-box">{errorMessage}</div>
+              <div className="pf-error-box">{errorMessage}</div>
             )}
 
-            <div className="stitch-submit-row">
-              <button className="stitch-primary-button" disabled={isSubmitting}>
+            <div className="pf-submit-row">
+              <button className="pf-primary-button" disabled={isSubmitting}>
                 {isSubmitting ? "Signing in..." : "Login"}
                 <span className="material-symbols-outlined" aria-hidden="true">
                   arrow_forward
@@ -218,7 +218,7 @@ function AdminLoginPage({
             </div>
           </form>
 
-          <div className="stitch-auth-footer">
+          <div className="pf-auth-footer">
             <p>Secure Connection Environment</p>
           </div>
         </section>
@@ -262,26 +262,26 @@ function MFAVerifyPage({
   }
 
   return (
-    <main className="stitch-auth-page">
-      <div className="stitch-auth-wrap">
+    <main className="pf-auth-page">
+      <div className="pf-auth-wrap">
         <PulseFiLogo />
 
-        <section className="stitch-login-card">
-          <div className="stitch-auth-heading">
+        <section className="pf-login-card">
+          <div className="pf-auth-heading">
             <h1>MFA Verification</h1>
             <p>{getMFAInstruction(challenge.method)}</p>
           </div>
 
-          <form onSubmit={handleVerifyMFA} className="stitch-auth-form">
-            <div className="stitch-field">
-              <label className="stitch-label" htmlFor="mfa-code">
+          <form onSubmit={handleVerifyMFA} className="pf-auth-form">
+            <div className="pf-field">
+              <label className="pf-label" htmlFor="mfa-code">
                 Verification Code
               </label>
 
-              <div className="stitch-input-shell">
+              <div className="pf-input-shell">
                 <input
                   id="mfa-code"
-                  className="stitch-input stitch-input-no-icon stitch-mfa-code"
+                  className="pf-input pf-input-no-icon pf-mfa-code"
                   value={code}
                   onChange={(event) => setCode(event.target.value)}
                   placeholder="123456"
@@ -293,17 +293,17 @@ function MFAVerifyPage({
             </div>
 
             {import.meta.env.DEV && challenge.dev_email_code ? (
-              <div className="stitch-dev-box">
+              <div className="pf-dev-box">
                 <strong>Development email MFA code</strong>
                 <code>{challenge.dev_email_code}</code>
               </div>
             ) : null}
 
             {errorMessage && (
-              <div className="stitch-error-box">{errorMessage}</div>
+              <div className="pf-error-box">{errorMessage}</div>
             )}
 
-            <button className="stitch-primary-button" disabled={isSubmitting}>
+            <button className="pf-primary-button" disabled={isSubmitting}>
               {isSubmitting ? "Verifying..." : "Verify MFA"}
               <span className="material-symbols-outlined" aria-hidden="true">
                 verified_user
@@ -311,7 +311,7 @@ function MFAVerifyPage({
             </button>
 
             <button
-              className="stitch-secondary-button"
+              className="pf-secondary-button"
               type="button"
               onClick={onBack}
             >
@@ -381,19 +381,19 @@ function MFASetupPage({
   }
 
   return (
-    <main className="stitch-auth-page">
-      <div className="stitch-auth-wrap stitch-auth-wrap-wide">
+    <main className="pf-auth-page">
+      <div className="pf-auth-wrap pf-auth-wrap-wide">
         <PulseFiLogo />
 
-        <section className="stitch-login-card">
-          <div className="stitch-auth-heading">
+        <section className="pf-login-card">
+          <div className="pf-auth-heading">
             <h1>Set up MFA</h1>
             <p>This admin account requires MFA before a login token is issued.</p>
           </div>
 
-          <div className="stitch-mfa-setup-card">
-            <div className="stitch-mfa-setup-header">
-              <div className="stitch-mfa-step-badge">1</div>
+          <div className="pf-mfa-setup-card">
+            <div className="pf-mfa-setup-header">
+              <div className="pf-mfa-step-badge">1</div>
 
               <div>
                 <strong>Connect your authenticator app</strong>
@@ -404,14 +404,14 @@ function MFASetupPage({
               </div>
             </div>
 
-            <div className="stitch-secret-box" aria-label="Authenticator secret">
+            <div className="pf-secret-box" aria-label="Authenticator secret">
               <span>Secret key</span>
               <code>{groupedAuthenticatorSecret}</code>
             </div>
 
-            <div className="stitch-mfa-action-grid">
+            <div className="pf-mfa-action-grid">
               <a
-                className="stitch-authenticator-link stitch-authenticator-link-primary"
+                className="pf-authenticator-link pf-authenticator-link-primary"
                 href={setup.authenticator_uri}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">
@@ -421,7 +421,7 @@ function MFASetupPage({
               </a>
 
               <button
-                className="stitch-copy-secret-button"
+                className="pf-copy-secret-button"
                 type="button"
                 onClick={() => void handleCopySecret()}
               >
@@ -432,21 +432,21 @@ function MFASetupPage({
               </button>
             </div>
 
-            <p className="stitch-mfa-hint">
+            <p className="pf-mfa-hint">
               If you logged in again, delete the old PulseFi entry from your
               authenticator app and use this newest secret.
             </p>
           </div>
 
-          <form onSubmit={handleConfirmSetup} className="stitch-auth-form">
-            <div className="stitch-field">
-              <label className="stitch-label" htmlFor="mfa-setup-code">
+          <form onSubmit={handleConfirmSetup} className="pf-auth-form">
+            <div className="pf-field">
+              <label className="pf-label" htmlFor="mfa-setup-code">
                 Authenticator Code
               </label>
 
               <input
                 id="mfa-setup-code"
-                className="stitch-input stitch-input-no-icon stitch-mfa-code"
+                className="pf-input pf-input-no-icon pf-mfa-code"
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
                 placeholder="123456"
@@ -457,10 +457,10 @@ function MFASetupPage({
             </div>
 
             {errorMessage && (
-              <div className="stitch-error-box">{errorMessage}</div>
+              <div className="pf-error-box">{errorMessage}</div>
             )}
 
-            <button className="stitch-primary-button" disabled={isSubmitting}>
+            <button className="pf-primary-button" disabled={isSubmitting}>
               {isSubmitting ? "Confirming..." : "Confirm MFA setup"}
               <span className="material-symbols-outlined" aria-hidden="true">
                 security
@@ -468,7 +468,7 @@ function MFASetupPage({
             </button>
 
             <button
-              className="stitch-secondary-button"
+              className="pf-secondary-button"
               type="button"
               onClick={onBack}
             >

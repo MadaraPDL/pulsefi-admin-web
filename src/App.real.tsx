@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import "./App.css";
 import { AdminAuthFlow } from "./components/AdminAuthFlow";
 import { restoreAdminSession } from "./api/adminAuth";
 import type { AdminAuthenticatedResult } from "./api/adminAuth";
@@ -111,15 +110,15 @@ export default function RealApp() {
 
 function SessionRestorePage() {
   return (
-    <main className="stitch-auth-page">
-      <div className="stitch-auth-wrap">
-        <section className="stitch-login-card">
-          <div className="stitch-auth-heading">
+    <main className="pf-auth-page">
+      <div className="pf-auth-wrap">
+        <section className="pf-login-card">
+          <div className="pf-auth-heading">
             <h1>Checking session</h1>
             <p>Verifying your admin session with PulseFi.</p>
           </div>
 
-          <p className="stitch-loading-text">Loading admin dashboard...</p>
+          <p className="pf-loading-text">Loading admin dashboard...</p>
         </section>
       </div>
     </main>

@@ -80,10 +80,10 @@ function PlatformSidebar({
   ];
 
   return (
-    <nav className="stitch-sidebar" aria-label="Platform Admin navigation">
-      <div className="stitch-sidebar-head">
-        <div className="stitch-profile-row">
-          <div className="stitch-profile-avatar">
+    <nav className="pf-sidebar" aria-label="Platform Admin navigation">
+      <div className="pf-sidebar-head">
+        <div className="pf-profile-row">
+          <div className="pf-profile-avatar">
             <span className="material-symbols-outlined">person</span>
           </div>
 
@@ -94,7 +94,7 @@ function PlatformSidebar({
         </div>
 
         <button
-          className="stitch-quick-action"
+          className="pf-quick-action"
           type="button"
           onClick={() => onNavigate("isps")}
         >
@@ -103,14 +103,14 @@ function PlatformSidebar({
         </button>
       </div>
 
-      <ul className="stitch-nav-list">
+      <ul className="pf-nav-list">
         {navItems.map((item) => (
           <li key={item.label}>
             <button
               className={
                 item.id === activeSection
-                  ? "stitch-sidebar-link stitch-sidebar-link-active"
-                  : "stitch-sidebar-link"
+                  ? "pf-sidebar-link pf-sidebar-link-active"
+                  : "pf-sidebar-link"
               }
               type="button"
               onClick={() => onNavigate(item.id)}
@@ -122,13 +122,13 @@ function PlatformSidebar({
         ))}
       </ul>
 
-      <div className="stitch-sidebar-bottom">
-        <button className="stitch-sidebar-link" type="button">
+      <div className="pf-sidebar-bottom">
+        <button className="pf-sidebar-link" type="button">
           <span className="material-symbols-outlined">help</span>
           <span>Support</span>
         </button>
 
-        <button className="stitch-sidebar-link" type="button" onClick={onLogout}>
+        <button className="pf-sidebar-link" type="button" onClick={onLogout}>
           <span className="material-symbols-outlined">logout</span>
           <span>Logout</span>
         </button>
@@ -146,20 +146,20 @@ function PlatformTopBar({
 }) {
   const copy = platformSectionCopy[activeSection];
   return (
-    <header className="stitch-topbar">
-      <div className="stitch-topbar-left">
+    <header className="pf-topbar">
+      <div className="pf-topbar-left">
         <div>
           <h2>{copy.title}</h2>
           <p>{copy.subtitle} - {adminName}</p>
         </div>
 
-        <label className="stitch-dashboard-search">
+        <label className="pf-dashboard-search">
           <span className="material-symbols-outlined">search</span>
           <input placeholder="Search platform..." />
         </label>
       </div>
 
-      <div className="stitch-topbar-actions">
+      <div className="pf-topbar-actions">
         <button type="button" aria-label="Notifications">
           <span className="material-symbols-outlined">notifications</span>
         </button>
@@ -186,7 +186,7 @@ function PlatformShell({
   children: ReactNode;
 }) {
   return (
-    <div className="stitch-dashboard-shell">
+    <div className="pf-dashboard-shell">
       <PlatformSidebar
         activeSection={activeSection}
         onNavigate={onNavigate}
@@ -194,7 +194,7 @@ function PlatformShell({
       />
       <PlatformTopBar adminName={adminName} activeSection={activeSection} />
 
-      <main className="stitch-dashboard-main">{children}</main>
+      <main className="pf-dashboard-main">{children}</main>
     </div>
   );
 }
@@ -232,17 +232,17 @@ function SummaryCards({ summary }: { summary: PlatformAdminSummary }) {
   ];
 
   return (
-    <section className="stitch-kpi-grid">
+    <section className="pf-kpi-grid">
       {cards.map((card) => (
-        <article className="stitch-kpi-card" key={card.label}>
-          <div className="stitch-kpi-top">
+        <article className="pf-kpi-card" key={card.label}>
+          <div className="pf-kpi-top">
             <span>{card.label}</span>
             <span className="material-symbols-outlined">{card.icon}</span>
           </div>
 
           <div>
             <strong>{card.value}</strong>
-            <div className="stitch-kpi-meta">
+            <div className="pf-kpi-meta">
               <span>{card.detail}</span>
               <span>{card.secondDetail}</span>
             </div>
@@ -255,14 +255,14 @@ function SummaryCards({ summary }: { summary: PlatformAdminSummary }) {
 
 function PlatformAlerts() {
   return (
-    <aside className="stitch-alerts-panel">
-      <div className="stitch-panel-title-row">
+    <aside className="pf-alerts-panel">
+      <div className="pf-panel-title-row">
         <h2>Platform Alerts</h2>
-        <span className="stitch-critical-pill">2 Critical</span>
+        <span className="pf-critical-pill">2 Critical</span>
       </div>
 
-      <div className="stitch-alert-list">
-        <article className="stitch-alert-item stitch-alert-warning">
+      <div className="pf-alert-list">
+        <article className="pf-alert-item pf-alert-warning">
           <span className="material-symbols-outlined">warning</span>
           <div>
             <h3>API Latency Spike</h3>
@@ -271,7 +271,7 @@ function PlatformAlerts() {
           </div>
         </article>
 
-        <article className="stitch-alert-item stitch-alert-warning">
+        <article className="pf-alert-item pf-alert-warning">
           <span className="material-symbols-outlined">storage</span>
           <div>
             <h3>Storage Capacity Warning</h3>
@@ -280,7 +280,7 @@ function PlatformAlerts() {
           </div>
         </article>
 
-        <article className="stitch-alert-item stitch-alert-info">
+        <article className="pf-alert-item pf-alert-info">
           <span className="material-symbols-outlined">verified_user</span>
           <div>
             <h3>Admin MFA Active</h3>
@@ -338,28 +338,28 @@ function PlatformOverviewRoutes({
   ];
 
   return (
-    <section className="stitch-content-card stitch-overview-route-panel">
-      <div className="stitch-panel-title-row">
+    <section className="pf-content-card pf-overview-route-panel">
+      <div className="pf-panel-title-row">
         <div>
           <h2>Platform Sections</h2>
           <p>Use one section at a time for a cleaner admin workflow.</p>
         </div>
       </div>
 
-      <div className="stitch-overview-route-list">
+      <div className="pf-overview-route-list">
         {routes.map((route) => (
           <button
-            className="stitch-overview-route-row"
+            className="pf-overview-route-row"
             key={route.section}
             type="button"
             onClick={() => onNavigate(route.section)}
           >
             <span className="material-symbols-outlined">{route.icon}</span>
-            <span className="stitch-overview-route-copy">
+            <span className="pf-overview-route-copy">
               <strong>{route.title}</strong>
               <span>{route.description}</span>
             </span>
-            <span className="stitch-overview-route-meta">{route.meta}</span>
+            <span className="pf-overview-route-meta">{route.meta}</span>
           </button>
         ))}
       </div>
@@ -559,25 +559,29 @@ function ISPManagement({
   }
 
   return (
-    <section className="stitch-content-card">
-      <div className="stitch-panel-title-row">
+    <section className="pf-content-card">
+      <div className="pf-panel-title-row">
         <div>
           <h2>ISP Management</h2>
           <p>Create ISP records, select an ISP, and invite the first ISP Admin.</p>
         </div>
 
-        <button className="stitch-view-link" type="button" onClick={loadISPs}>
+        <button
+          className="pf-view-link pf-refresh-button"
+          type="button"
+          onClick={loadISPs}
+        >
           Refresh
         </button>
       </div>
 
-      <div className="stitch-selected-strip">
+      <div className="pf-selected-strip">
         <strong>Selected ISP:</strong>{" "}
         {selectedISP ? selectedISP.name : "None selected yet"}
       </div>
 
-      <div className="stitch-management-grid">
-        <form className="stitch-management-form" onSubmit={handleCreateISP}>
+      <div className="pf-management-grid">
+        <form className="pf-management-form" onSubmit={handleCreateISP}>
           <h3>Create ISP record</h3>
           <p>This creates the company/ISP container.</p>
 
@@ -624,12 +628,12 @@ function ISPManagement({
           </button>
         </form>
 
-        <form className="stitch-management-form" onSubmit={handleInviteISPAdmin}>
+        <form className="pf-management-form" onSubmit={handleInviteISPAdmin}>
           <h3>Invite ISP Admin</h3>
           <p>The invited admin accepts the link and creates their login.</p>
 
           {!selectedISP && (
-            <p className="stitch-warning-text">Select an ISP from the table first.</p>
+            <p className="pf-warning-text">Select an ISP from the table first.</p>
           )}
 
           <label>
@@ -671,7 +675,7 @@ function ISPManagement({
           </button>
 
           {latestInvitation?.dev_invitation_token && (
-            <div className="stitch-dev-box">
+            <div className="pf-dev-box">
               <strong>Local DEBUG invitation token</strong>
               <code>{latestInvitation.dev_invitation_token}</code>
               <small>
@@ -682,7 +686,7 @@ function ISPManagement({
           )}
         </form>
 
-        <form className="stitch-management-form" onSubmit={handleUpdateISP}>
+        <form className="pf-management-form" onSubmit={handleUpdateISP}>
           <h3>Edit selected ISP</h3>
 
           {!selectedISP && (
@@ -747,13 +751,13 @@ function ISPManagement({
         </form>
       </div>
 
-      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
-      {successMessage && <div className="stitch-success-box">{successMessage}</div>}
+      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
+      {successMessage && <div className="pf-success-box">{successMessage}</div>}
 
-      {isLoading && <p className="stitch-loading-text">Loading ISPs...</p>}
+      {isLoading && <p className="pf-loading-text">Loading ISPs...</p>}
 
       {!isLoading && (
-        <div className="stitch-table-wrap">
+        <div className="pf-table-wrap">
           <table>
             <thead>
               <tr>
@@ -775,7 +779,7 @@ function ISPManagement({
                   onClick={() => chooseISP(isp)}
                 >
                   <td>
-                    <span className="stitch-table-icon">
+                    <span className="pf-table-icon">
                       <span className="material-symbols-outlined">router</span>
                     </span>
                     {isp.name}
@@ -828,7 +832,7 @@ function PlatformPlaceholder({
   description: string;
 }) {
   return (
-    <section className="stitch-content-card stitch-placeholder-card">
+    <section className="pf-content-card pf-placeholder-card">
       <span className="material-symbols-outlined">{icon}</span>
       <h2>{title}</h2>
       <p>{description}</p>
@@ -894,17 +898,17 @@ export default function PlatformAdminDashboard({
       onNavigate={setActiveSection}
       onLogout={handleLogout}
     >
-      {errorMessage && <div className="stitch-error-box">{errorMessage}</div>}
+      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
 
       {!summary && !errorMessage && (
-        <p className="stitch-loading-text">Loading summary...</p>
+        <p className="pf-loading-text">Loading summary...</p>
       )}
 
       {activeSection === "dashboard" && (
         <>
           {summary && <SummaryCards summary={summary} />}
 
-          <section className="stitch-bento-grid">
+          <section className="pf-bento-grid">
             <PlatformOverviewRoutes
               selectedISP={selectedISP}
               onNavigate={setActiveSection}
@@ -935,7 +939,7 @@ export default function PlatformAdminDashboard({
       )}
 
       {activeSection === "system_health" && (
-        <section className="stitch-bento-grid">
+        <section className="pf-bento-grid">
           <PlatformPlaceholder
             icon="monitor_heart"
             title="System Health"

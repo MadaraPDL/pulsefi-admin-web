@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
@@ -367,7 +367,11 @@ export function RouterManagement() {
             Link routers to user subscriptions. Passwords are not collected here.
           </p>
         </div>
-        <button type="button" className="secondary-button" onClick={loadRouters}>
+        <button
+          type="button"
+          className="secondary-button pf-refresh-button"
+          onClick={loadRouters}
+        >
           Refresh
         </button>
       </div>
