@@ -17,6 +17,7 @@ import type {
   UpdateISPRequest,
 } from "../api/platformAdmin";
 import { clearSession, getAdminName } from "../auth/session";
+import { PlatformISPAdminManagement } from "../components/PlatformISPAdminManagement";
 import { PlatformISPAdminInvitationManagement } from "../components/PlatformISPAdminInvitationManagement";
 
 type PlatformSection =
@@ -24,8 +25,7 @@ type PlatformSection =
   | "isps"
   | "admins"
   | "invitations"
-  | "system_health"
-  | "settings";
+  | "system_health";
 
 const platformSectionCopy: Record<
   PlatformSection,
@@ -41,7 +41,7 @@ const platformSectionCopy: Record<
   },
   admins: {
     title: "ISP Admin Accounts",
-    subtitle: "Review admin-account surfaces supported by the backend.",
+    subtitle: "Review and update ISP Admin accounts for the selected ISP.",
   },
   invitations: {
     title: "ISP Admin Invitations",
@@ -49,11 +49,7 @@ const platformSectionCopy: Record<
   },
   system_health: {
     title: "System Health",
-    subtitle: "Monitor API, security, and platform status.",
-  },
-  settings: {
-    title: "Settings",
-    subtitle: "Platform configuration area.",
+    subtitle: "Review admin-session and backend-readiness signals.",
   },
 };
 
@@ -76,7 +72,6 @@ function PlatformSidebar({
     { id: "invitations", label: "ISP Admin Invitations", icon: "mail" },
     { id: "admins", label: "ISP Admin Accounts", icon: "admin_panel_settings" },
     { id: "system_health", label: "System Health", icon: "monitor_heart" },
-    { id: "settings", label: "Settings", icon: "settings" },
   ];
 
   return (
@@ -257,35 +252,35 @@ function PlatformAlerts() {
   return (
     <aside className="pf-alerts-panel">
       <div className="pf-panel-title-row">
-        <h2>Platform Alerts</h2>
-        <span className="pf-critical-pill">2 Critical</span>
+        <h2>Platform Readiness</h2>
+        <span className="pf-health-pill">Live contract</span>
       </div>
 
       <div className="pf-alert-list">
-        <article className="pf-alert-item pf-alert-warning">
-          <span className="material-symbols-outlined">warning</span>
+        <article className="pf-alert-item pf-alert-info">
+          <span className="material-symbols-outlined">verified_user</span>
           <div>
-            <h3>API Latency Spike</h3>
-            <p>Average response time exceeded the local monitoring target.</p>
-            <small>15 mins ago</small>
-          </div>
-        </article>
-
-        <article className="pf-alert-item pf-alert-warning">
-          <span className="material-symbols-outlined">storage</span>
-          <div>
-            <h3>Storage Capacity Warning</h3>
-            <p>Database capacity monitor placeholder for production telemetry.</p>
-            <small>1 hour ago</small>
+            <h3>Admin Session Guarded</h3>
+            <p>Only backend-authenticated Platform Admins reach this dashboard.</p>
+            <small>Auth route: /auth/me</small>
           </div>
         </article>
 
         <article className="pf-alert-item pf-alert-info">
-          <span className="material-symbols-outlined">verified_user</span>
+          <span className="material-symbols-outlined">router</span>
           <div>
-            <h3>Admin MFA Active</h3>
-            <p>Admin sessions are routed by backend role and MFA state.</p>
-            <small>Security checkpoint</small>
+            <h3>ISP Management Connected</h3>
+            <p>ISP records, ISP Admin invitations, and ISP Admin accounts use backend routes.</p>
+            <small>Platform Admin API</small>
+          </div>
+        </article>
+
+        <article className="pf-alert-item pf-alert-info">
+          <span className="material-symbols-outlined">mail</span>
+          <div>
+            <h3>Invitation Tokens Protected</h3>
+            <p>Invitation tokens are only shown when the backend returns a local DEBUG token.</p>
+            <small>Email delivery contract</small>
           </div>
         </article>
       </div>
@@ -325,15 +320,15 @@ function PlatformOverviewRoutes({
       section: "admins",
       icon: "admin_panel_settings",
       title: "ISP Admin Accounts",
-      description: "Reserved for account listing once the backend route exists.",
-      meta: "No route yet",
+      description: "List and update ISP Admin accounts for the selected ISP.",
+      meta: selectedISP ? "Scoped" : "Needs ISP",
     },
     {
       section: "system_health",
       icon: "monitor_heart",
       title: "System Health",
-      description: "View platform health placeholders and admin-session signals.",
-      meta: "Status",
+      description: "Review auth, API contract, and platform-readiness signals.",
+      meta: "Readiness",
     },
   ];
 
@@ -822,24 +817,6 @@ function ISPManagement({
   );
 }
 
-function PlatformPlaceholder({
-  icon,
-  title,
-  description,
-}: {
-  icon: string;
-  title: string;
-  description: string;
-}) {
-  return (
-    <section className="pf-content-card pf-placeholder-card">
-      <span className="material-symbols-outlined">{icon}</span>
-      <h2>{title}</h2>
-      <p>{description}</p>
-    </section>
-  );
-}
-
 export default function PlatformAdminDashboard({
   onLogout,
 }: {
@@ -927,11 +904,7 @@ export default function PlatformAdminDashboard({
       )}
 
       {activeSection === "admins" && (
-        <PlatformPlaceholder
-          icon="admin_panel_settings"
-          title="ISP Admin Accounts"
-          description="This section will list ISP Admin accounts once a dedicated backend route exists."
-        />
+        <PlatformISPAdminManagement selectedISP={selectedISP} />
       )}
 
       {activeSection === "invitations" && (
@@ -940,21 +913,8 @@ export default function PlatformAdminDashboard({
 
       {activeSection === "system_health" && (
         <section className="pf-bento-grid">
-          <PlatformPlaceholder
-            icon="monitor_heart"
-            title="System Health"
-            description="This section will connect to live platform health, API, database, and job status checks later."
-          />
           <PlatformAlerts />
         </section>
-      )}
-
-      {activeSection === "settings" && (
-        <PlatformPlaceholder
-          icon="settings"
-          title="Platform Settings"
-          description="This section will hold platform-level settings after the backend settings contract is added."
-        />
       )}
     </PlatformShell>
   );

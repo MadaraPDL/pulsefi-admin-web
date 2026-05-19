@@ -80,6 +80,34 @@ export type RevokeISPAdminInvitationResponse = {
   invitation: ISPAdminInvitation;
 };
 
+export type ISPAdminStatus = "active" | "inactive" | "suspended";
+
+export type ISPAdminFilter = ISPAdminStatus | "all";
+
+export type ISPAdmin = {
+  id: string;
+  isp_id: string | null;
+  full_name: string;
+  email: string;
+  username: string | null;
+  phone_number: string | null;
+  role: string;
+  status: ISPAdminStatus;
+  created_by_admin_id: string | null;
+  email_verified_at: string | null;
+  mfa_enabled: boolean;
+  mfa_required: boolean;
+  preferred_mfa_method: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UpdateISPAdminRequest = {
+  full_name?: string;
+  phone_number?: string | null;
+  status?: ISPAdminStatus;
+};
+
 export async function getPlatformAdminSummary(): Promise<PlatformAdminSummary> {
   return apiRequest<PlatformAdminSummary>("/platform-admin/summary");
 }
@@ -147,6 +175,49 @@ export async function revokeISPAdminInvitation(
     `/platform-admin/isps/${ispId}/admin-invitations/${invitationId}/revoke`,
     {
       method: "PATCH",
+    }
+  );
+}
+
+export async function listISPAdmins(
+  ispId: string,
+  status: ISPAdminStatus | null = null,
+  limit = 50,
+  offset = 0
+): Promise<ISPAdmin[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  return apiRequest<ISPAdmin[]>(
+    `/platform-admin/isps/${ispId}/admins?${params.toString()}`
+  );
+}
+
+export async function getISPAdmin(
+  ispId: string,
+  adminId: string
+): Promise<ISPAdmin> {
+  return apiRequest<ISPAdmin>(
+    `/platform-admin/isps/${ispId}/admins/${adminId}`
+  );
+}
+
+export async function updateISPAdmin(
+  ispId: string,
+  adminId: string,
+  payload: UpdateISPAdminRequest
+): Promise<ISPAdmin> {
+  return apiRequest<ISPAdmin>(
+    `/platform-admin/isps/${ispId}/admins/${adminId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
     }
   );
 }
