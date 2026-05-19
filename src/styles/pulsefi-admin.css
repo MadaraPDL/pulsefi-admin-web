@@ -24,17 +24,97 @@
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+.pf-real-app {
+  min-height: 100vh;
+  background: var(--pf-bg);
+  color: var(--pf-text);
+}
+
+.pf-real-app[data-theme="dark"] {
+  --pf-bg: #131313;
+  --pf-surface: #1c1b1b;
+  --pf-surface-2: #20201f;
+  --pf-surface-3: #2b2b2a;
+  --pf-field: #353535;
+  --pf-border: #3c494e;
+  --pf-border-soft: rgba(148, 163, 184, 0.18);
+  --pf-row-border: #2d383d;
+  --pf-text: #e5e2e1;
+  --pf-muted: #bbc9cf;
+  --pf-faint: #8fa1aa;
+  --pf-primary: #00d1ff;
+  --pf-primary-soft: rgba(0, 209, 255, 0.1);
+  --pf-primary-border: rgba(0, 209, 255, 0.34);
+  --pf-link: #4cd6ff;
+  --pf-link-hover: #a4e6ff;
+  --pf-success: #34d399;
+  --pf-warning: #ffcc66;
+  --pf-danger: #ff8a8a;
+  --pf-success-soft: rgba(16, 185, 129, 0.14);
+  --pf-success-border: rgba(16, 185, 129, 0.36);
+  --pf-auth-bg:
+    radial-gradient(circle at top left, rgba(0, 209, 255, 0.11), transparent 34rem),
+    #070d10;
+  --pf-auth-card: #171b1f;
+  --pf-auth-border: #2d3842;
+  --pf-auth-text: #f8fafc;
+  --pf-auth-muted: #9aa9b5;
+  --pf-auth-label: #e5edf5;
+  --pf-auth-input: #2a3036;
+  --pf-auth-input-border: #3a4650;
+  --pf-auth-icon: #91a5b4;
+  --pf-auth-placeholder: #7f8f9f;
+  --pf-auth-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+  color-scheme: dark;
+}
+
+.pf-real-app[data-theme="light"] {
+  --pf-bg: #f4f7fb;
+  --pf-surface: #ffffff;
+  --pf-surface-2: #f8fafc;
+  --pf-surface-3: #eef4f8;
+  --pf-field: #ffffff;
+  --pf-border: #d7e0e8;
+  --pf-border-soft: rgba(15, 23, 42, 0.12);
+  --pf-row-border: #dce5ec;
+  --pf-text: #10202a;
+  --pf-muted: #52616d;
+  --pf-faint: #71808b;
+  --pf-primary: #00aeda;
+  --pf-primary-soft: rgba(0, 174, 218, 0.1);
+  --pf-primary-border: rgba(0, 174, 218, 0.34);
+  --pf-link: #007d99;
+  --pf-link-hover: #005f75;
+  --pf-success: #047857;
+  --pf-warning: #a16207;
+  --pf-danger: #b42318;
+  --pf-success-soft: rgba(16, 185, 129, 0.12);
+  --pf-success-border: rgba(4, 120, 87, 0.28);
+  --pf-auth-bg: #f4f7fb;
+  --pf-auth-card: #ffffff;
+  --pf-auth-border: #d7e0e8;
+  --pf-auth-text: #10202a;
+  --pf-auth-muted: #52616d;
+  --pf-auth-label: #243642;
+  --pf-auth-input: #ffffff;
+  --pf-auth-input-border: #d7e0e8;
+  --pf-auth-icon: #71808b;
+  --pf-auth-placeholder: #8a98a4;
+  --pf-auth-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
+  color-scheme: light;
+}
+
 html,
 body,
 #root {
-  width: 100% !important;
-  max-width: none !important;
-  min-height: 100vh !important;
-  margin: 0 !important;
-  border: 0 !important;
-  background: var(--pf-bg) !important;
-  color: var(--pf-text) !important;
-  text-align: left !important;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  border: 0;
+  background: var(--pf-bg);
+  color: var(--pf-text);
+  text-align: left;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 16px;
   letter-spacing: 0;
@@ -973,8 +1053,34 @@ dd {
 }
 
 .dev-token-box {
+  display: grid;
+  gap: 8px;
+  border: 1px solid rgba(255, 204, 102, 0.28);
   background: rgba(255, 204, 102, 0.12);
   color: var(--pf-warning);
+}
+
+.create-form .dev-token-box {
+  margin: 0;
+}
+
+.dev-token-box code {
+  display: block;
+  border-radius: 6px;
+  background: var(--pf-surface);
+  color: #ffd98a;
+  padding: 10px;
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.dev-token-box small {
+  color: var(--pf-muted);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 /* Tables */
@@ -1236,76 +1342,99 @@ dd {
   font-size: 48px;
 }
 
-.pf-overview-route-panel {
+.pf-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.pf-overview-action-center,
+.pf-needs-attention-panel,
+.pf-overview-recent-activity {
   align-self: start;
 }
 
-.pf-overview-route-list {
+.pf-overview-action-grid {
   display: grid;
-  gap: 6px;
-  padding: 10px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 18px;
 }
 
-.pf-overview-route-row {
-  width: 100%;
-  min-height: 82px;
+.pf-overview-action-button {
+  min-height: 94px;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
+  grid-template-columns: 42px minmax(0, 1fr);
   align-items: center;
-  gap: 14px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  background: transparent;
+  gap: 12px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface-2);
   color: var(--pf-text);
   padding: 14px;
   text-align: left;
 }
 
-.pf-overview-route-row:hover {
+.pf-overview-action-button:hover {
   border-color: var(--pf-primary-border);
   background: rgba(0, 209, 255, 0.07);
 }
 
-.pf-overview-route-row > .material-symbols-outlined {
+.pf-overview-action-button > .material-symbols-outlined {
   width: 42px;
   height: 42px;
   display: grid;
   place-items: center;
   border: 1px solid var(--pf-border);
   border-radius: 10px;
-  background: var(--pf-surface-2);
+  background: var(--pf-surface);
   color: #4cd6ff;
 }
 
-.pf-overview-route-copy {
+.pf-overview-action-button span:last-child {
   display: grid;
-  gap: 5px;
+  gap: 6px;
   min-width: 0;
 }
 
-.pf-overview-route-copy strong {
+.pf-overview-action-button strong {
   color: var(--pf-text);
-  font-size: 15px;
+  font-size: 15.5px;
   font-weight: 900;
+  line-height: 1.25;
 }
 
-.pf-overview-route-copy span {
+.pf-overview-action-button small {
   color: var(--pf-muted);
-  font-size: 14px;
-  line-height: 1.45;
+  font-size: 13.5px;
+  line-height: 1.35;
 }
 
-.pf-overview-route-meta {
-  max-width: 180px;
+.pf-overview-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 24px;
+}
+
+.pf-overview-table-panel {
   overflow: hidden;
-  border: 1px solid var(--pf-border);
-  border-radius: 999px;
-  color: #4cd6ff;
-  padding: 6px 10px;
-  font-size: 12px;
-  font-weight: 900;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.pf-overview-table-panel-wide {
+  grid-column: 1 / -1;
+}
+
+.pf-overview-table-panel .pf-table-wrap {
+  width: calc(100% - 32px);
+  max-height: 300px;
+  margin: 16px;
+}
+
+.pf-overview-table-panel .pf-table-wrap table {
+  min-width: 640px;
+  table-layout: fixed;
 }
 
 /* Monitoring */
@@ -1688,6 +1817,7 @@ dd {
   }
 
   .pf-bento-grid,
+  .pf-overview-grid,
   .pf-monitoring-split,
   .pf-operations-grid,
   .pf-operations-split,
@@ -1722,6 +1852,8 @@ dd {
   .pf-management-grid,
   .management-grid,
   .pf-network-grid,
+  .pf-overview-action-grid,
+  .pf-overview-recent-grid,
   .pf-monitoring-card-grid,
   .pf-intelligence-list-item,
   .pf-intelligence-automation-panel,
@@ -1760,200 +1892,508 @@ dd {
   }
 }
 
-/* PulseFi sidebar-safe full layout */
+/* Live admin auth, theme, and layout refinements */
 
-/*
-  Goal:
-  The sidebar + main dashboard must fit inside the browser width.
-  The main area should fill the remaining space, not become 100vw beside the sidebar.
-*/
+.pf-real-app .pf-auth-page {
+  background: var(--pf-auth-bg);
+  color: var(--pf-auth-text);
+}
 
-html,
-body,
-#root {
+.pf-real-app .pf-auth-wrap {
+  width: min(460px, 100%);
+}
+
+.pf-real-app .pf-auth-wrap-wide {
+  width: min(560px, 100%);
+}
+
+.pf-real-app .pf-login-card {
   width: 100%;
-  max-width: 100%;
+  border-color: var(--pf-auth-border);
+  border-radius: 18px;
+  background: var(--pf-auth-card);
+  color: var(--pf-auth-text);
+  padding: 34px;
+  box-shadow: var(--pf-auth-shadow);
+}
+
+.pf-real-app .pf-auth-heading h1 {
+  color: var(--pf-auth-text);
+  font-size: 30px;
+}
+
+.pf-real-app .pf-auth-heading p,
+.pf-real-app .pf-auth-footer p {
+  color: var(--pf-auth-muted);
+}
+
+.pf-real-app .pf-login-card .pf-label {
+  color: var(--pf-auth-label);
+  font-size: 13px;
+}
+
+.pf-real-app .pf-login-card .pf-input {
+  min-height: 52px;
+  border-color: var(--pf-auth-input-border);
+  background: var(--pf-auth-input);
+  color: var(--pf-auth-text);
+}
+
+.pf-real-app .pf-login-card .pf-input::placeholder {
+  color: var(--pf-auth-placeholder);
+}
+
+.pf-real-app .pf-login-card .pf-input-icon,
+.pf-real-app .pf-login-card .pf-password-toggle {
+  color: var(--pf-auth-icon);
+}
+
+.pf-real-app .pf-login-card .pf-link-button {
+  justify-self: end;
+  width: max-content;
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  color: var(--pf-link);
+  padding: 0;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.pf-real-app .pf-login-card .pf-link-button:hover {
+  color: var(--pf-link-hover);
+}
+
+.pf-real-app .pf-login-card .pf-password-toggle {
+  min-height: 38px;
+}
+
+.pf-real-app .pf-submit-row {
+  width: 100%;
+}
+
+.pf-real-app .pf-login-submit-button {
+  width: 100%;
+  min-height: 56px;
+  font-size: 17px;
+}
+
+.pf-real-app .pf-login-submit-button .material-symbols-outlined {
+  font-size: 22px;
+}
+
+.pf-real-app .pf-login-card .pf-error-box {
   margin: 0;
-  overflow-x: hidden;
 }
 
-/* Main app shell */
-.pf-admin-shell {
+.pf-real-app .pf-login-card.pf-mfa-card {
+  width: min(500px, 100%);
+  padding: 30px 34px;
+}
+
+.pf-real-app .pf-login-card.pf-mfa-card .pf-auth-heading h1 {
+  font-size: 28px;
+}
+
+.pf-real-app .pf-login-card.pf-mfa-card .pf-auth-form {
+  gap: 14px;
+}
+
+.pf-real-app .pf-login-card.pf-mfa-card .pf-mfa-code-field {
+  justify-items: center;
+}
+
+.pf-real-app .pf-login-card.pf-mfa-card .pf-mfa-code-field .pf-label {
+  text-align: center;
+}
+
+.pf-real-app .pf-login-card.pf-mfa-card .pf-mfa-code-field .pf-input-shell,
+.pf-real-app .pf-login-card.pf-mfa-card .pf-mfa-code-field > .pf-input {
+  width: min(220px, 100%);
+}
+
+.pf-real-app .pf-login-card.pf-mfa-card .pf-mfa-code {
+  min-height: 46px;
+  padding: 10px 14px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 950;
+  letter-spacing: 0.18em;
+}
+
+.pf-real-app .pf-mfa-action-button,
+.pf-real-app .pf-mfa-back-button {
+  width: min(220px, 100%);
+  min-height: 46px;
+  justify-self: center;
+  font-size: 15px;
+}
+
+/* Live admin full-width layout */
+
+.pf-real-app .pf-dashboard-shell {
   width: 100%;
-  max-width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-
-/* If the admin shell uses flex, this prevents children from forcing overflow */
-.pf-admin-shell,
-.pf-admin-layout,
-.pf-dashboard-shell,
-.pf-app-shell {
-  max-width: 100%;
+  max-width: none;
   min-width: 0;
-  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
-/* Sidebar should keep its size, main content should shrink into remaining width */
-.pf-admin-sidebar,
-.pf-sidebar {
-  flex: 0 0 215px;
-  width: 215px;
-  max-width: 215px;
-  box-sizing: border-box;
+.pf-real-app .pf-sidebar {
+  width: 260px;
+  max-width: 260px;
+  flex-basis: 260px;
+  padding: 22px 10px;
+  background: var(--pf-bg);
 }
 
-/* This is the important part: main content uses remaining width, not full viewport width */
-.pf-admin-main,
-.pf-main,
-.pf-dashboard-main,
-.pf-page-main,
-.pf-admin-content,
-.pf-dashboard-content,
-.pf-page-content {
+.pf-real-app .pf-topbar {
+  left: 260px;
+  width: calc(100% - 260px);
+  max-width: none;
+  min-width: 0;
+  background: var(--pf-bg);
+}
+
+.pf-real-app .pf-dashboard-main {
   flex: 1 1 auto;
-  width: auto;
-  max-width: 100%;
+  width: calc(100% - 260px);
+  max-width: none;
   min-width: 0;
+  margin-left: 260px;
   overflow-x: hidden;
-  box-sizing: border-box;
 }
 
-/* Any topbar/content wrapper must not use 100vw beside the sidebar */
-.pf-admin-main > *,
-.pf-main > *,
-.pf-dashboard-main > *,
-.pf-page-main > *,
-.pf-admin-content > *,
-.pf-dashboard-content > *,
-.pf-page-content > * {
-  max-width: 100%;
+.pf-real-app .pf-dashboard-main > *,
+.pf-real-app .pf-section-stack,
+.pf-real-app .pf-content-card,
+.pf-real-app .pf-kpi-grid,
+.pf-real-app .pf-overview-grid,
+.pf-real-app .pf-management-grid,
+.pf-real-app .pf-table-wrap {
   min-width: 0;
-  box-sizing: border-box;
 }
 
-/* Make dashboard grids fit inside the available space */
-.pf-summary-grid,
-.pf-dashboard-grid,
-.pf-card-grid,
-.pf-section-grid,
-.pf-management-grid,
-.pf-overview-grid,
-.pf-stats-grid {
+.pf-real-app .pf-content-card,
+.pf-real-app .pf-platform-isp-management,
+.pf-real-app .pf-platform-invitation-panel,
+.pf-real-app .pf-platform-readiness-panel,
+.pf-real-app .pf-platform-workflow-panel {
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
+  max-width: none;
 }
 
-/* Cards/panels should fill available content width only */
-.pf-panel,
-.pf-card,
-.pf-table-card,
-.pf-section-card,
-.pf-dashboard-card {
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
+.pf-real-app .pf-table-wrap {
+  overflow: auto;
 }
 
-/* Tables can scroll inside their own card if needed, but the whole page must not scroll horizontally */
-.pf-table-card {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+.pf-real-app .pf-table-wrap tbody tr,
+.pf-real-app .table-card tbody tr {
+  border-bottom-color: var(--pf-row-border);
 }
 
-/* Tables should not push the dashboard wider than the screen */
-.pf-table-card table {
-  width: 100%;
-  max-width: 100%;
-}
-
-/* Long IDs/text should wrap instead of pushing the page wider */
-.pf-table-card th,
-.pf-table-card td,
-.pf-panel th,
-.pf-panel td,
-.pf-card th,
-.pf-card td {
+.pf-real-app .pf-table-wrap th,
+.pf-real-app .pf-table-wrap td,
+.pf-real-app .table-card th,
+.pf-real-app .table-card td {
   overflow-wrap: anywhere;
-  word-break: normal;
 }
 
-/* Search/header area should shrink instead of forcing overflow */
-.pf-topbar,
-.pf-header,
-.pf-dashboard-header,
-.pf-page-header {
-  max-width: 100%;
+.pf-real-app .pf-topbar input {
+  max-width: min(420px, 100%);
+}
+
+/* Sidebar */
+
+.pf-real-app .pf-sidebar-head {
+  margin-bottom: 26px;
+  padding: 0 6px;
+}
+
+.pf-real-app .pf-profile-row {
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pf-real-app[data-theme="light"] .pf-profile-row h1 {
+  color: #083344;
+}
+
+.pf-real-app .pf-sidebar .pf-quick-action {
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  gap: 10px;
+  border-radius: 10px;
+  padding: 11px 14px;
+  text-align: left;
+}
+
+.pf-real-app .pf-sidebar .pf-quick-action .material-symbols-outlined {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.pf-real-app .pf-nav-list {
+  gap: 6px;
+  padding-right: 2px;
+}
+
+.pf-real-app .pf-sidebar-link {
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 0 12px;
+  text-align: left;
+}
+
+.pf-real-app .pf-sidebar-link:hover {
+  border-color: var(--pf-primary-border);
+  background: var(--pf-primary-soft);
+  color: var(--pf-text);
+}
+
+.pf-real-app .pf-sidebar-link-active {
+  border-color: var(--pf-primary-border);
+  background: var(--pf-primary-soft);
+  color: var(--pf-text);
+  box-shadow: inset 2px 0 0 var(--pf-primary);
+}
+
+.pf-real-app .pf-sidebar-link .material-symbols-outlined {
+  width: 22px;
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  font-size: 20px;
+}
+
+.pf-real-app .pf-sidebar-link span:last-child {
   min-width: 0;
-  box-sizing: border-box;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
-.pf-topbar input,
-.pf-header input,
-.pf-dashboard-header input,
-.pf-page-header input {
-  max-width: 100%;
+.pf-real-app .pf-sidebar-bottom {
+  gap: 6px;
+  padding: 18px 6px 0;
 }
 
-/* On smaller screens, reduce sidebar size slightly if needed */
-@media (max-width: 900px) {
-  .pf-admin-sidebar,
-  .pf-sidebar {
-    flex-basis: 190px;
-    width: 190px;
-    max-width: 190px;
+/* Top bar */
+
+.pf-real-app .pf-topbar-left,
+.pf-real-app .pf-topbar-actions {
+  min-width: 0;
+}
+
+.pf-real-app .pf-topbar-left > div {
+  min-width: 0;
+}
+
+.pf-real-app .pf-topbar h2,
+.pf-real-app .pf-topbar p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-real-app .pf-topbar-actions {
+  gap: 10px;
+}
+
+.pf-real-app .pf-topbar-actions .pf-theme-toggle {
+  width: auto;
+  min-width: 0;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--pf-border);
+  border-radius: 999px;
+  background: var(--pf-surface-2);
+  color: var(--pf-text);
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 850;
+}
+
+.pf-real-app .pf-topbar-actions .pf-theme-toggle:hover {
+  border-color: var(--pf-primary-border);
+  background: var(--pf-primary-soft);
+  color: var(--pf-link);
+}
+
+.pf-real-app .pf-topbar-actions .pf-theme-toggle .material-symbols-outlined {
+  font-size: 19px;
+}
+
+/* Platform admin */
+
+.pf-real-app .pf-platform-overview-grid {
+  align-items: stretch;
+}
+
+.pf-real-app .pf-platform-context-strip {
+  margin: 0 0 24px;
+}
+
+.pf-real-app .pf-platform-workflow-panel,
+.pf-real-app .pf-platform-readiness-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-real-app .pf-platform-workflow-panel .pf-overview-action-grid,
+.pf-real-app .pf-platform-readiness-panel .pf-alert-list {
+  flex: 1;
+}
+
+.pf-real-app .pf-platform-action-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.pf-real-app .pf-platform-workflow-panel .pf-overview-action-button {
+  min-height: 118px;
+  grid-template-columns: 38px minmax(0, 1fr);
+  padding: 14px;
+}
+
+.pf-real-app .pf-platform-workflow-panel .pf-overview-action-button > .material-symbols-outlined {
+  width: 38px;
+  height: 38px;
+  font-size: 21px;
+}
+
+.pf-real-app .pf-platform-feature-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-top: 1px solid var(--pf-border);
+  padding: 14px 18px 18px;
+}
+
+.pf-real-app .pf-platform-feature-strip span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border: 1px solid var(--pf-border);
+  border-radius: 999px;
+  background: var(--pf-surface-2);
+  color: var(--pf-muted);
+  padding: 7px 10px;
+  font-size: 12.5px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.pf-real-app .pf-platform-readiness-panel .pf-panel-title-row {
+  align-items: center;
+}
+
+.pf-real-app .pf-platform-readiness-panel .pf-health-pill {
+  flex: 0 0 auto;
+  min-height: 32px;
+  border-color: var(--pf-success-border);
+  background: var(--pf-success-soft);
+  color: var(--pf-success);
+  padding: 8px 12px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.pf-real-app .pf-platform-empty-state {
+  min-height: 240px;
+  margin: 24px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  background: var(--pf-surface-2);
+}
+
+.pf-real-app .pf-platform-isp-form-grid {
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+}
+
+.pf-real-app .pf-platform-isp-edit-form {
+  grid-column: 1 / -1;
+}
+
+.pf-real-app .pf-platform-invitation-panel {
+  margin-top: 24px;
+}
+
+.pf-real-app .pf-platform-invitation-panel .pf-table-wrap {
+  margin-top: 16px;
+}
+
+.pf-real-app .pf-platform-invitation-filters {
+  justify-content: flex-start;
+}
+
+/* Theme contrast refinements */
+
+.pf-real-app .pf-view-link,
+.pf-real-app .pf-refresh-button,
+.pf-real-app .secondary-button,
+.pf-real-app .filter-chip.active-filter,
+.pf-real-app .active-filter,
+.pf-real-app .status-info,
+.pf-real-app .status-inactive {
+  color: var(--pf-link);
+}
+
+.pf-real-app .pf-view-link:hover,
+.pf-real-app .pf-refresh-button:hover:not(:disabled),
+.pf-real-app .secondary-button:hover:not(:disabled) {
+  color: var(--pf-link-hover);
+}
+
+.pf-real-app .detail-item,
+.pf-real-app .pf-monitoring-stat-list div,
+.pf-real-app .pf-intelligence-detail-grid div,
+.pf-real-app .pf-intelligence-run-summary div,
+.pf-real-app .pf-intelligence-run-details,
+.pf-real-app .pf-intelligence-run-details article,
+.pf-real-app .pf-intelligence-list-item {
+  border-color: var(--pf-row-border);
+}
+
+@media (max-width: 1280px) {
+  .pf-real-app .pf-platform-action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* PulseFi safe table scrolling */
+@media (max-width: 900px) {
+  .pf-real-app .pf-sidebar,
+  .pf-real-app .pf-topbar {
+    position: static;
+    width: 100%;
+    max-width: 100%;
+    flex-basis: auto;
+  }
 
-/*
-  Tables should scroll inside their own card when they have many rows/columns.
-  The full dashboard page should not get horizontal scrolling.
-*/
+  .pf-real-app .pf-topbar {
+    left: auto;
+  }
 
-.pf-table-card,
-.pf-table-wrapper,
-.pf-data-table-card {
-  width: 100%;
-  max-width: 100%;
-  overflow: auto;
-  box-sizing: border-box;
-}
+  .pf-real-app .pf-dashboard-main {
+    width: 100%;
+    margin-left: 0;
+  }
 
-/* Prevent very large tables from making the page impossible to use */
-.pf-table-card {
-  max-height: 520px;
-}
-
-/* Keep table headers visible while scrolling long tables */
-.pf-table-card thead th {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-/* Tables can be wider than their card, but only the card scrolls */
-.pf-table-card table,
-.pf-table-wrapper table,
-.pf-data-table-card table {
-  width: 100%;
-  min-width: 720px;
-}
-
-/* Long IDs/messages should wrap instead of pushing the page */
-.pf-table-card th,
-.pf-table-card td,
-.pf-table-wrapper th,
-.pf-table-wrapper td,
-.pf-data-table-card th,
-.pf-data-table-card td {
-  overflow-wrap: anywhere;
-  word-break: normal;
+  .pf-real-app .pf-platform-action-grid,
+  .pf-real-app .pf-platform-isp-form-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -30,17 +30,6 @@ type AuthStep =
       identifier: string;
     };
 
-function PulseFiLogo() {
-  return (
-    <div className="pf-logo" aria-label="PulseFi">
-      <div className="pf-logo-mark">
-        <span className="pf-logo-pulse">P</span>
-        <span>PulseFi</span>
-      </div>
-    </div>
-  );
-}
-
 function getMFAInstruction(method: string) {
   if (method === "email") {
     return "Enter the code sent to your admin email address.";
@@ -133,8 +122,6 @@ function AdminLoginPage({
   return (
     <main className="pf-auth-page">
       <div className="pf-auth-wrap">
-        <PulseFiLogo />
-
         <section className="pf-login-card">
           <div className="pf-auth-heading">
             <h1>Admin Login</h1>
@@ -165,15 +152,9 @@ function AdminLoginPage({
             </div>
 
             <div className="pf-field">
-              <div className="pf-label-row">
-                <label className="pf-label" htmlFor="admin-password">
-                  Password
-                </label>
-
-                <button className="pf-link-button" type="button">
-                  Forgot password?
-                </button>
-              </div>
+              <label className="pf-label" htmlFor="admin-password">
+                Password
+              </label>
 
               <div className="pf-input-shell">
                 <span className="pf-input-icon" aria-hidden="true">
@@ -202,6 +183,10 @@ function AdminLoginPage({
                   </span>
                 </button>
               </div>
+
+              <button className="pf-link-button" type="button">
+                Forgot password?
+              </button>
             </div>
 
             {errorMessage && (
@@ -209,7 +194,11 @@ function AdminLoginPage({
             )}
 
             <div className="pf-submit-row">
-              <button className="pf-primary-button" disabled={isSubmitting}>
+              <button
+                className="pf-primary-button pf-login-submit-button"
+                type="submit"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Signing in..." : "Login"}
                 <span className="material-symbols-outlined" aria-hidden="true">
                   arrow_forward
@@ -264,16 +253,14 @@ function MFAVerifyPage({
   return (
     <main className="pf-auth-page">
       <div className="pf-auth-wrap">
-        <PulseFiLogo />
-
-        <section className="pf-login-card">
+        <section className="pf-login-card pf-mfa-card">
           <div className="pf-auth-heading">
             <h1>MFA Verification</h1>
             <p>{getMFAInstruction(challenge.method)}</p>
           </div>
 
           <form onSubmit={handleVerifyMFA} className="pf-auth-form">
-            <div className="pf-field">
+            <div className="pf-field pf-mfa-code-field">
               <label className="pf-label" htmlFor="mfa-code">
                 Verification Code
               </label>
@@ -303,7 +290,11 @@ function MFAVerifyPage({
               <div className="pf-error-box">{errorMessage}</div>
             )}
 
-            <button className="pf-primary-button" disabled={isSubmitting}>
+            <button
+              className="pf-primary-button pf-mfa-action-button"
+              type="submit"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Verifying..." : "Verify MFA"}
               <span className="material-symbols-outlined" aria-hidden="true">
                 verified_user
@@ -311,7 +302,7 @@ function MFAVerifyPage({
             </button>
 
             <button
-              className="pf-secondary-button"
+              className="pf-secondary-button pf-mfa-back-button"
               type="button"
               onClick={onBack}
             >
@@ -383,9 +374,7 @@ function MFASetupPage({
   return (
     <main className="pf-auth-page">
       <div className="pf-auth-wrap pf-auth-wrap-wide">
-        <PulseFiLogo />
-
-        <section className="pf-login-card">
+        <section className="pf-login-card pf-mfa-card">
           <div className="pf-auth-heading">
             <h1>Set up MFA</h1>
             <p>This admin account requires MFA before a login token is issued.</p>
@@ -439,7 +428,7 @@ function MFASetupPage({
           </div>
 
           <form onSubmit={handleConfirmSetup} className="pf-auth-form">
-            <div className="pf-field">
+            <div className="pf-field pf-mfa-code-field">
               <label className="pf-label" htmlFor="mfa-setup-code">
                 Authenticator Code
               </label>
@@ -460,7 +449,11 @@ function MFASetupPage({
               <div className="pf-error-box">{errorMessage}</div>
             )}
 
-            <button className="pf-primary-button" disabled={isSubmitting}>
+            <button
+              className="pf-primary-button pf-mfa-action-button"
+              type="submit"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? "Confirming..." : "Confirm MFA setup"}
               <span className="material-symbols-outlined" aria-hidden="true">
                 security
@@ -468,7 +461,7 @@ function MFASetupPage({
             </button>
 
             <button
-              className="pf-secondary-button"
+              className="pf-secondary-button pf-mfa-back-button"
               type="button"
               onClick={onBack}
             >

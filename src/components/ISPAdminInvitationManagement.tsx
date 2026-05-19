@@ -11,7 +11,10 @@ import type {
   ISPAdminInvitationStatus,
 } from "../api/ispAdmin";
 
-const invitationFilters: { label: string; value: ISPAdminInvitationStatus | "all" }[] = [
+const invitationFilters: {
+  label: string;
+  value: ISPAdminInvitationStatus | "all";
+}[] = [
   { label: "All", value: "all" },
   { label: "Pending", value: "pending" },
   { label: "Accepted", value: "accepted" },
@@ -33,7 +36,9 @@ function formatDateTime(value: string | null) {
   return date.toLocaleString();
 }
 
-function getInvitationStatus(invitation: ISPAdminInvitation): ISPAdminInvitationStatus {
+function getInvitationStatus(
+  invitation: ISPAdminInvitation
+): ISPAdminInvitationStatus {
   const now = new Date();
 
   if (invitation.accepted_at) {
@@ -52,7 +57,9 @@ function getInvitationStatus(invitation: ISPAdminInvitation): ISPAdminInvitation
 }
 
 export function ISPAdminInvitationManagement() {
-  const [statusFilter, setStatusFilter] = useState<ISPAdminInvitationStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    ISPAdminInvitationStatus | "all"
+  >("pending");
   const [invitations, setInvitations] = useState<ISPAdminInvitation[]>([]);
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
@@ -122,7 +129,11 @@ export function ISPAdminInvitationManagement() {
 
     const parsedExpiresInDays = Number(expiresInDays);
 
-    if (!Number.isInteger(parsedExpiresInDays) || parsedExpiresInDays < 1 || parsedExpiresInDays > 30) {
+    if (
+      !Number.isInteger(parsedExpiresInDays) ||
+      parsedExpiresInDays < 1 ||
+      parsedExpiresInDays > 30
+    ) {
       setErrorMessage("Expiration must be between 1 and 30 days.");
       return;
     }
@@ -139,7 +150,10 @@ export function ISPAdminInvitationManagement() {
         expires_in_days: parsedExpiresInDays,
       });
 
-      setInvitations((current) => [createdInvitation, ...current]);
+      if (apiStatusFilter === null || apiStatusFilter === "pending") {
+        setInvitations((current) => [createdInvitation, ...current]);
+      }
+
       setEmail("");
       setFullName("");
       setExpiresInDays("7");
@@ -155,17 +169,31 @@ export function ISPAdminInvitationManagement() {
   }
 
   async function handleRevokeInvitation(invitation: ISPAdminInvitation) {
+    if (getInvitationStatus(invitation) !== "pending") {
+      setErrorMessage("Only pending ISP Admin invitations can be revoked.");
+      return;
+    }
+
     setErrorMessage("");
     setSuccessMessage("");
     setRevokingId(invitation.id);
 
     try {
-      const response = await revokeISPAdminInvitationForCurrentISP(invitation.id);
+      const response = await revokeISPAdminInvitationForCurrentISP(
+        invitation.id
+      );
 
       setInvitations((current) =>
-        current.map((item) =>
-          item.id === invitation.id ? response.invitation : item
-        )
+        current
+          .map((item) =>
+            item.id === invitation.id ? response.invitation : item
+          )
+          .filter((item) => {
+            return (
+              apiStatusFilter === null ||
+              getInvitationStatus(item) === apiStatusFilter
+            );
+          })
       );
 
       setSuccessMessage(response.message);
@@ -179,23 +207,29 @@ export function ISPAdminInvitationManagement() {
   }
 
   return (
-    <section className="pf-panel">
-      <div className="pf-section-header">
+    <section className="panel isp-admin-invitation-panel">
+      <div className="section-header">
         <div>
-          <p className="pf-eyebrow">ISP Admin Invitations</p>
-          <h2>Invite ISP Admins</h2>
-          <p className="pf-muted">
-            Invite another ISP Admin under your same ISP. The backend automatically scopes the invitation to your ISP.
+          <p className="eyebrow">ISP Admin Access</p>
+          <h2>ISP Admin Invitations</h2>
+          <p className="muted">
+            Invite another ISP Admin under your same ISP and track invitation
+            status.
           </p>
         </div>
 
-        <button type="button" className="pf-secondary-button" onClick={loadInvitations}>
+        <button
+          type="button"
+          className="secondary-button pf-refresh-button"
+          onClick={loadInvitations}
+          disabled={isLoading}
+        >
           Refresh
         </button>
       </div>
 
-      <div className="pf-management-grid">
-        <form className="pf-form-card" onSubmit={handleCreateInvitation}>
+      <div className="management-grid">
+        <form className="create-form" onSubmit={handleCreateInvitation}>
           <h3>Create ISP Admin invitation</h3>
 
           <label>
@@ -232,20 +266,21 @@ export function ISPAdminInvitationManagement() {
             />
           </label>
 
-          <button disabled={isCreating}>
+          <button type="submit" disabled={isCreating}>
             {isCreating ? "Creating..." : "Create invitation"}
           </button>
         </form>
 
-        <div className="pf-form-card">
+        <div className="create-form">
           <h3>Invitation notes</h3>
-          <p className="pf-muted">
-            This creates an admin invitation for the same ISP only. The invited admin cannot choose a different ISP.
+          <p className="muted">
+            This creates an admin invitation for the same ISP only. The invited
+            admin cannot choose a different ISP.
           </p>
 
           {devToken && (
-            <div className="pf-dev-token-box">
-              <strong>Development invitation token</strong>
+            <div className="dev-token-box">
+              <strong>Local DEBUG invitation token:</strong>
               <code>{devToken}</code>
               <small>
                 This appears only when the backend is running with DEBUG=True.
@@ -255,13 +290,13 @@ export function ISPAdminInvitationManagement() {
         </div>
       </div>
 
-      <div className="pf-filter-bar" aria-label="ISP Admin invitation filters">
+      <div className="filter-bar" aria-label="ISP Admin invitation filters">
         {invitationFilters.map((filter) => (
           <button
             key={filter.value}
             type="button"
-            className={`pf-filter-chip ${
-              statusFilter === filter.value ? "pf-active-filter" : ""
+            className={`filter-chip ${
+              statusFilter === filter.value ? "active-filter" : ""
             }`}
             aria-pressed={statusFilter === filter.value}
             onClick={() => setStatusFilter(filter.value)}
@@ -271,13 +306,15 @@ export function ISPAdminInvitationManagement() {
         ))}
       </div>
 
-      {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
-      {successMessage && <div className="pf-success-box">{successMessage}</div>}
+      {errorMessage && <div className="error-box">{errorMessage}</div>}
+      {successMessage && <div className="success-box">{successMessage}</div>}
 
-      {isLoading && <p className="pf-muted">Loading ISP Admin invitations...</p>}
+      {isLoading && (
+        <p className="pf-loading-text">Loading ISP Admin invitations...</p>
+      )}
 
       {!isLoading && (
-        <div className="pf-table-card">
+        <div className="table-card">
           <table>
             <thead>
               <tr>
@@ -300,21 +337,27 @@ export function ISPAdminInvitationManagement() {
                     <td>{invitation.email}</td>
                     <td>{invitation.full_name ?? "-"}</td>
                     <td>
-                      <span className={`pf-status-pill pf-status-${status}`}>
+                      <span className={`status-pill status-${status}`}>
                         {status}
                       </span>
                     </td>
                     <td>{formatDateTime(invitation.expires_at)}</td>
                     <td>{formatDateTime(invitation.created_at)}</td>
                     <td>
-                      <button
-                        type="button"
-                        className="pf-small-button"
-                        disabled={!canRevoke || revokingId === invitation.id}
-                        onClick={() => handleRevokeInvitation(invitation)}
-                      >
-                        {revokingId === invitation.id ? "Revoking..." : "Revoke"}
-                      </button>
+                      {canRevoke ? (
+                        <button
+                          type="button"
+                          className="small-button danger-button"
+                          disabled={revokingId === invitation.id}
+                          onClick={() => handleRevokeInvitation(invitation)}
+                        >
+                          {revokingId === invitation.id
+                            ? "Revoking..."
+                            : "Revoke"}
+                        </button>
+                      ) : (
+                        <span className="muted">No action</span>
+                      )}
                     </td>
                   </tr>
                 );
@@ -322,7 +365,9 @@ export function ISPAdminInvitationManagement() {
 
               {invitations.length === 0 && (
                 <tr>
-                  <td colSpan={6}>No ISP Admin invitations found.</td>
+                  <td colSpan={6}>
+                    No ISP Admin invitations found for this filter.
+                  </td>
                 </tr>
               )}
             </tbody>

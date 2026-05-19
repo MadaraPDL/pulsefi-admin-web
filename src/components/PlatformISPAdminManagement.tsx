@@ -229,8 +229,15 @@ export function PlatformISPAdminManagement({
       </div>
 
       {!selectedISP && (
-        <div className="pf-selected-strip">
-          Select an ISP from ISP Management before reviewing its admin accounts.
+        <div className="pf-empty-state pf-platform-empty-state">
+          <span className="material-symbols-outlined">
+            admin_panel_settings
+          </span>
+          <h3>Select an ISP from ISP Management first</h3>
+          <p>
+            ISP Admin accounts are scoped to one ISP. Open ISP Management,
+            select an ISP, then return here to review and update its admins.
+          </p>
         </div>
       )}
 

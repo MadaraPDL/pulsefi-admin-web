@@ -61,8 +61,10 @@ function formatDate(value: string | null) {
 
 export function PlatformISPAdminInvitationManagement({
   selectedISP,
+  refreshKey = 0,
 }: {
   selectedISP: ISP | null;
+  refreshKey?: number;
 }) {
   const [statusFilter, setStatusFilter] =
     useState<ISPAdminInvitationFilter>("pending");
@@ -138,7 +140,7 @@ export function PlatformISPAdminInvitationManagement({
     return () => {
       isCancelled = true;
     };
-  }, [selectedISP, statusFilter]);
+  }, [selectedISP, statusFilter, refreshKey]);
 
   async function handleRevokeInvitation(invitation: ISPAdminInvitation) {
     if (!selectedISP) {
@@ -172,12 +174,13 @@ export function PlatformISPAdminInvitationManagement({
   }
 
   return (
-    <section className="pf-platform-invitation-panel">
+    <section className="pf-content-card pf-platform-invitation-panel">
       <div className="pf-panel-title-row">
         <div>
           <h2>ISP Admin Invitations</h2>
           <p>
-            List and revoke pending ISP Admin invitations for the selected ISP.
+            List, filter, and revoke pending ISP Admin invitations for the
+            selected ISP.
           </p>
         </div>
 
@@ -192,9 +195,13 @@ export function PlatformISPAdminInvitationManagement({
       </div>
 
       {!selectedISP && (
-        <div className="pf-selected-strip">
-          Select an ISP in the ISPs section to review or revoke its ISP Admin
-          invitations.
+        <div className="pf-empty-state pf-platform-empty-state">
+          <span className="material-symbols-outlined">router</span>
+          <h3>Select an ISP from ISP Management first</h3>
+          <p>
+            ISP Admin invitations are scoped to one ISP. Select an ISP above,
+            then review or revoke invitations here.
+          </p>
         </div>
       )}
 

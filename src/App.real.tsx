@@ -14,12 +14,30 @@ import ISPAdminDashboard from "./pages/ISPAdminDashboard";
 import PlatformAdminDashboard from "./pages/PlatformAdminDashboard";
 
 type AuthStatus = "checking" | "logged_out" | "authenticated";
+export type AdminTheme = "dark" | "light";
+
+const ADMIN_THEME_STORAGE_KEY = "pulsefi-admin-theme";
+
+function getInitialTheme(): AdminTheme {
+  try {
+    const savedTheme = window.localStorage.getItem(ADMIN_THEME_STORAGE_KEY);
+
+    if (savedTheme === "light" || savedTheme === "dark") {
+      return savedTheme;
+    }
+  } catch {
+    return "dark";
+  }
+
+  return "dark";
+}
 
 export default function RealApp() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [authStatus, setAuthStatus] = useState<AuthStatus>(
     hasSession() ? "checking" : "logged_out"
   );
+  const [theme, setTheme] = useState<AdminTheme>(getInitialTheme);
 
   useEffect(() => {
     function handlePopState() {
@@ -82,30 +100,64 @@ export default function RealApp() {
     setAuthStatus("logged_out");
   }
 
-  if (currentPath === "/accept-invitation") {
-    return <AcceptInvitationPage />;
+  function toggleTheme() {
+    setTheme((current) => {
+      const nextTheme = current === "dark" ? "light" : "dark";
+
+      try {
+        window.localStorage.setItem(ADMIN_THEME_STORAGE_KEY, nextTheme);
+      } catch {
+        // Theme still updates for the current session if storage is unavailable.
+      }
+
+      return nextTheme;
+    });
   }
 
-  if (authStatus === "checking") {
-    return <SessionRestorePage />;
-  }
+  function renderCurrentView() {
+    if (currentPath === "/accept-invitation") {
+      return <AcceptInvitationPage />;
+    }
 
-  if (authStatus === "logged_out") {
+    if (authStatus === "checking") {
+      return <SessionRestorePage />;
+    }
+
+    if (authStatus === "logged_out") {
+      return <AdminAuthFlow onAuthenticated={handleAuthenticated} />;
+    }
+
+    const role = getAdminRole();
+
+    if (role === "platform_admin") {
+      return (
+        <PlatformAdminDashboard
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onLogout={handleLogout}
+        />
+      );
+    }
+
+    if (role === "isp_admin") {
+      return (
+        <ISPAdminDashboard
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onLogout={handleLogout}
+        />
+      );
+    }
+
+    clearSession();
     return <AdminAuthFlow onAuthenticated={handleAuthenticated} />;
   }
 
-  const role = getAdminRole();
-
-  if (role === "platform_admin") {
-    return <PlatformAdminDashboard onLogout={handleLogout} />;
-  }
-
-  if (role === "isp_admin") {
-    return <ISPAdminDashboard onLogout={handleLogout} />;
-  }
-
-  clearSession();
-  return <AdminAuthFlow onAuthenticated={handleAuthenticated} />;
+  return (
+    <div className="pf-real-app" data-theme={theme}>
+      {renderCurrentView()}
+    </div>
+  );
 }
 
 function SessionRestorePage() {
