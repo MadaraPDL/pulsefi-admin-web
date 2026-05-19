@@ -862,3 +862,62 @@ export async function runISPAdminIntelligence(): Promise<ISPAdminIntelligenceRun
     }
   );
 }
+
+export type ISPAdminInvitationStatus =
+  | "pending"
+  | "accepted"
+  | "revoked"
+  | "expired";
+
+export type CreateISPAdminInvitationRequest = {
+  email: string;
+  full_name?: string | null;
+  expires_in_days: number;
+};
+
+export type ISPAdminInvitation = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  account_type: string;
+  admin_role: string | null;
+  isp_id: string | null;
+  invited_by_admin_id: string | null;
+  expires_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+  dev_invitation_token: string | null;
+};
+
+export type RevokeISPAdminInvitationResponse = {
+  message: string;
+  invitation: ISPAdminInvitation;
+};
+
+export async function createISPAdminInvitationForCurrentISP(
+  payload: CreateISPAdminInvitationRequest
+): Promise<ISPAdminInvitation> {
+  return apiRequest<ISPAdminInvitation>("/isp-admin/admin-invitations", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function listISPAdminInvitationsForCurrentISP(
+  status?: ISPAdminInvitationStatus | null
+): Promise<ISPAdminInvitation[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : "";
+  return apiRequest<ISPAdminInvitation[]>(`/isp-admin/admin-invitations${query}`);
+}
+
+export async function revokeISPAdminInvitationForCurrentISP(
+  invitationId: string
+): Promise<RevokeISPAdminInvitationResponse> {
+  return apiRequest<RevokeISPAdminInvitationResponse>(
+    `/isp-admin/admin-invitations/${invitationId}/revoke`,
+    {
+      method: "PATCH",
+    }
+  );
+}

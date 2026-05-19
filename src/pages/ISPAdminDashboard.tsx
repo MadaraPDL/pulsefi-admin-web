@@ -5,6 +5,7 @@ import { getISPAdminSummary } from "../api/ispAdmin";
 import type { ISPAdminSummary } from "../api/ispAdmin";
 import { clearSession, getAdminName } from "../auth/session";
 import { AppUserInvitationManagement } from "../components/AppUserInvitationManagement";
+import { ISPAdminInvitationManagement } from "../components/ISPAdminInvitationManagement";
 import { AppUserManagement } from "../components/AppUserManagement";
 import { SubscriptionPlanManagement } from "../components/SubscriptionPlanManagement";
 import { UserSubscriptionManagement } from "../components/UserSubscriptionManagement";
@@ -542,7 +543,8 @@ export default function ISPAdminDashboard({
 
       {activeSection === "invitations" && (
         <SectionCard>
-          <AppUserInvitationManagement />
+          <ISPAdminInvitationManagement />
+      <AppUserInvitationManagement />
         </SectionCard>
       )}
     </ISPShell>
