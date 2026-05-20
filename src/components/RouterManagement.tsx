@@ -8,6 +8,7 @@ import {
   listRouters,
   listSubscriptionPlans,
   listUserSubscriptions,
+  runFullSimulatorIngestionForRouter,
   updateRouter,
 } from "../api/ispAdmin";
 import type {
@@ -89,6 +90,9 @@ export function RouterManagement() {
   const [selectingRouterId, setSelectingRouterId] = useState<string | null>(
     null
   );
+  const [simulatorRunningRouterId, setSimulatorRunningRouterId] = useState<
+    string | null
+  >(null);
 
   const userNameById = useMemo(() => {
     return new Map(users.map((user) => [user.id, user.full_name]));
@@ -354,6 +358,28 @@ export function RouterManagement() {
       setErrorMessage(getErrorMessage(error, "Could not update router."));
     } finally {
       setIsUpdating(false);
+    }
+  }
+
+  async function handleRunFullSimulator(router: ISPAdminRouter) {
+    setSimulatorRunningRouterId(router.id);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    try {
+      const result = await runFullSimulatorIngestionForRouter(router.id);
+
+      await loadRouters();
+
+      setSuccessMessage(
+        `Full simulator completed: ${result.device_ingestion.devices_seen} devices seen, ${result.usage_ingestion.records_created} usage records created, ${result.alerts_created} alerts created.`
+      );
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, "Could not run full simulator ingestion.")
+      );
+    } finally {
+      setSimulatorRunningRouterId(null);
     }
   }
 
@@ -673,7 +699,7 @@ export function RouterManagement() {
                     </span>
                   </td>
                   <td>{formatDateTime(router.created_at)}</td>
-                  <td>
+                  <td className="router-action-cell">
                     <button
                       className="small-button"
                       type="button"
@@ -684,6 +710,19 @@ export function RouterManagement() {
                       }}
                     >
                       {selectingRouterId === router.id ? "Loading..." : "View"}
+                    </button>
+                    <button
+                      className="small-button"
+                      type="button"
+                      disabled={simulatorRunningRouterId === router.id}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handleRunFullSimulator(router);
+                      }}
+                    >
+                      {simulatorRunningRouterId === router.id
+                        ? "Running..."
+                        : "Run full simulator"}
                     </button>
                   </td>
                 </tr>

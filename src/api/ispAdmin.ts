@@ -921,3 +921,49 @@ export async function revokeISPAdminInvitationForCurrentISP(
     }
   );
 }
+
+export type SimulatorDeviceIngestionResponse = {
+  router_id: string;
+  user_id: string;
+  user_subscription_id: string;
+  devices_seen: number;
+  devices_created: number;
+  devices_updated: number;
+  connection_logs_created: number;
+  alerts_created: number;
+};
+
+export type SimulatorUsageIngestionResponse = {
+  router_id: string;
+  user_id: string;
+  user_subscription_id: string;
+  record_start: string;
+  record_end: string;
+  records_created: number;
+  upload_mb: string | number;
+  download_mb: string | number;
+  total_mb: string | number;
+  alerts_created: number;
+};
+
+export type SimulatorFullIngestionResponse = {
+  router_id: string;
+  user_id: string;
+  user_subscription_id: string;
+  device_ingestion: SimulatorDeviceIngestionResponse;
+  usage_ingestion: SimulatorUsageIngestionResponse;
+  alerts_created: number;
+};
+
+export async function runFullSimulatorIngestionForRouter(
+  routerId: string
+): Promise<SimulatorFullIngestionResponse> {
+  return apiRequest<SimulatorFullIngestionResponse>(
+    `/isp-admin/usage-ingestion/routers/${routerId}/simulator/run`,
+    {
+      method: "POST",
+      body: JSON.stringify({}),
+    }
+  );
+}
+
