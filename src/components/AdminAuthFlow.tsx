@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   assertAdminSession,
@@ -40,6 +40,65 @@ function getMFAInstruction(method: string) {
   return "Enter the 6-digit code from your authenticator app.";
 }
 
+
+const ADMIN_AUTH_STEP_STORAGE_KEY = "pulsefi-admin-auth-step";
+
+function getStoredAuthStep(): AuthStep {
+  try {
+    const rawStep = window.sessionStorage.getItem(ADMIN_AUTH_STEP_STORAGE_KEY);
+
+    if (!rawStep) {
+      return { kind: "login" };
+    }
+
+    const parsedStep = JSON.parse(rawStep) as Partial<AuthStep>;
+
+    if (
+      parsedStep.kind === "mfa_required" &&
+      parsedStep.challenge?.challenge_token &&
+      typeof parsedStep.identifier === "string"
+    ) {
+      return parsedStep as AuthStep;
+    }
+
+    if (
+      parsedStep.kind === "mfa_setup_required" &&
+      parsedStep.setup?.mfa_setup_token &&
+      typeof parsedStep.identifier === "string"
+    ) {
+      return parsedStep as AuthStep;
+    }
+  } catch {
+    // If stored data is invalid or unavailable, safely fall back to login.
+  }
+
+  return { kind: "login" };
+}
+
+function storeAuthStep(step: AuthStep) {
+  try {
+    if (step.kind === "login") {
+      window.sessionStorage.removeItem(ADMIN_AUTH_STEP_STORAGE_KEY);
+      return;
+    }
+
+    window.sessionStorage.setItem(
+      ADMIN_AUTH_STEP_STORAGE_KEY,
+      JSON.stringify(step)
+    );
+  } catch {
+    // Auth still works without storage.
+  }
+}
+
+function clearStoredAuthStep() {
+  try {
+    window.sessionStorage.removeItem(ADMIN_AUTH_STEP_STORAGE_KEY);
+  } catch {
+    // Ignore storage cleanup failures.
+  }
+}
+
 export function AdminAuthFlow({
   theme,
   onSetTheme,
@@ -49,7 +108,16 @@ export function AdminAuthFlow({
   onSetTheme: (theme: AdminTheme) => void;
   onAuthenticated: (result: AdminAuthenticatedResult) => void;
 }) {
-  const [step, setStep] = useState<AuthStep>({ kind: "login" });
+  const [step, setStep] = useState<AuthStep>(getStoredAuthStep);
+
+  useEffect(() => {
+    storeAuthStep(step);
+  }, [step]);
+
+  function handleAuthenticated(result: AdminAuthenticatedResult) {
+    clearStoredAuthStep();
+    onAuthenticated(result);
+  }
 
   function handleLoginResponse(response: AdminLoginResponse, identifier: string) {
     if (isMFARequiredResponse(response)) {
@@ -82,7 +150,7 @@ export function AdminAuthFlow({
         theme={theme}
         onSetTheme={onSetTheme}
         onBack={() => setStep({ kind: "login" })}
-        onAuthenticated={onAuthenticated}
+        onAuthenticated={handleAuthenticated}
       />
     );
   }
@@ -95,7 +163,7 @@ export function AdminAuthFlow({
         theme={theme}
         onSetTheme={onSetTheme}
         onBack={() => setStep({ kind: "login" })}
-        onAuthenticated={onAuthenticated}
+        onAuthenticated={handleAuthenticated}
       />
     );
   }
@@ -553,3 +621,6 @@ function AuthThemeToggle({
     </div>
   );
 }
+
+
+

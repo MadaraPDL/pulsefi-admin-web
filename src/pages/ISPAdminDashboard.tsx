@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
@@ -47,6 +47,47 @@ type ISPSection =
   | "app_invitations"
   | "admin_invitations"
   | "settings";
+
+const ISP_ACTIVE_SECTION_STORAGE_KEY = "pulsefi-isp-active-section";
+
+const ispSectionIds: ISPSection[] = [
+  "dashboard",
+  "monitoring",
+  "operations",
+  "network",
+  "intelligence",
+  "users",
+  "plans",
+  "subscriptions",
+  "routers",
+  "app_invitations",
+  "admin_invitations",
+  "settings",
+];
+
+function getInitialISPSection(): ISPSection {
+  try {
+    const savedSection = window.localStorage.getItem(
+      ISP_ACTIVE_SECTION_STORAGE_KEY
+    );
+
+    if (ispSectionIds.includes(savedSection as ISPSection)) {
+      return savedSection as ISPSection;
+    }
+  } catch {
+    // Fall back to overview if storage is unavailable.
+  }
+
+  return "dashboard";
+}
+
+function storeISPSection(section: ISPSection) {
+  try {
+    window.localStorage.setItem(ISP_ACTIVE_SECTION_STORAGE_KEY, section);
+  } catch {
+    // Ignore storage failures.
+  }
+}
 
 const ispSectionCopy: Record<ISPSection, { title: string; subtitle: string }> = {
   dashboard: {
@@ -743,9 +784,13 @@ export default function ISPAdminDashboard({
 }) {
   const [summary, setSummary] = useState<ISPAdminSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [activeSection, setActiveSection] = useState<ISPSection>("dashboard");
+  const [activeSection, setActiveSection] = useState<ISPSection>(getInitialISPSection);
 
   const adminName = getAdminName("ISP Admin");
+
+  useEffect(() => {
+    storeISPSection(activeSection);
+  }, [activeSection]);
 
   useEffect(() => {
     async function loadSummary() {
@@ -881,3 +926,5 @@ export default function ISPAdminDashboard({
     </ISPShell>
   );
 }
+
+
