@@ -16,6 +16,8 @@ import type {
   MFASetupRequiredResponse,
 } from "../api/adminAuth";
 import { getErrorMessage } from "../api/errors";
+import type { AdminTheme } from "../App.real";
+import { AdminPasswordResetFlow } from "./AdminPasswordResetFlow";
 
 type AuthStep =
   | { kind: "login" }
@@ -39,8 +41,12 @@ function getMFAInstruction(method: string) {
 }
 
 export function AdminAuthFlow({
+  theme,
+  onSetTheme,
   onAuthenticated,
 }: {
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
   onAuthenticated: (result: AdminAuthenticatedResult) => void;
 }) {
   const [step, setStep] = useState<AuthStep>({ kind: "login" });
@@ -73,6 +79,8 @@ export function AdminAuthFlow({
       <MFAVerifyPage
         challenge={step.challenge}
         identifier={step.identifier}
+        theme={theme}
+        onSetTheme={onSetTheme}
         onBack={() => setStep({ kind: "login" })}
         onAuthenticated={onAuthenticated}
       />
@@ -84,23 +92,36 @@ export function AdminAuthFlow({
       <MFASetupPage
         setup={step.setup}
         identifier={step.identifier}
+        theme={theme}
+        onSetTheme={onSetTheme}
         onBack={() => setStep({ kind: "login" })}
         onAuthenticated={onAuthenticated}
       />
     );
   }
 
-  return <AdminLoginPage onLoginResponse={handleLoginResponse} />;
+  return (
+    <AdminLoginPage
+      theme={theme}
+      onSetTheme={onSetTheme}
+      onLoginResponse={handleLoginResponse}
+    />
+  );
 }
 
 function AdminLoginPage({
+  theme,
+  onSetTheme,
   onLoginResponse,
 }: {
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
   onLoginResponse: (response: AdminLoginResponse, identifier: string) => void;
 }) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isResetMode, setIsResetMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -121,91 +142,111 @@ function AdminLoginPage({
 
   return (
     <main className="pf-auth-page">
+      <AuthThemeToggle theme={theme} onSetTheme={onSetTheme} />
+
       <div className="pf-auth-wrap">
         <section className="pf-login-card">
           <div className="pf-auth-heading">
-            <h1>Admin Login</h1>
-            <p>Sign in to access the control panel</p>
+            <h1>{isResetMode ? "Reset Password" : "Admin Login"}</h1>
+            <p>
+              {isResetMode
+                ? "Send a reset email, then set a new admin password."
+                : "Sign in to access the control panel"}
+            </p>
           </div>
 
-          <form onSubmit={handleLogin} className="pf-auth-form">
-            <div className="pf-field">
-              <label className="pf-label" htmlFor="admin-identifier">
-                Email Address
-              </label>
+          {isResetMode ? (
+            <AdminPasswordResetFlow
+              initialIdentifier={identifier}
+              onDone={() => setIsResetMode(false)}
+            />
+          ) : (
+            <form onSubmit={handleLogin} className="pf-auth-form">
+              <div className="pf-field">
+                <label className="pf-label" htmlFor="admin-identifier">
+                  Email Address
+                </label>
 
-              <div className="pf-input-shell">
-                <span className="pf-input-icon" aria-hidden="true">
-                  <span className="material-symbols-outlined">mail</span>
-                </span>
+                <div className="pf-input-shell">
+                  <span className="pf-input-icon" aria-hidden="true">
+                    <span className="material-symbols-outlined">mail</span>
+                  </span>
 
-                <input
-                  id="admin-identifier"
-                  className="pf-input"
-                  value={identifier}
-                  onChange={(event) => setIdentifier(event.target.value)}
-                  placeholder="admin@pulsefi.com"
-                  autoComplete="username"
-                  required
-                />
+                  <input
+                    id="admin-identifier"
+                    className="pf-input"
+                    value={identifier}
+                    onChange={(event) => setIdentifier(event.target.value)}
+                    placeholder="admin@pulsefi.com"
+                    autoComplete="username"
+                    required
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="pf-field">
-              <label className="pf-label" htmlFor="admin-password">
-                Password
-              </label>
+              <div className="pf-field">
+                <label className="pf-label" htmlFor="admin-password">
+                  Password
+                </label>
 
-              <div className="pf-input-shell">
-                <span className="pf-input-icon" aria-hidden="true">
-                  <span className="material-symbols-outlined">lock</span>
-                </span>
+                <div className="pf-input-shell">
+                  <span className="pf-input-icon" aria-hidden="true">
+                    <span className="material-symbols-outlined">lock</span>
+                  </span>
 
-                <input
-                  id="admin-password"
-                  className="pf-input pf-input-with-action"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  autoComplete="current-password"
-                  required
-                />
+                  <input
+                    id="admin-password"
+                    className="pf-input pf-input-with-action"
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
+                    autoComplete="current-password"
+                    required
+                  />
+
+                  <button
+                    className="pf-password-toggle"
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      {showPassword ? "visibility_off" : "visibility"}
+                    </span>
+                  </button>
+                </div>
 
                 <button
-                  className="pf-password-toggle"
+                  className="pf-link-button"
                   type="button"
-                  onClick={() => setShowPassword((current) => !current)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => {
+                    setErrorMessage("");
+                    setIsResetMode(true);
+                  }}
                 >
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    {showPassword ? "visibility_off" : "visibility"}
-                  </span>
+                  Forgot password?
                 </button>
               </div>
 
-              <button className="pf-link-button" type="button">
-                Forgot password?
-              </button>
-            </div>
+              {errorMessage && (
+                <div className="pf-error-box">{errorMessage}</div>
+              )}
 
-            {errorMessage && (
-              <div className="pf-error-box">{errorMessage}</div>
-            )}
-
-            <div className="pf-submit-row">
-              <button
-                className="pf-primary-button pf-login-submit-button"
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Signing in..." : "Login"}
-                <span className="material-symbols-outlined" aria-hidden="true">
-                  arrow_forward
-                </span>
-              </button>
-            </div>
-          </form>
+              <div className="pf-submit-row">
+                <button
+                  className="pf-primary-button pf-login-submit-button"
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Signing in..." : "Login"}
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    arrow_forward
+                  </span>
+                </button>
+              </div>
+            </form>
+          )}
 
           <div className="pf-auth-footer">
             <p>Secure Connection Environment</p>
@@ -219,11 +260,15 @@ function AdminLoginPage({
 function MFAVerifyPage({
   challenge,
   identifier,
+  theme,
+  onSetTheme,
   onBack,
   onAuthenticated,
 }: {
   challenge: MFARequiredResponse;
   identifier: string;
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
   onBack: () => void;
   onAuthenticated: (result: AdminAuthenticatedResult) => void;
 }) {
@@ -252,6 +297,8 @@ function MFAVerifyPage({
 
   return (
     <main className="pf-auth-page">
+      <AuthThemeToggle theme={theme} onSetTheme={onSetTheme} />
+
       <div className="pf-auth-wrap">
         <section className="pf-login-card pf-mfa-card">
           <div className="pf-auth-heading">
@@ -318,11 +365,15 @@ function MFAVerifyPage({
 function MFASetupPage({
   setup,
   identifier,
+  theme,
+  onSetTheme,
   onBack,
   onAuthenticated,
 }: {
   setup: MFASetupRequiredResponse;
   identifier: string;
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
   onBack: () => void;
   onAuthenticated: (result: AdminAuthenticatedResult) => void;
 }) {
@@ -373,6 +424,8 @@ function MFASetupPage({
 
   return (
     <main className="pf-auth-page">
+      <AuthThemeToggle theme={theme} onSetTheme={onSetTheme} />
+
       <div className="pf-auth-wrap pf-auth-wrap-wide">
         <section className="pf-login-card pf-mfa-card">
           <div className="pf-auth-heading">
@@ -471,5 +524,32 @@ function MFASetupPage({
         </section>
       </div>
     </main>
+  );
+}
+
+function AuthThemeToggle({
+  theme,
+  onSetTheme,
+}: {
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
+}) {
+  return (
+    <div className="pf-auth-theme-toggle" aria-label="Login theme">
+      {(["dark", "light"] as const).map((mode) => (
+        <button
+          key={mode}
+          className={theme === mode ? "active-filter" : ""}
+          type="button"
+          onClick={() => onSetTheme(mode)}
+          aria-pressed={theme === mode}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {mode === "dark" ? "dark_mode" : "light_mode"}
+          </span>
+          {mode === "dark" ? "Dark" : "Light"}
+        </button>
+      ))}
+    </div>
   );
 }

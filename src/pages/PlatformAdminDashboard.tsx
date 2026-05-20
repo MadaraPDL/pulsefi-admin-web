@@ -16,16 +16,24 @@ import type {
   PlatformAdminSummary,
   UpdateISPRequest,
 } from "../api/platformAdmin";
-import { clearSession, getAdminName } from "../auth/session";
+import {
+  clearSession,
+  getAdminEmail,
+  getAdminName,
+  getAdminUsername,
+} from "../auth/session";
+import { AdminSettingsPanel } from "../components/AdminSettingsPanel";
 import { PlatformISPAdminManagement } from "../components/PlatformISPAdminManagement";
 import { PlatformISPAdminInvitationManagement } from "../components/PlatformISPAdminInvitationManagement";
 import type { AdminTheme } from "../App.real";
+import type { CurrentAdminResponse } from "../api/adminAuth";
 
 type PlatformSection =
   | "dashboard"
   | "isps"
   | "admins"
-  | "system_health";
+  | "system_health"
+  | "settings";
 
 const platformSectionCopy: Record<
   PlatformSection,
@@ -46,6 +54,10 @@ const platformSectionCopy: Record<
   system_health: {
     title: "System Health",
     subtitle: "Review admin-session and backend-readiness signals.",
+  },
+  settings: {
+    title: "Settings",
+    subtitle: "Manage appearance, account identity, and recovery.",
   },
 };
 
@@ -130,13 +142,11 @@ function PlatformSidebar({
 function PlatformTopBar({
   adminName,
   activeSection,
-  theme,
-  onToggleTheme,
+  onNavigate,
 }: {
   adminName: string;
   activeSection: PlatformSection;
-  theme: AdminTheme;
-  onToggleTheme: () => void;
+  onNavigate: (section: PlatformSection) => void;
 }) {
   const copy = platformSectionCopy[activeSection];
   return (
@@ -155,22 +165,11 @@ function PlatformTopBar({
 
       <div className="pf-topbar-actions">
         <button
-          className="pf-theme-toggle"
+          className={activeSection === "settings" ? "pf-icon-button-active" : ""}
           type="button"
-          onClick={onToggleTheme}
-          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          aria-label="Settings"
+          onClick={() => onNavigate("settings")}
         >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            {theme === "dark" ? "light_mode" : "dark_mode"}
-          </span>
-          <span>{theme === "dark" ? "Light" : "Dark"}</span>
-        </button>
-
-        <button type="button" aria-label="Notifications">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
-
-        <button type="button" aria-label="Settings">
           <span className="material-symbols-outlined">settings</span>
         </button>
       </div>
@@ -181,17 +180,13 @@ function PlatformTopBar({
 function PlatformShell({
   adminName,
   activeSection,
-  theme,
   onNavigate,
-  onToggleTheme,
   onLogout,
   children,
 }: {
   adminName: string;
   activeSection: PlatformSection;
-  theme: AdminTheme;
   onNavigate: (section: PlatformSection) => void;
-  onToggleTheme: () => void;
   onLogout: () => void;
   children: ReactNode;
 }) {
@@ -205,8 +200,7 @@ function PlatformShell({
       <PlatformTopBar
         adminName={adminName}
         activeSection={activeSection}
-        theme={theme}
-        onToggleTheme={onToggleTheme}
+        onNavigate={onNavigate}
       />
 
       <main className="pf-dashboard-main">{children}</main>
@@ -882,11 +876,13 @@ function ISPManagement({
 
 export default function PlatformAdminDashboard({
   theme,
-  onToggleTheme,
+  onSetTheme,
+  onAdminUpdated,
   onLogout,
 }: {
   theme: AdminTheme;
-  onToggleTheme: () => void;
+  onSetTheme: (theme: AdminTheme) => void;
+  onAdminUpdated: (admin: CurrentAdminResponse) => void;
   onLogout: () => void;
 }) {
   const [summary, setSummary] = useState<PlatformAdminSummary | null>(null);
@@ -939,9 +935,7 @@ export default function PlatformAdminDashboard({
     <PlatformShell
       activeSection={activeSection}
       adminName={adminName}
-      theme={theme}
       onNavigate={setActiveSection}
-      onToggleTheme={onToggleTheme}
       onLogout={handleLogout}
     >
       {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
@@ -985,6 +979,27 @@ export default function PlatformAdminDashboard({
 
       {activeSection === "system_health" && (
         <PlatformReadinessPanel />
+      )}
+
+      {activeSection === "settings" && (
+        <AdminSettingsPanel
+          adminName={getAdminName("Admin")}
+          adminEmail={getAdminEmail()}
+          adminUsername={getAdminUsername()}
+          roleLabel="Platform Admin"
+          activeSectionLabel={platformSectionCopy[activeSection].title}
+          theme={theme}
+          shortcuts={[
+            { label: "Overview", section: "dashboard" },
+            { label: "ISP Management", section: "isps" },
+            { label: "ISP Admin Accounts", section: "admins" },
+            { label: "System Health", section: "system_health" },
+          ]}
+          onSetTheme={onSetTheme}
+          onNavigate={setActiveSection}
+          onAdminUpdated={onAdminUpdated}
+          onLogout={handleLogout}
+        />
       )}
     </PlatformShell>
   );

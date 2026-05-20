@@ -2029,6 +2029,149 @@ dd {
   font-size: 15px;
 }
 
+.pf-real-app .pf-auth-theme-toggle {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 5;
+  display: inline-flex;
+  gap: 6px;
+  border: 1px solid var(--pf-auth-border);
+  border-radius: 999px;
+  background: var(--pf-auth-card);
+  padding: 5px;
+  box-shadow: var(--pf-auth-shadow);
+}
+
+.pf-real-app .pf-auth-theme-toggle button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--pf-auth-muted);
+  padding: 0 11px;
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.pf-real-app .pf-auth-theme-toggle button:hover,
+.pf-real-app .pf-auth-theme-toggle button.active-filter {
+  border-color: var(--pf-primary-border);
+  background: var(--pf-primary-soft);
+  color: var(--pf-link);
+}
+
+.pf-real-app .pf-auth-theme-toggle .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.pf-real-app .pf-password-reset-flow {
+  display: grid;
+  gap: 14px;
+}
+
+.pf-real-app .pf-password-reset-form {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--pf-auth-border);
+  border-radius: var(--pf-radius);
+  background: color-mix(in srgb, var(--pf-auth-card) 88%, var(--pf-primary) 12%);
+  padding: 16px;
+}
+
+.pf-real-app .pf-settings-popover .pf-password-reset-form {
+  min-width: 0;
+  border-color: var(--pf-border);
+  background: var(--pf-surface-2);
+}
+
+.pf-real-app .pf-password-reset-form h4 {
+  color: var(--pf-auth-text);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.pf-real-app .pf-settings-popover .pf-password-reset-form h4 {
+  color: var(--pf-text);
+}
+
+.pf-real-app .pf-password-reset-form p {
+  margin-top: 4px;
+  color: var(--pf-auth-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.pf-real-app .pf-settings-popover .pf-password-reset-form p {
+  color: var(--pf-muted);
+}
+
+.pf-real-app .pf-password-reset-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--pf-auth-label);
+  font-size: 12.5px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pf-real-app .pf-settings-popover .pf-password-reset-form label {
+  color: var(--pf-muted);
+}
+
+.pf-real-app .pf-password-reset-form input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--pf-auth-input-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-auth-input);
+  color: var(--pf-auth-text);
+  padding: 10px 12px;
+  font-size: 15px;
+  line-height: 1.35;
+  outline: none;
+}
+
+.pf-real-app .pf-settings-popover .pf-password-reset-form input {
+  border-color: var(--pf-border);
+  background: var(--pf-field);
+  color: var(--pf-text);
+}
+
+.pf-real-app .pf-password-reset-form input:focus {
+  border-color: var(--pf-primary);
+  box-shadow: 0 0 0 1px var(--pf-primary);
+}
+
+.pf-real-app .pf-password-reset-form .pf-primary-button,
+.pf-real-app .pf-password-reset-form .pf-secondary-button,
+.pf-real-app .pf-password-reset-flow > .pf-secondary-button {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  white-space: normal;
+}
+
+.pf-real-app .pf-password-reset-flow > .pf-dev-box,
+.pf-real-app .pf-password-reset-flow > .pf-error-box,
+.pf-real-app .pf-password-reset-flow > .pf-success-box {
+  margin: 0;
+}
+
+.pf-real-app .pf-dev-box a {
+  min-width: 0;
+  color: var(--pf-link);
+  font-weight: 850;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 /* Live admin full-width layout */
 
 .pf-real-app .pf-dashboard-shell {
@@ -2211,31 +2354,374 @@ dd {
   gap: 10px;
 }
 
-.pf-real-app .pf-topbar-actions .pf-theme-toggle {
-  width: auto;
+.pf-real-app .pf-topbar-actions .pf-icon-button-active {
+  background: var(--pf-primary-soft);
+  color: var(--pf-primary);
+}
+
+.pf-real-app .pf-topbar-popover {
+  position: absolute;
+  top: 72px;
+  right: 24px;
+  z-index: 50;
+  width: min(420px, calc(100vw - 48px));
+  max-height: calc(100vh - 96px);
+  display: grid;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  background: var(--pf-surface);
+  color: var(--pf-text);
+  box-shadow: var(--pf-shadow);
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.pf-real-app .pf-settings-popover,
+.pf-real-app .pf-settings-popover * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.pf-real-app .pf-settings-popover > *,
+.pf-real-app .pf-settings-section,
+.pf-real-app .pf-settings-section > *,
+.pf-real-app .pf-password-reset-flow,
+.pf-real-app .pf-password-reset-flow > * {
   min-width: 0;
-  min-height: 40px;
-  display: inline-flex;
+}
+
+.pf-real-app .pf-popover-header,
+.pf-real-app .pf-popover-footer {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+}
+
+.pf-real-app .pf-popover-header > div {
+  min-width: 0;
+  flex: 1 1 220px;
+}
+
+.pf-real-app .pf-popover-header h3,
+.pf-real-app .pf-popover-header p {
+  overflow-wrap: anywhere;
+}
+
+.pf-real-app .pf-popover-header {
+  border-bottom: 1px solid var(--pf-border);
+}
+
+.pf-real-app .pf-popover-header h3 {
+  color: var(--pf-text);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.pf-real-app .pf-popover-header p {
+  margin-top: 4px;
+  color: var(--pf-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.pf-real-app .pf-popover-header > button {
+  width: 34px;
+  min-height: 34px;
+  display: grid;
+  place-items: center;
   border: 1px solid var(--pf-border);
   border-radius: 999px;
   background: var(--pf-surface-2);
-  color: var(--pf-text);
-  padding: 0 12px;
-  font-size: 14px;
-  font-weight: 850;
+  color: var(--pf-muted);
+  padding: 0;
 }
 
-.pf-real-app .pf-topbar-actions .pf-theme-toggle:hover {
+.pf-real-app .pf-popover-footer {
+  border-top: 1px solid var(--pf-border);
+}
+
+.pf-real-app .pf-popover-footer .pf-secondary-button,
+.pf-real-app .pf-popover-footer .pf-view-link,
+.pf-real-app .pf-popover-footer .pf-danger-outline-button {
+  flex: 1 1 140px;
+  min-width: 0;
+  min-height: 40px;
+  margin: 0;
+  text-align: center;
+  white-space: normal;
+}
+
+.pf-real-app .pf-settings-section {
+  display: grid;
+  gap: 10px;
+  border-bottom: 1px solid var(--pf-border);
+  padding: 16px;
+}
+
+.pf-real-app .pf-settings-page {
+  max-width: none;
+  overflow: hidden;
+}
+
+.pf-real-app .pf-settings-page,
+.pf-real-app .pf-settings-page * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.pf-real-app .pf-settings-page-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pf-real-app .pf-settings-header-row {
+  align-items: center;
+  gap: 18px;
+}
+
+.pf-real-app .pf-settings-header-row > div:first-child {
+  min-width: 240px;
+}
+
+.pf-real-app .pf-settings-theme-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.pf-real-app .pf-settings-page .pf-settings-section {
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  background: var(--pf-surface-2);
+  padding: 18px;
+}
+
+.pf-real-app .pf-settings-section-wide {
+  grid-column: 1 / -1;
+}
+
+.pf-real-app .pf-settings-label {
+  color: var(--pf-faint);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pf-real-app .pf-segmented-control,
+.pf-real-app .pf-settings-shortcuts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pf-real-app .pf-segmented-control button,
+.pf-real-app .pf-settings-shortcuts button {
+  max-width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--pf-border);
+  border-radius: 999px;
+  background: var(--pf-surface-2);
+  color: var(--pf-muted);
+  padding: 0 12px;
+  font-size: 13.5px;
+  font-weight: 850;
+  white-space: normal;
+}
+
+.pf-real-app .pf-segmented-control button:hover,
+.pf-real-app .pf-segmented-control button.active-filter,
+.pf-real-app .pf-settings-shortcuts button:hover {
   border-color: var(--pf-primary-border);
   background: var(--pf-primary-soft);
   color: var(--pf-link);
 }
 
-.pf-real-app .pf-topbar-actions .pf-theme-toggle .material-symbols-outlined {
-  font-size: 19px;
+.pf-real-app .pf-segmented-control .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.pf-real-app .pf-settings-account dl {
+  display: grid;
+  gap: 8px;
+}
+
+.pf-real-app .pf-settings-page .pf-settings-account dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pf-real-app .pf-settings-account dl div {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.62fr) minmax(0, 1.38fr);
+  gap: 12px;
+  border: 1px solid var(--pf-row-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface-2);
+  padding: 10px;
+}
+
+.pf-real-app .pf-settings-account dt {
+  min-width: 0;
+  color: var(--pf-faint);
+  font-size: 12.5px;
+  font-weight: 850;
+}
+
+.pf-real-app .pf-settings-account dd {
+  min-width: 0;
+  color: var(--pf-text);
+  font-size: 13.5px;
+  font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+.pf-real-app .pf-settings-identity-form {
+  display: grid;
+  gap: 14px;
+}
+
+.pf-real-app .pf-settings-form-grid,
+.pf-real-app .pf-settings-verification-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.pf-real-app .pf-settings-identity-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--pf-muted);
+  font-size: 12.5px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pf-real-app .pf-settings-identity-form input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-field);
+  color: var(--pf-text);
+  padding: 10px 12px;
+  font-size: 15px;
+  line-height: 1.35;
+  outline: none;
+}
+
+.pf-real-app .pf-settings-identity-form input:focus {
+  border-color: var(--pf-primary);
+  box-shadow: 0 0 0 1px var(--pf-primary);
+}
+
+.pf-real-app .pf-settings-page .pf-password-reset-form {
+  border-color: var(--pf-border);
+  background: var(--pf-field);
+}
+
+.pf-real-app .pf-settings-page .pf-password-reset-form h4 {
+  color: var(--pf-text);
+}
+
+.pf-real-app .pf-settings-page .pf-password-reset-form p,
+.pf-real-app .pf-settings-page .pf-password-reset-form label {
+  color: var(--pf-muted);
+}
+
+.pf-real-app .pf-settings-page .pf-password-reset-form input {
+  border-color: var(--pf-border);
+  background: var(--pf-surface);
+  color: var(--pf-text);
+}
+
+.pf-real-app .pf-settings-page-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.pf-real-app .pf-settings-popover .pf-dev-box code {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.pf-real-app .pf-danger-outline-button {
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: var(--pf-radius-sm);
+  background: rgba(255, 107, 107, 0.08);
+  color: var(--pf-danger);
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 850;
+}
+
+.pf-real-app .pf-notification-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 16px 16px 0;
+}
+
+.pf-real-app .pf-notification-summary span {
+  display: grid;
+  gap: 4px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface-2);
+  color: var(--pf-muted);
+  padding: 10px;
+  font-size: 12.5px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.pf-real-app .pf-notification-summary strong {
+  color: var(--pf-text);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.pf-real-app .pf-popover-filter-bar {
+  padding: 14px 16px 0;
+}
+
+.pf-real-app .pf-notification-list {
+  display: grid;
+  gap: 12px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.pf-real-app .pf-notifications-popover .pf-alert-item {
+  padding: 14px;
+}
+
+.pf-real-app .pf-popover-empty-state {
+  min-height: 220px;
+}
+
+.pf-real-app .pf-topbar-popover .pf-error-box,
+.pf-real-app .pf-topbar-popover .pf-loading-text {
+  margin: 16px;
 }
 
 /* Platform admin */
@@ -2393,7 +2879,21 @@ dd {
   }
 
   .pf-real-app .pf-platform-action-grid,
-  .pf-real-app .pf-platform-isp-form-grid {
+  .pf-real-app .pf-platform-isp-form-grid,
+  .pf-real-app .pf-settings-page-grid,
+  .pf-real-app .pf-settings-page .pf-settings-account dl,
+  .pf-real-app .pf-settings-form-grid,
+  .pf-real-app .pf-settings-verification-row {
     grid-template-columns: 1fr;
+  }
+
+  .pf-real-app .pf-settings-header-row {
+    align-items: flex-start;
+  }
+
+  .pf-real-app .pf-settings-theme-control {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
   }
 }

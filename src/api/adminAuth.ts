@@ -9,6 +9,7 @@ export type AdminSession = {
   account_id: string;
   full_name: string;
   email: string;
+  username?: string | null;
   role: AdminRole;
 };
 
@@ -47,6 +48,15 @@ export type MFASetupConfirmRequest = {
   code: string;
 };
 
+export type ForgotPasswordResponse = {
+  message: string;
+  dev_reset_url?: string | null;
+};
+
+export type ResetPasswordResponse = {
+  message: string;
+};
+
 export type CurrentAdminResponse = {
   account_type: "admin" | "app_user";
   account_id: string;
@@ -59,6 +69,21 @@ export type CurrentAdminResponse = {
   mfa_enabled: boolean;
   mfa_required: boolean;
   preferred_mfa_method: string | null;
+};
+
+export type ProfileUpdateChallengeResponse = {
+  challenge_token: string;
+  method: "email" | "authenticator";
+  expires_at: string;
+  message: string;
+  dev_email_code?: string | null;
+};
+
+export type UpdateAdminIdentityRequest = {
+  email?: string;
+  username?: string;
+  mfa_challenge_token: string;
+  mfa_code: string;
 };
 
 export type AdminAuthenticatedResult = {
@@ -166,6 +191,7 @@ export async function restoreAdminSession(
     account_id: currentAdmin.account_id,
     full_name: currentAdmin.full_name,
     email: currentAdmin.email,
+    username: currentAdmin.username,
     role: currentAdmin.role,
   });
 }
@@ -229,4 +255,47 @@ export async function confirmAdminMFASetup(
   });
 
   return assertAdminSession(response);
+}
+
+export async function requestAdminPasswordReset(
+  identifier: string
+): Promise<ForgotPasswordResponse> {
+  return apiRequest<ForgotPasswordResponse>("/auth/password/forgot", {
+    method: "POST",
+    body: JSON.stringify({
+      account_type: "admin",
+      identifier,
+    }),
+  });
+}
+
+export async function requestAdminIdentityVerification(): Promise<ProfileUpdateChallengeResponse> {
+  return apiRequest<ProfileUpdateChallengeResponse>(
+    "/auth/me/profile-update-challenge",
+    {
+      method: "POST",
+    }
+  );
+}
+
+export async function updateAdminIdentity(
+  payload: UpdateAdminIdentityRequest
+): Promise<CurrentAdminResponse> {
+  return apiRequest<CurrentAdminResponse>("/auth/me/identity", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function resetAdminPassword(
+  token: string,
+  newPassword: string
+): Promise<ResetPasswordResponse> {
+  return apiRequest<ResetPasswordResponse>("/auth/password/reset", {
+    method: "POST",
+    body: JSON.stringify({
+      token,
+      new_password: newPassword,
+    }),
+  });
 }

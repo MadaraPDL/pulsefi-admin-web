@@ -13,9 +13,16 @@ import type {
   ISPAdminSummary,
   ISPAdminUsageRecord,
 } from "../api/ispAdmin";
-import { clearSession, getAdminName } from "../auth/session";
+import {
+  clearSession,
+  getAdminEmail,
+  getAdminName,
+  getAdminUsername,
+} from "../auth/session";
+import { AdminSettingsPanel } from "../components/AdminSettingsPanel";
 import { AppUserInvitationManagement } from "../components/AppUserInvitationManagement";
 import { ISPAdminInvitationManagement } from "../components/ISPAdminInvitationManagement";
+import { ISPNotificationsPanel } from "../components/ISPNotificationsPanel";
 import { AppUserManagement } from "../components/AppUserManagement";
 import { SubscriptionPlanManagement } from "../components/SubscriptionPlanManagement";
 import { UserSubscriptionManagement } from "../components/UserSubscriptionManagement";
@@ -25,6 +32,7 @@ import { ISPAdminOperationsCenter } from "../components/ISPAdminOperationsCenter
 import { ISPAdminNetworkActivityCenter } from "../components/ISPAdminNetworkActivityCenter";
 import { ISPAdminIntelligenceCenter } from "../components/ISPAdminIntelligenceCenter";
 import type { AdminTheme } from "../App.real";
+import type { CurrentAdminResponse } from "../api/adminAuth";
 
 type ISPSection =
   | "dashboard"
@@ -37,7 +45,8 @@ type ISPSection =
   | "subscriptions"
   | "routers"
   | "app_invitations"
-  | "admin_invitations";
+  | "admin_invitations"
+  | "settings";
 
 const ispSectionCopy: Record<ISPSection, { title: string; subtitle: string }> = {
   dashboard: {
@@ -83,6 +92,10 @@ const ispSectionCopy: Record<ISPSection, { title: string; subtitle: string }> = 
   admin_invitations: {
     title: "ISP Admin Invitations",
     subtitle: "Invite ISP Admins for the same ISP.",
+  },
+  settings: {
+    title: "Settings",
+    subtitle: "Manage appearance, account identity, and recovery.",
   },
 };
 
@@ -174,15 +187,18 @@ function ISPSidebar({
 function ISPTopBar({
   adminName,
   activeSection,
-  theme,
-  onToggleTheme,
+  onNavigate,
 }: {
   adminName: string;
   activeSection: ISPSection;
-  theme: AdminTheme;
-  onToggleTheme: () => void;
+  onNavigate: (section: ISPSection) => void;
 }) {
   const copy = ispSectionCopy[activeSection];
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  function toggleNotifications() {
+    setIsNotificationsOpen((current) => !current);
+  }
 
   return (
     <header className="pf-topbar">
@@ -202,25 +218,30 @@ function ISPTopBar({
 
       <div className="pf-topbar-actions">
         <button
-          className="pf-theme-toggle"
+          className={isNotificationsOpen ? "pf-icon-button-active" : ""}
           type="button"
-          onClick={onToggleTheme}
-          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          aria-label="Notifications"
+          onClick={toggleNotifications}
         >
-          <span className="material-symbols-outlined" aria-hidden="true">
-            {theme === "dark" ? "light_mode" : "dark_mode"}
-          </span>
-          <span>{theme === "dark" ? "Light" : "Dark"}</span>
-        </button>
-
-        <button type="button" aria-label="Notifications">
           <span className="material-symbols-outlined">notifications</span>
         </button>
 
-        <button type="button" aria-label="Settings">
+        <button
+          className={activeSection === "settings" ? "pf-icon-button-active" : ""}
+          type="button"
+          aria-label="Settings"
+          onClick={() => onNavigate("settings")}
+        >
           <span className="material-symbols-outlined">settings</span>
         </button>
       </div>
+
+      {isNotificationsOpen && (
+        <ISPNotificationsPanel
+          onClose={() => setIsNotificationsOpen(false)}
+          onOpenMonitoring={() => onNavigate("monitoring")}
+        />
+      )}
     </header>
   );
 }
@@ -228,17 +249,13 @@ function ISPTopBar({
 function ISPShell({
   adminName,
   activeSection,
-  theme,
   onNavigate,
-  onToggleTheme,
   onLogout,
   children,
 }: {
   adminName: string;
   activeSection: ISPSection;
-  theme: AdminTheme;
   onNavigate: (section: ISPSection) => void;
-  onToggleTheme: () => void;
   onLogout: () => void;
   children: ReactNode;
 }) {
@@ -252,8 +269,7 @@ function ISPShell({
       <ISPTopBar
         adminName={adminName}
         activeSection={activeSection}
-        theme={theme}
-        onToggleTheme={onToggleTheme}
+        onNavigate={onNavigate}
       />
 
       <main className="pf-dashboard-main">{children}</main>
@@ -716,11 +732,13 @@ function SectionCard({ children }: { children: ReactNode }) {
 
 export default function ISPAdminDashboard({
   theme,
-  onToggleTheme,
+  onSetTheme,
+  onAdminUpdated,
   onLogout,
 }: {
   theme: AdminTheme;
-  onToggleTheme: () => void;
+  onSetTheme: (theme: AdminTheme) => void;
+  onAdminUpdated: (admin: CurrentAdminResponse) => void;
   onLogout: () => void;
 }) {
   const [summary, setSummary] = useState<ISPAdminSummary | null>(null);
@@ -753,9 +771,7 @@ export default function ISPAdminDashboard({
     <ISPShell
       activeSection={activeSection}
       adminName={adminName}
-      theme={theme}
       onNavigate={setActiveSection}
-      onToggleTheme={onToggleTheme}
       onLogout={handleLogout}
     >
       {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
@@ -839,6 +855,28 @@ export default function ISPAdminDashboard({
         <SectionCard>
           <ISPAdminInvitationManagement />
         </SectionCard>
+      )}
+
+      {activeSection === "settings" && (
+        <AdminSettingsPanel
+          adminName={getAdminName("ISP Admin")}
+          adminEmail={getAdminEmail()}
+          adminUsername={getAdminUsername()}
+          roleLabel="ISP Admin"
+          activeSectionLabel={ispSectionCopy[activeSection].title}
+          theme={theme}
+          shortcuts={[
+            { label: "Overview", section: "dashboard" },
+            { label: "Users", section: "users" },
+            { label: "App User Invitations", section: "app_invitations" },
+            { label: "Monitoring", section: "monitoring" },
+            { label: "Network Activity", section: "network" },
+          ]}
+          onSetTheme={onSetTheme}
+          onNavigate={setActiveSection}
+          onAdminUpdated={onAdminUpdated}
+          onLogout={handleLogout}
+        />
       )}
     </ISPShell>
   );
