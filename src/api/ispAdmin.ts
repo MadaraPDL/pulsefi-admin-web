@@ -1,4 +1,4 @@
-import { apiRequest } from "./client";
+﻿import { apiRequest } from "./client";
 
 export type StatusCounts = {
   total: number;
@@ -513,6 +513,10 @@ export async function listISPAdminAlerts(
   return apiRequest<ISPAdminAlert[]>(`/isp-admin/alerts?${params.toString()}`);
 }
 
+export async function getISPAdminAlert(alertId: string): Promise<ISPAdminAlert> {
+  return apiRequest<ISPAdminAlert>(`/isp-admin/alerts/${alertId}`);
+}
+
 
 export type ISPAdminReportType =
   | "usage_report"
@@ -616,6 +620,14 @@ export async function listPlanChangeRequests(
   );
 }
 
+export async function getPlanChangeRequest(
+  requestId: string
+): Promise<ISPAdminPlanChangeRequest> {
+  return apiRequest<ISPAdminPlanChangeRequest>(
+    `/isp-admin/plan-change-requests/${requestId}`
+  );
+}
+
 export async function reviewPlanChangeRequest(
   requestId: string,
   decision: PlanChangeReviewDecision,
@@ -687,6 +699,14 @@ export async function listISPAdminUsageRecords(
   );
 }
 
+export async function getISPAdminUsageRecord(
+  usageRecordId: string
+): Promise<ISPAdminUsageRecord> {
+  return apiRequest<ISPAdminUsageRecord>(
+    `/isp-admin/usage-records/${usageRecordId}`
+  );
+}
+
 export async function listISPAdminDeviceConnectionLogs(
   limit = 10,
   offset = 0
@@ -698,6 +718,14 @@ export async function listISPAdminDeviceConnectionLogs(
 
   return apiRequest<ISPAdminDeviceConnectionLog[]>(
     `/isp-admin/device-connection-logs?${params.toString()}`
+  );
+}
+
+export async function getISPAdminDeviceConnectionLog(
+  connectionLogId: string
+): Promise<ISPAdminDeviceConnectionLog> {
+  return apiRequest<ISPAdminDeviceConnectionLog>(
+    `/isp-admin/device-connection-logs/${connectionLogId}`
   );
 }
 
@@ -717,6 +745,14 @@ export async function listISPAdminRouterActionLogs(
 
   return apiRequest<ISPAdminRouterActionLog[]>(
     `/isp-admin/router-action-logs?${params.toString()}`
+  );
+}
+
+export async function getISPAdminRouterActionLog(
+  actionLogId: string
+): Promise<ISPAdminRouterActionLog> {
+  return apiRequest<ISPAdminRouterActionLog>(
+    `/isp-admin/router-action-logs/${actionLogId}`
   );
 }
 
@@ -955,14 +991,41 @@ export type SimulatorFullIngestionResponse = {
   alerts_created: number;
 };
 
-export async function runFullSimulatorIngestionForRouter(
+export type SimulatorUsageIngestionRequest = Record<string, unknown>;
+
+export async function runSimulatorUsageIngestionForRouter(
+  routerId: string,
+  payload: SimulatorUsageIngestionRequest = {}
+): Promise<SimulatorUsageIngestionResponse> {
+  return apiRequest<SimulatorUsageIngestionResponse>(
+    `/isp-admin/usage-ingestion/routers/${routerId}/simulator`,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function runSimulatorDeviceIngestionForRouter(
   routerId: string
+): Promise<SimulatorDeviceIngestionResponse> {
+  return apiRequest<SimulatorDeviceIngestionResponse>(
+    `/isp-admin/usage-ingestion/routers/${routerId}/simulator/devices`,
+    {
+      method: "POST",
+    }
+  );
+}
+
+export async function runFullSimulatorIngestionForRouter(
+  routerId: string,
+  payload: SimulatorUsageIngestionRequest = {}
 ): Promise<SimulatorFullIngestionResponse> {
   return apiRequest<SimulatorFullIngestionResponse>(
     `/isp-admin/usage-ingestion/routers/${routerId}/simulator/run`,
     {
       method: "POST",
-      body: JSON.stringify({}),
+      body: JSON.stringify(payload),
     }
   );
 }

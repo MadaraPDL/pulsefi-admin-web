@@ -1,4 +1,4 @@
-import { apiRequest } from "./client";
+﻿import { apiRequest } from "./client";
 
 export type PlatformAdminSummary = {
   total_isps: number;
@@ -114,6 +114,10 @@ export async function getPlatformAdminSummary(): Promise<PlatformAdminSummary> {
 
 export async function listISPs(): Promise<ISP[]> {
   return apiRequest<ISP[]>("/platform-admin/isps");
+}
+
+export async function getISP(ispId: string): Promise<ISP> {
+  return apiRequest<ISP>(`/platform-admin/isps/${ispId}`);
 }
 
 export async function createISP(payload: CreateISPRequest): Promise<ISP> {
