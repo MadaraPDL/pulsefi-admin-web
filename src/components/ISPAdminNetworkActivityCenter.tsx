@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
+  getISPAdminDeviceConnectionLog,
+  getISPAdminRouterActionLog,
+  getISPAdminUsageRecord,
   listISPAdminDeviceConnectionLogs,
   listISPAdminRouterActionLogs,
   listISPAdminUsageRecords,
@@ -55,7 +58,39 @@ function getLogStatusClass(status: string) {
   return "status-pending";
 }
 
-function UsageRecordsTable({ records }: { records: ISPAdminUsageRecord[] }) {
+function DetailLine({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | null;
+}) {
+  return (
+    <small>
+      <strong>{label}:</strong> {value ?? "-"}
+    </small>
+  );
+}
+
+function formatJson(value: Record<string, unknown> | null) {
+  if (!value) {
+    return "-";
+  }
+
+  return JSON.stringify(value, null, 2);
+}
+
+function UsageRecordsTable({
+  records,
+  selectedRecord,
+  loadingRecordId,
+  onViewDetail,
+}: {
+  records: ISPAdminUsageRecord[];
+  selectedRecord: ISPAdminUsageRecord | null;
+  loadingRecordId: string | null;
+  onViewDetail: (recordId: string) => void;
+}) {
   return (
     <div className="pf-table-wrap">
       <table className="pf-usage-records-table">
@@ -66,29 +101,70 @@ function UsageRecordsTable({ records }: { records: ISPAdminUsageRecord[] }) {
             <th>Download</th>
             <th>Source</th>
             <th>Period</th>
+            <th>Detail</th>
           </tr>
         </thead>
 
         <tbody>
-          {records.map((record) => (
-            <tr key={record.id}>
-              <td className="pf-total-mb-cell">
-                {formatMb(record.total_mb)}
-              </td>
-              <td>{formatMb(record.upload_mb)}</td>
-              <td>{formatMb(record.download_mb)}</td>
-              <td>{record.source ?? "-"}</td>
-              <td>
-                {formatDateTime(record.record_start)}
-                <br />
-                <span className="muted">to {formatDateTime(record.record_end)}</span>
-              </td>
-            </tr>
-          ))}
+          {records.map((record) => {
+            const isSelected = selectedRecord?.id === record.id;
+            const isLoading = loadingRecordId === record.id;
+            const detail = isSelected ? selectedRecord : record;
+
+            return (
+              <Fragment key={record.id}>
+                <tr>
+                  <td className="pf-total-mb-cell">
+                    {formatMb(record.total_mb)}
+                  </td>
+                  <td>{formatMb(record.upload_mb)}</td>
+                  <td>{formatMb(record.download_mb)}</td>
+                  <td>{record.source ?? "-"}</td>
+                  <td>
+                    {formatDateTime(record.record_start)}
+                    <br />
+                    <span className="muted">to {formatDateTime(record.record_end)}</span>
+                  </td>
+                  <td>
+                    <button
+                      className="small-button"
+                      type="button"
+                      disabled={isLoading}
+                      onClick={() => onViewDetail(record.id)}
+                    >
+                      {isLoading
+                        ? "Loading..."
+                        : isSelected
+                          ? "Hide"
+                          : "View"}
+                    </button>
+                  </td>
+                </tr>
+
+                {isSelected && (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="pf-inline-detail-panel">
+                        <DetailLine label="Usage record ID" value={detail.id} />
+                        <DetailLine label="User ID" value={detail.user_id} />
+                        <DetailLine
+                          label="Subscription ID"
+                          value={detail.user_subscription_id}
+                        />
+                        <DetailLine label="Router ID" value={detail.router_id} />
+                        <DetailLine label="Device ID" value={detail.device_id} />
+                        <DetailLine label="Created" value={formatDateTime(detail.created_at)} />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
+            );
+          })}
 
           {records.length === 0 && (
             <tr>
-              <td colSpan={5}>
+              <td colSpan={6}>
                 No usage records yet. Seed or import usage data to review ISP
                 traffic here.
               </td>
@@ -102,8 +178,14 @@ function UsageRecordsTable({ records }: { records: ISPAdminUsageRecord[] }) {
 
 function DeviceConnectionTable({
   logs,
+  selectedLog,
+  loadingLogId,
+  onViewDetail,
 }: {
   logs: ISPAdminDeviceConnectionLog[];
+  selectedLog: ISPAdminDeviceConnectionLog | null;
+  loadingLogId: string | null;
+  onViewDetail: (logId: string) => void;
 }) {
   return (
     <div className="pf-table-wrap">
@@ -114,22 +196,60 @@ function DeviceConnectionTable({
             <th>IP</th>
             <th>Details</th>
             <th>Time</th>
+            <th>Detail</th>
           </tr>
         </thead>
 
         <tbody>
-          {logs.map((log) => (
-            <tr key={log.id}>
-              <td>{log.event_type}</td>
-              <td>{log.ip_address ?? "-"}</td>
-              <td>{log.details ?? "-"}</td>
-              <td>{formatDateTime(log.event_time)}</td>
-            </tr>
-          ))}
+          {logs.map((log) => {
+            const isSelected = selectedLog?.id === log.id;
+            const isLoading = loadingLogId === log.id;
+            const detail = isSelected ? selectedLog : log;
+
+            return (
+              <Fragment key={log.id}>
+                <tr>
+                  <td>{log.event_type}</td>
+                  <td>{log.ip_address ?? "-"}</td>
+                  <td>{log.details ?? "-"}</td>
+                  <td>{formatDateTime(log.event_time)}</td>
+                  <td>
+                    <button
+                      className="small-button"
+                      type="button"
+                      disabled={isLoading}
+                      onClick={() => onViewDetail(log.id)}
+                    >
+                      {isLoading
+                        ? "Loading..."
+                        : isSelected
+                          ? "Hide"
+                          : "View"}
+                    </button>
+                  </td>
+                </tr>
+
+                {isSelected && (
+                  <tr>
+                    <td colSpan={5}>
+                      <div className="pf-inline-detail-panel">
+                        <DetailLine label="Connection log ID" value={detail.id} />
+                        <DetailLine label="Device ID" value={detail.device_id} />
+                        <DetailLine label="Router ID" value={detail.router_id} />
+                        <DetailLine label="Event type" value={detail.event_type} />
+                        <DetailLine label="IP address" value={detail.ip_address} />
+                        <DetailLine label="Details" value={detail.details} />
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
+            );
+          })}
 
           {logs.length === 0 && (
             <tr>
-              <td colSpan={4}>
+              <td colSpan={5}>
                 No device connection logs yet. Router or device events will
                 appear here after they are recorded.
               </td>
@@ -143,8 +263,14 @@ function DeviceConnectionTable({
 
 function RouterActionLogTable({
   logs,
+  selectedLog,
+  loadingLogId,
+  onViewDetail,
 }: {
   logs: ISPAdminRouterActionLog[];
+  selectedLog: ISPAdminRouterActionLog | null;
+  loadingLogId: string | null;
+  onViewDetail: (logId: string) => void;
 }) {
   return (
     <div className="pf-table-wrap">
@@ -155,26 +281,76 @@ function RouterActionLogTable({
             <th>Status</th>
             <th>Error</th>
             <th>Executed</th>
+            <th>Detail</th>
           </tr>
         </thead>
 
         <tbody>
-          {logs.map((log) => (
-            <tr key={log.id}>
-              <td>{log.action_type}</td>
-              <td>
-                <span className={`status-pill ${getLogStatusClass(log.status)}`}>
-                  {log.status}
-                </span>
-              </td>
-              <td className="pf-log-message-cell">{log.error_message ?? "-"}</td>
-              <td className="pf-time-cell">{formatDateTime(log.executed_at)}</td>
-            </tr>
-          ))}
+          {logs.map((log) => {
+            const isSelected = selectedLog?.id === log.id;
+            const isLoading = loadingLogId === log.id;
+            const detail = isSelected ? selectedLog : log;
+
+            return (
+              <Fragment key={log.id}>
+                <tr>
+                  <td>{log.action_type}</td>
+                  <td>
+                    <span className={`status-pill ${getLogStatusClass(log.status)}`}>
+                      {log.status}
+                    </span>
+                  </td>
+                  <td className="pf-log-message-cell">{log.error_message ?? "-"}</td>
+                  <td className="pf-time-cell">{formatDateTime(log.executed_at)}</td>
+                  <td>
+                    <button
+                      className="small-button"
+                      type="button"
+                      disabled={isLoading}
+                      onClick={() => onViewDetail(log.id)}
+                    >
+                      {isLoading
+                        ? "Loading..."
+                        : isSelected
+                          ? "Hide"
+                          : "View"}
+                    </button>
+                  </td>
+                </tr>
+
+                {isSelected && (
+                  <tr>
+                    <td colSpan={5}>
+                      <div className="pf-inline-detail-panel">
+                        <DetailLine label="Action log ID" value={detail.id} />
+                        <DetailLine label="Router ID" value={detail.router_id} />
+                        <DetailLine label="Policy ID" value={detail.policy_id} />
+                        <DetailLine label="Action type" value={detail.action_type} />
+                        <DetailLine label="Status" value={detail.status} />
+                        <DetailLine label="Error" value={detail.error_message} />
+                        <small>
+                          <strong>Command payload:</strong>
+                        </small>
+                        <pre className="pf-json-preview">
+                          {formatJson(detail.command_payload)}
+                        </pre>
+                        <small>
+                          <strong>Response payload:</strong>
+                        </small>
+                        <pre className="pf-json-preview">
+                          {formatJson(detail.response_payload)}
+                        </pre>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
+            );
+          })}
 
           {logs.length === 0 && (
             <tr>
-              <td colSpan={4}>
+              <td colSpan={5}>
                 No router action logs match this filter. Policy actions appear
                 here after execution.
               </td>
@@ -194,6 +370,24 @@ export function ISPAdminNetworkActivityCenter() {
   const [routerActionLogs, setRouterActionLogs] = useState<
     ISPAdminRouterActionLog[]
   >([]);
+
+  const [selectedUsageRecord, setSelectedUsageRecord] =
+    useState<ISPAdminUsageRecord | null>(null);
+  const [selectedConnectionLog, setSelectedConnectionLog] =
+    useState<ISPAdminDeviceConnectionLog | null>(null);
+  const [selectedRouterActionLog, setSelectedRouterActionLog] =
+    useState<ISPAdminRouterActionLog | null>(null);
+
+  const [loadingUsageRecordId, setLoadingUsageRecordId] = useState<string | null>(
+    null
+  );
+  const [loadingConnectionLogId, setLoadingConnectionLogId] = useState<
+    string | null
+  >(null);
+  const [loadingRouterActionLogId, setLoadingRouterActionLogId] = useState<
+    string | null
+  >(null);
+
   const [routerActionStatus, setRouterActionStatus] = useState<
     RouterActionLogStatus | "all"
   >("all");
@@ -217,12 +411,78 @@ export function ISPAdminNetworkActivityCenter() {
       setUsageRecords(usageData);
       setConnectionLogs(connectionData);
       setRouterActionLogs(actionData);
+      setSelectedUsageRecord(null);
+      setSelectedConnectionLog(null);
+      setSelectedRouterActionLog(null);
     } catch (error) {
       setErrorMessage(
         getErrorMessage(error, "Could not load network activity data.")
       );
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleViewUsageRecord(recordId: string) {
+    if (selectedUsageRecord?.id === recordId) {
+      setSelectedUsageRecord(null);
+      return;
+    }
+
+    setLoadingUsageRecordId(recordId);
+    setErrorMessage("");
+
+    try {
+      const record = await getISPAdminUsageRecord(recordId);
+      setSelectedUsageRecord(record);
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, "Could not load usage record details.")
+      );
+    } finally {
+      setLoadingUsageRecordId(null);
+    }
+  }
+
+  async function handleViewConnectionLog(logId: string) {
+    if (selectedConnectionLog?.id === logId) {
+      setSelectedConnectionLog(null);
+      return;
+    }
+
+    setLoadingConnectionLogId(logId);
+    setErrorMessage("");
+
+    try {
+      const log = await getISPAdminDeviceConnectionLog(logId);
+      setSelectedConnectionLog(log);
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, "Could not load device connection details.")
+      );
+    } finally {
+      setLoadingConnectionLogId(null);
+    }
+  }
+
+  async function handleViewRouterActionLog(logId: string) {
+    if (selectedRouterActionLog?.id === logId) {
+      setSelectedRouterActionLog(null);
+      return;
+    }
+
+    setLoadingRouterActionLogId(logId);
+    setErrorMessage("");
+
+    try {
+      const log = await getISPAdminRouterActionLog(logId);
+      setSelectedRouterActionLog(log);
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, "Could not load router action details.")
+      );
+    } finally {
+      setLoadingRouterActionLogId(null);
     }
   }
 
@@ -267,7 +527,12 @@ export function ISPAdminNetworkActivityCenter() {
               <h3>Recent Usage Records</h3>
             </div>
 
-            <UsageRecordsTable records={usageRecords} />
+            <UsageRecordsTable
+              records={usageRecords}
+              selectedRecord={selectedUsageRecord}
+              loadingRecordId={loadingUsageRecordId}
+              onViewDetail={handleViewUsageRecord}
+            />
           </article>
 
           <article className="pf-network-panel">
@@ -275,7 +540,12 @@ export function ISPAdminNetworkActivityCenter() {
               <h3>Device Connection Logs</h3>
             </div>
 
-            <DeviceConnectionTable logs={connectionLogs} />
+            <DeviceConnectionTable
+              logs={connectionLogs}
+              selectedLog={selectedConnectionLog}
+              loadingLogId={loadingConnectionLogId}
+              onViewDetail={handleViewConnectionLog}
+            />
           </article>
 
           <article className="pf-network-panel">
@@ -300,7 +570,12 @@ export function ISPAdminNetworkActivityCenter() {
               </div>
             </div>
 
-            <RouterActionLogTable logs={routerActionLogs} />
+            <RouterActionLogTable
+              logs={routerActionLogs}
+              selectedLog={selectedRouterActionLog}
+              loadingLogId={loadingRouterActionLogId}
+              onViewDetail={handleViewRouterActionLog}
+            />
           </article>
         </section>
       )}

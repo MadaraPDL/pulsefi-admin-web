@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   createISPAdminReport,
+  getPlanChangeRequest,
   listISPAdminReports,
   listPlanChangeRequests,
   reviewPlanChangeRequest,
@@ -45,6 +46,20 @@ function formatDateTime(value: string | null) {
 
 function formatReportType(value: string) {
   return value.replaceAll("_", " ");
+}
+
+function DetailLine({
+  label,
+  value,
+}: {
+  label: string;
+  value: string | number | null;
+}) {
+  return (
+    <small>
+      <strong>{label}:</strong> {value ?? "-"}
+    </small>
+  );
 }
 
 function RequestReviewActions({
@@ -119,6 +134,9 @@ function RequestReviewActions({
 export function ISPAdminOperationsCenter() {
   const [reports, setReports] = useState<ISPAdminReport[]>([]);
   const [requests, setRequests] = useState<ISPAdminPlanChangeRequest[]>([]);
+  const [selectedRequest, setSelectedRequest] =
+    useState<ISPAdminPlanChangeRequest | null>(null);
+  const [loadingRequestId, setLoadingRequestId] = useState<string | null>(null);
   const [reportType, setReportType] =
     useState<ISPAdminReportType>("usage_report");
   const [reportTitle, setReportTitle] = useState("");
@@ -144,12 +162,34 @@ export function ISPAdminOperationsCenter() {
 
       setReports(reportData);
       setRequests(requestData);
+      setSelectedRequest(null);
     } catch (error) {
       setErrorMessage(
         getErrorMessage(error, "Could not load operations data.")
       );
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleViewRequestDetail(requestId: string) {
+    if (selectedRequest?.id === requestId) {
+      setSelectedRequest(null);
+      return;
+    }
+
+    setLoadingRequestId(requestId);
+    setErrorMessage("");
+
+    try {
+      const request = await getPlanChangeRequest(requestId);
+      setSelectedRequest(request);
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, "Could not load plan-change request details.")
+      );
+    } finally {
+      setLoadingRequestId(null);
     }
   }
 
@@ -322,24 +362,90 @@ export function ISPAdminOperationsCenter() {
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.map((request) => (
-                    <tr key={request.id}>
-                      <td>{request.request_type}</td>
-                      <td>
-                        <span className={`status-pill status-${request.status}`}>
-                          {request.status}
-                        </span>
-                      </td>
-                      <td>{formatDateTime(request.requested_at)}</td>
-                      <td>{request.reason ?? "-"}</td>
-                      <td>
-                        <RequestReviewActions
-                          request={request}
-                          onReviewed={loadOperationsData}
-                        />
-                      </td>
-                    </tr>
-                  ))}
+                  {requests.map((request) => {
+                    const isSelected = selectedRequest?.id === request.id;
+                    const isLoadingDetail = loadingRequestId === request.id;
+                    const detail = isSelected ? selectedRequest : request;
+
+                    return (
+                      <Fragment key={request.id}>
+                        <tr>
+                          <td>{request.request_type}</td>
+                          <td>
+                            <span className={`status-pill status-${request.status}`}>
+                              {request.status}
+                            </span>
+                          </td>
+                          <td>{formatDateTime(request.requested_at)}</td>
+                          <td>{request.reason ?? "-"}</td>
+                          <td>
+                            <div className="pf-row-action-stack">
+                              <button
+                                className="small-button"
+                                type="button"
+                                disabled={isLoadingDetail}
+                                onClick={() => void handleViewRequestDetail(request.id)}
+                              >
+                                {isLoadingDetail
+                                  ? "Loading..."
+                                  : isSelected
+                                    ? "Hide details"
+                                    : "View details"}
+                              </button>
+
+                              <RequestReviewActions
+                                request={request}
+                                onReviewed={loadOperationsData}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+
+                        {isSelected && (
+                          <tr>
+                            <td colSpan={5}>
+                              <div className="pf-inline-detail-panel">
+                                <DetailLine label="Request ID" value={detail.id} />
+                                <DetailLine label="User ID" value={detail.user_id} />
+                                <DetailLine
+                                  label="Subscription ID"
+                                  value={detail.user_subscription_id}
+                                />
+                                <DetailLine
+                                  label="Current plan ID"
+                                  value={detail.current_plan_id}
+                                />
+                                <DetailLine
+                                  label="Requested plan ID"
+                                  value={detail.requested_plan_id}
+                                />
+                                <DetailLine
+                                  label="Recommendation ID"
+                                  value={detail.recommendation_id}
+                                />
+                                <DetailLine
+                                  label="Reviewed by"
+                                  value={detail.reviewed_by_admin_id}
+                                />
+                                <DetailLine
+                                  label="Reviewed at"
+                                  value={formatDateTime(detail.reviewed_at)}
+                                />
+                                <DetailLine
+                                  label="Admin response"
+                                  value={detail.admin_response}
+                                />
+                                <DetailLine
+                                  label="Updated"
+                                  value={formatDateTime(detail.updated_at)}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
 
                   {requests.length === 0 && (
                     <tr>

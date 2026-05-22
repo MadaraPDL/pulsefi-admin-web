@@ -1,11 +1,22 @@
-﻿const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL?.trim() ||
-  "http://127.0.0.1:8000/api/v1";
+﻿const envApiBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+
+function getDefaultApiBaseUrl() {
+  if (typeof window === "undefined") {
+    return "http://127.0.0.1:8000/api/v1";
+  }
+
+  return `${window.location.protocol}//${window.location.hostname}:8000/api/v1`;
+}
+
+const API_BASE_URL = envApiBaseUrl || getDefaultApiBaseUrl();
+
+console.log("PulseFi admin API:", API_BASE_URL);
 
 export type ApiErrorBody = {
   error?: string;
   message?: string;
   details?: unknown;
+  detail?: unknown;
 };
 
 export class ApiError extends Error {
@@ -13,10 +24,40 @@ export class ApiError extends Error {
   body: ApiErrorBody;
 
   constructor(status: number, body: ApiErrorBody) {
-    super(body.message || "API request failed");
+    const fallbackMessage = parseApiErrorMessage(body);
+    super(fallbackMessage);
     this.status = status;
     this.body = body;
   }
+}
+
+function parseApiErrorMessage(body: ApiErrorBody) {
+  if (typeof body.message === "string") {
+    return body.message;
+  }
+
+  if (typeof body.detail === "string") {
+    return body.detail;
+  }
+
+  if (Array.isArray(body.detail)) {
+    return body.detail
+      .map((item) => {
+        if (
+          item &&
+          typeof item === "object" &&
+          "msg" in item &&
+          typeof item.msg === "string"
+        ) {
+          return item.msg;
+        }
+
+        return JSON.stringify(item);
+      })
+      .join("\n");
+  }
+
+  return "API request failed";
 }
 
 function getAccessToken(): string | null {
