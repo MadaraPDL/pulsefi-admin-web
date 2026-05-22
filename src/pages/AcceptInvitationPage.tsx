@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { acceptInvitation } from "../api/auth";
-import type { MFAMethod } from "../api/auth";
 import { getErrorMessage } from "../api/errors";
+import type { AdminTheme } from "../App.real";
 
 function getInvitationTokenFromUrl() {
   return new URLSearchParams(window.location.search).get("token") ?? "";
@@ -24,15 +24,47 @@ function PulseFiLogo() {
   );
 }
 
-export default function AcceptInvitationPage() {
-  const [token, setToken] = useState(getInvitationTokenFromUrl);
+function AuthThemeToggle({
+  theme,
+  onSetTheme,
+}: {
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
+}) {
+  return (
+    <div className="pf-auth-theme-toggle" aria-label="Invitation page theme">
+      {(["dark", "light"] as const).map((mode) => (
+        <button
+          key={mode}
+          className={theme === mode ? "active-filter" : ""}
+          type="button"
+          onClick={() => onSetTheme(mode)}
+          aria-pressed={theme === mode}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {mode === "dark" ? "dark_mode" : "light_mode"}
+          </span>
+          {mode === "dark" ? "Dark" : "Light"}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export default function AcceptInvitationPage({
+  theme,
+  onSetTheme,
+}: {
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
+}) {
+  const [token] = useState(getInvitationTokenFromUrl);
   const [tokenWasInUrl] = useState(() => Boolean(getInvitationTokenFromUrl()));
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [preferredMfaMethod, setPreferredMfaMethod] =
-    useState<MFAMethod>("authenticator");
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -55,6 +87,15 @@ export default function AcceptInvitationPage() {
   async function handleAcceptInvitation(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!token) {
+      setErrorMessage(
+        "This invitation link is missing required information. Request a new invitation email."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -62,11 +103,14 @@ export default function AcceptInvitationPage() {
         token,
         username,
         password,
-        preferred_mfa_method: preferredMfaMethod,
       });
 
       setPassword("");
-      goToLogin();
+      setSuccessMessage(
+        "Invitation accepted. Sign in with your new account to complete MFA setup."
+      );
+
+      window.setTimeout(goToLogin, 1200);
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not accept invitation."));
     } finally {
@@ -76,87 +120,43 @@ export default function AcceptInvitationPage() {
 
   return (
     <main className="pf-auth-page">
+      <AuthThemeToggle theme={theme} onSetTheme={onSetTheme} />
+
       <div className="pf-auth-wrap pf-auth-wrap-wide">
         <PulseFiLogo />
 
         <section className="pf-login-card">
           <div className="pf-auth-heading">
             <h1>Accept Invitation</h1>
-            <p>Create your ISP Admin login and secure the account with MFA.</p>
+            <p>Create your admin login. MFA setup will be required on first sign-in.</p>
           </div>
 
           <form onSubmit={handleAcceptInvitation} className="pf-auth-form">
             {!tokenWasInUrl && (
-              <div className="pf-field">
-                <label className="pf-label" htmlFor="invitation-token">
-                  Invitation Token
-                </label>
+              <div className="pf-error-box">
+                This invitation link is missing required information. Request a new invitation email.
+              </div>
+            )}
 
-                <textarea
-                  id="invitation-token"
-                  className="pf-input pf-input-no-icon pf-token-area"
-                  value={token}
-                  onChange={(event) => setToken(event.target.value)}
-                  placeholder="Invitation token from email"
+            <div className="pf-field">
+              <label className="pf-label" htmlFor="invitation-username">
+                Username
+              </label>
+
+              <div className="pf-input-shell">
+                <span className="pf-input-icon" aria-hidden="true">
+                  <span className="material-symbols-outlined">person</span>
+                </span>
+
+                <input
+                  id="invitation-username"
+                  className="pf-input"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  placeholder="Choose a username"
+                  autoComplete="username"
                   required
                 />
-              </div>
-            )}
-
-            {tokenWasInUrl && (
-              <div className="pf-dev-box pf-token-note">
-                <strong>Invitation token loaded</strong>
-                <small>
-                  The token was removed from the URL for safer local testing.
-                </small>
-              </div>
-            )}
-
-            <div className="pf-two-column-form">
-              <div className="pf-field">
-                <label className="pf-label" htmlFor="invitation-username">
-                  Username
-                </label>
-
-                <div className="pf-input-shell">
-                  <span className="pf-input-icon" aria-hidden="true">
-                    <span className="material-symbols-outlined">person</span>
-                  </span>
-
-                  <input
-                    id="invitation-username"
-                    className="pf-input"
-                    value={username}
-                    onChange={(event) => setUsername(event.target.value)}
-                    placeholder="Choose a username"
-                    autoComplete="username"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="pf-field">
-                <label className="pf-label" htmlFor="preferred-mfa-method">
-                  MFA Method
-                </label>
-
-                <div className="pf-input-shell">
-                  <span className="pf-input-icon" aria-hidden="true">
-                    <span className="material-symbols-outlined">security</span>
-                  </span>
-
-                  <select
-                    id="preferred-mfa-method"
-                    className="pf-input"
-                    value={preferredMfaMethod}
-                    onChange={(event) =>
-                      setPreferredMfaMethod(event.target.value as MFAMethod)
-                    }
-                  >
-                    <option value="authenticator">Authenticator app</option>
-                    <option value="email">Email code</option>
-                  </select>
-                </div>
               </div>
             </div>
 
@@ -178,6 +178,7 @@ export default function AcceptInvitationPage() {
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a password"
                   autoComplete="new-password"
+                  minLength={8}
                   required
                 />
 
@@ -194,11 +195,14 @@ export default function AcceptInvitationPage() {
               </div>
             </div>
 
-            {errorMessage && (
-              <div className="pf-error-box">{errorMessage}</div>
-            )}
+            {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
+            {successMessage && <div className="pf-success-box">{successMessage}</div>}
 
-            <button className="pf-primary-button" disabled={isSubmitting}>
+            <button
+              className="pf-primary-button"
+              type="submit"
+              disabled={isSubmitting || !token}
+            >
               {isSubmitting ? "Accepting..." : "Accept invitation"}
               <span className="material-symbols-outlined" aria-hidden="true">
                 arrow_forward

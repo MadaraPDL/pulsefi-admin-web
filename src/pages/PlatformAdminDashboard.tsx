@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
@@ -11,7 +11,6 @@ import {
 import type {
   CreateISPRequest,
   ISP,
-  ISPAdminInvitation,
   ISPStatus,
   PlatformAdminSummary,
   UpdateISPRequest,
@@ -313,8 +312,8 @@ function PlatformReadinessPanel() {
         <article className="pf-alert-item pf-alert-info">
           <span className="material-symbols-outlined">mail</span>
           <div>
-            <h3>Invitation Tokens Protected</h3>
-            <p>Invitation tokens are only shown when the backend returns a local DEBUG token.</p>
+            <h3>Invitation Links Protected</h3>
+            <p>Invitation links are sent by email and are not displayed in the admin UI.</p>
             <small>Email delivery contract</small>
           </div>
         </article>
@@ -434,8 +433,6 @@ function ISPManagement({
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteFullName, setInviteFullName] = useState("");
   const [inviteDays, setInviteDays] = useState(7);
-  const [latestInvitation, setLatestInvitation] =
-    useState<ISPAdminInvitation | null>(null);
   const [invitationRefreshKey, setInvitationRefreshKey] = useState(0);
 
   const [errorMessage, setErrorMessage] = useState("");
@@ -494,7 +491,6 @@ function ISPManagement({
     setEditPhoneNumber(isp.phone_number ?? "");
     setEditAddress(isp.address ?? "");
     setEditStatus(isp.status);
-    setLatestInvitation(null);
     setErrorMessage("");
     setSuccessMessage(`Selected ISP: ${isp.name}`);
   }
@@ -576,7 +572,6 @@ function ISPManagement({
 
     setErrorMessage("");
     setSuccessMessage("");
-    setLatestInvitation(null);
     setIsInviting(true);
 
     try {
@@ -586,7 +581,6 @@ function ISPManagement({
         expires_in_days: inviteDays,
       });
 
-      setLatestInvitation(invitation);
       setInviteEmail("");
       setInviteFullName("");
       setInviteDays(7);
@@ -722,16 +716,6 @@ function ISPManagement({
               {isInviting ? "Creating invitation..." : "Create invitation"}
             </button>
 
-            {latestInvitation?.dev_invitation_token && (
-              <div className="pf-dev-box">
-                <strong>Local DEBUG invitation token</strong>
-                <code>{latestInvitation.dev_invitation_token}</code>
-                <small>
-                  In production, this is sent by email. Locally, use this token
-                  with the invitation accept screen/API.
-                </small>
-              </div>
-            )}
           </form>
 
           <form
@@ -1011,4 +995,3 @@ export default function PlatformAdminDashboard({
     </PlatformShell>
   );
 }
-

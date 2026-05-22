@@ -64,7 +64,6 @@ export function ISPAdminInvitationManagement() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [expiresInDays, setExpiresInDays] = useState("7");
-  const [devToken, setDevToken] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -140,7 +139,6 @@ export function ISPAdminInvitationManagement() {
 
     setErrorMessage("");
     setSuccessMessage("");
-    setDevToken(null);
     setIsCreating(true);
 
     try {
@@ -157,7 +155,6 @@ export function ISPAdminInvitationManagement() {
       setEmail("");
       setFullName("");
       setExpiresInDays("7");
-      setDevToken(createdInvitation.dev_invitation_token);
       setSuccessMessage("ISP Admin invitation created successfully.");
     } catch (error) {
       setErrorMessage(
@@ -281,16 +278,6 @@ export function ISPAdminInvitationManagement() {
             This creates an admin invitation for the same ISP only. The invited
             admin cannot choose a different ISP.
           </p>
-
-          {devToken && (
-            <div className="dev-token-box">
-              <strong>Local DEBUG invitation token:</strong>
-              <code>{devToken}</code>
-              <small>
-                This appears only when the backend is running with DEBUG=True.
-              </small>
-            </div>
-          )}
         </div>
       </div>
 

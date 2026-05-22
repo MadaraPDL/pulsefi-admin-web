@@ -68,8 +68,6 @@ export function AppUserInvitationManagement() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [expiresInDays, setExpiresInDays] = useState(7);
-  const [latestInvitation, setLatestInvitation] =
-    useState<AppUserInvitation | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -132,7 +130,6 @@ export function AppUserInvitationManagement() {
     event.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
-    setLatestInvitation(null);
     setIsCreating(true);
 
     const payload: CreateAppUserInvitationRequest = {
@@ -143,7 +140,6 @@ export function AppUserInvitationManagement() {
 
     try {
       const invitation = await createAppUserInvitation(payload);
-      setLatestInvitation(invitation);
       setEmail("");
       setFullName("");
       setExpiresInDays(7);
@@ -241,17 +237,6 @@ export function AppUserInvitationManagement() {
           <button className="pf-action-button" disabled={isCreating}>
             {isCreating ? "Creating invitation..." : "Create App User invitation"}
           </button>
-
-          {latestInvitation?.dev_invitation_token && (
-            <div className="dev-token-box">
-              <strong>Local DEBUG invitation token:</strong>
-              <code>{latestInvitation.dev_invitation_token}</code>
-              <small>
-                Use this token on the invitation accept screen only in local
-                development.
-              </small>
-            </div>
-          )}
         </form>
 
         <div className="create-form">

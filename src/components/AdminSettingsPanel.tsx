@@ -1,5 +1,3 @@
-const shouldShowDevCodes = import.meta.env.VITE_SHOW_DEV_CODES === "true";
-
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { AdminTheme } from "../App.real";
@@ -663,17 +661,6 @@ export function AdminSettingsPanel<TSection extends string>({
                 </label>
               </div>
 
-              {shouldShowDevCodes && settingsChallenge?.dev_email_code && (
-                <div className="pf-dev-box">
-                  <strong>Local DEBUG MFA settings code</strong>
-                  <code>{settingsChallenge.dev_email_code}</code>
-                  <small>
-                    Production sends this code by email. It is shown here only
-                    when the backend returns it in DEBUG mode.
-                  </small>
-                </div>
-              )}
-
               <div className="pf-settings-action-row">
                 <button
                   className="pf-primary-button pf-settings-confirm-button"
@@ -842,17 +829,6 @@ export function AdminSettingsPanel<TSection extends string>({
                 </label>
               </div>
 
-              {shouldShowDevCodes && backupCodeChallenge?.dev_email_code && (
-                <div className="pf-dev-box">
-                  <strong>Local DEBUG backup-code settings code</strong>
-                  <code>{backupCodeChallenge.dev_email_code}</code>
-                  <small>
-                    Production sends this code by email. It is shown here only
-                    when the backend returns it in DEBUG mode.
-                  </small>
-                </div>
-              )}
-
               <div className="pf-settings-action-row">
                 <button
                   className="pf-primary-button pf-settings-confirm-button"
@@ -974,17 +950,6 @@ export function AdminSettingsPanel<TSection extends string>({
                 />
               </label>
             </div>
-
-            {challenge?.dev_email_code && (
-              <div className="pf-dev-box">
-                <strong>Local DEBUG settings code</strong>
-                <code>{challenge.dev_email_code}</code>
-                <small>
-                  Production sends this code by email. It is shown here only
-                  when the backend returns it in DEBUG mode.
-                </small>
-              </div>
-            )}
 
             {identityError && <div className="pf-error-box">{identityError}</div>}
             {identitySuccess && (

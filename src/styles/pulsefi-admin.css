@@ -3639,3 +3639,151 @@ dd {
   }
 }
 /* PulseFi precise admin button system end */
+
+/* PulseFi auth theme stabilization start */
+.pf-real-app[data-theme="dark"] .pf-auth-page {
+  background:
+    radial-gradient(circle at top left, rgba(0, 209, 255, 0.08), transparent 34rem),
+    #050d11;
+  color: #f8fafc;
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-page {
+  background:
+    radial-gradient(circle at top left, rgba(0, 148, 190, 0.12), transparent 32rem),
+    #f4f8fb;
+  color: #0f172a;
+}
+
+.pf-real-app[data-theme="dark"] .pf-login-card {
+  background: rgba(20, 26, 31, 0.96);
+  border-color: rgba(148, 163, 184, 0.22);
+  color: #f8fafc;
+}
+
+.pf-real-app[data-theme="light"] .pf-login-card {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-heading h1,
+.pf-real-app[data-theme="light"] .pf-login-card h1,
+.pf-real-app[data-theme="light"] .pf-login-card h2,
+.pf-real-app[data-theme="light"] .pf-login-card h3,
+.pf-real-app[data-theme="light"] .pf-login-card h4,
+.pf-real-app[data-theme="light"] .pf-label {
+  color: #0f172a;
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-heading p,
+.pf-real-app[data-theme="light"] .pf-auth-footer,
+.pf-real-app[data-theme="light"] .pf-login-card p,
+.pf-real-app[data-theme="light"] .pf-mfa-hint {
+  color: #52616d;
+}
+
+.pf-real-app[data-theme="dark"] .pf-input,
+.pf-real-app[data-theme="dark"] .pf-input-shell input,
+.pf-real-app[data-theme="dark"] .pf-input-shell select,
+.pf-real-app[data-theme="dark"] .pf-input-shell textarea {
+  background: #25303a;
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #f8fafc;
+}
+
+.pf-real-app[data-theme="light"] .pf-input,
+.pf-real-app[data-theme="light"] .pf-input-shell input,
+.pf-real-app[data-theme="light"] .pf-input-shell select,
+.pf-real-app[data-theme="light"] .pf-input-shell textarea {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.16);
+  color: #0f172a;
+}
+
+.pf-real-app[data-theme="light"] .pf-input::placeholder,
+.pf-real-app[data-theme="light"] .pf-input-shell input::placeholder {
+  color: #94a3b8;
+}
+
+.pf-real-app[data-theme="light"] .pf-input-icon,
+.pf-real-app[data-theme="light"] .pf-password-toggle {
+  color: #64748b;
+}
+
+.pf-real-app[data-theme="dark"] .pf-mfa-setup-card,
+.pf-real-app[data-theme="dark"] .pf-mfa-fallback-box {
+  background: rgba(15, 23, 42, 0.28);
+  border-color: rgba(148, 163, 184, 0.18);
+  color: #f8fafc;
+}
+
+.pf-real-app[data-theme="light"] .pf-mfa-setup-card,
+.pf-real-app[data-theme="light"] .pf-mfa-fallback-box {
+  background: rgba(241, 245, 249, 0.84);
+  border-color: rgba(15, 23, 42, 0.12);
+  color: #0f172a;
+}
+
+.pf-real-app[data-theme="dark"] .pf-secret-box {
+  background: rgba(2, 6, 23, 0.28);
+  border-color: rgba(0, 209, 255, 0.24);
+  color: #e2f7ff;
+}
+
+.pf-real-app[data-theme="light"] .pf-secret-box {
+  background: #ffffff;
+  border-color: rgba(0, 148, 190, 0.26);
+  color: #0f172a;
+}
+
+.pf-real-app[data-theme="light"] .pf-secret-box span {
+  color: #52616d;
+}
+
+.pf-auth-theme-toggle {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 20;
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 209, 255, 0.22);
+  background: rgba(15, 23, 42, 0.34);
+  backdrop-filter: blur(14px);
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-theme-toggle {
+  border-color: rgba(0, 148, 190, 0.18);
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.pf-auth-theme-toggle button {
+  min-height: 34px;
+  border-radius: 999px;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+}
+
+.pf-auth-theme-toggle button.active-filter {
+  border-color: rgba(0, 209, 255, 0.56);
+  background: rgba(0, 209, 255, 0.14);
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-theme-toggle button.active-filter {
+  border-color: rgba(0, 148, 190, 0.46);
+  background: rgba(0, 148, 190, 0.12);
+}
+
+@media (max-width: 720px) {
+  .pf-auth-theme-toggle {
+    position: static;
+    margin: 14px auto 0;
+  }
+}
+/* PulseFi auth theme stabilization end */

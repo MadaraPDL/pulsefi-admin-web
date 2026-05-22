@@ -143,7 +143,7 @@ export default function RealApp() {
 
   function renderCurrentView() {
     if (currentPath === "/accept-invitation") {
-      return <AcceptInvitationPage />;
+      return <AcceptInvitationPage theme={theme} onSetTheme={setAdminTheme} />;
     }
 
     if (currentPath === "/reset-password") {

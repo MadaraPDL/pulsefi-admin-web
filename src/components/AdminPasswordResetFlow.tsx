@@ -20,7 +20,6 @@ export function AdminPasswordResetFlow({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const [devResetUrl, setDevResetUrl] = useState<string | null>(null);
   const [isRequesting, setIsRequesting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
 
@@ -30,16 +29,11 @@ export function AdminPasswordResetFlow({
     event.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
-    setDevResetUrl(null);
     setIsRequesting(true);
 
     try {
       const response = await requestAdminPasswordReset(identifier.trim());
       setSuccessMessage(response.message);
-
-      if (response.dev_reset_url) {
-        setDevResetUrl(response.dev_reset_url);
-      }
     } catch (error) {
       setErrorMessage(
         getErrorMessage(error, "Could not request password reset.")
@@ -143,17 +137,6 @@ export function AdminPasswordResetFlow({
             {isResetting ? "Resetting..." : "Reset password"}
           </button>
         </form>
-      )}
-
-      {devResetUrl && (
-        <div className="pf-dev-box">
-          <strong>Local DEBUG reset link</strong>
-          <a href={devResetUrl}>{devResetUrl}</a>
-          <small>
-            Production sends this link by email. This local link is only shown
-            when the backend returns it in DEBUG mode.
-          </small>
-        </div>
       )}
 
       {errorMessage && <div className="pf-error-box">{errorMessage}</div>}

@@ -1,5 +1,3 @@
-const shouldShowDevCodes = import.meta.env.VITE_SHOW_DEV_CODES === "true";
-
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -436,13 +434,6 @@ function MFAVerifyPage({
                 />
               </div>
             </div>
-
-            {shouldShowDevCodes && activeChallenge.dev_email_code ? (
-              <div className="pf-dev-box">
-                <strong>Development email MFA code</strong>
-                <code>{activeChallenge.dev_email_code}</code>
-              </div>
-            ) : null}
 
             {errorMessage && (
               <div className="pf-error-box">{errorMessage}</div>
