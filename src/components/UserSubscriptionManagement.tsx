@@ -491,7 +491,10 @@ export function UserSubscriptionManagement() {
             Auto-renew
           </label>
 
-          <button disabled={isCreating || isLoadingOptions}>
+          <button
+            className="pf-action-button"
+            disabled={isCreating || isLoadingOptions}
+          >
             {isCreating ? "Assigning..." : "Assign subscription"}
           </button>
         </form>
@@ -591,7 +594,7 @@ export function UserSubscriptionManagement() {
                 Auto-renew
               </label>
 
-              <button disabled={isUpdating}>
+              <button className="pf-action-button" disabled={isUpdating}>
                 {isUpdating ? "Updating..." : "Update subscription"}
               </button>
             </>

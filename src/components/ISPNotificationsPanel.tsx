@@ -118,7 +118,12 @@ export function ISPNotificationsPanel({
           <p>Backend alerts for this ISP</p>
         </div>
 
-        <button type="button" onClick={onClose} aria-label="Close notifications">
+        <button
+          className="pf-icon-button"
+          type="button"
+          onClick={onClose}
+          aria-label="Close notifications"
+        >
           <span className="material-symbols-outlined">close</span>
         </button>
       </div>

@@ -276,6 +276,7 @@ export function ISPAdminOperationsCenter() {
           </label>
 
           <button
+            className="pf-action-button"
             type="button"
             disabled={isGeneratingReport}
             onClick={() => void handleGenerateReport()}

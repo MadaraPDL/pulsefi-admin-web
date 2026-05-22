@@ -238,7 +238,7 @@ export function AppUserInvitationManagement() {
             />
           </label>
 
-          <button disabled={isCreating}>
+          <button className="pf-action-button" disabled={isCreating}>
             {isCreating ? "Creating invitation..." : "Create App User invitation"}
           </button>
 

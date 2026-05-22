@@ -259,7 +259,11 @@ function ISPTopBar({
 
       <div className="pf-topbar-actions">
         <button
-          className={isNotificationsOpen ? "pf-icon-button-active" : ""}
+          className={
+            isNotificationsOpen
+              ? "pf-icon-button pf-icon-button-active"
+              : "pf-icon-button"
+          }
           type="button"
           aria-label="Notifications"
           onClick={toggleNotifications}
@@ -268,7 +272,11 @@ function ISPTopBar({
         </button>
 
         <button
-          className={activeSection === "settings" ? "pf-icon-button-active" : ""}
+          className={
+            activeSection === "settings"
+              ? "pf-icon-button pf-icon-button-active"
+              : "pf-icon-button"
+          }
           type="button"
           aria-label="Settings"
           onClick={() => onNavigate("settings")}

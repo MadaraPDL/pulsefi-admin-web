@@ -564,21 +564,44 @@ dd {
 }
 
 .pf-quick-action,
-.pf-management-form button:not(.pf-link-button),
-.pf-dashboard-main .create-form button:not(.secondary-button),
-.pf-section-stack .create-form button:not(.secondary-button),
-.pf-operations-panel button:not(.filter-chip),
-.pf-intelligence-panel button,
-.pf-intelligence-automation-panel > button {
+.pf-action-button,
+.pf-automation-action-button,
+.pf-intelligence-action-button {
   min-height: 44px;
-  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--pf-primary-border);
   border-radius: var(--pf-radius-sm);
-  background: var(--pf-primary);
-  color: #071113;
+  background: var(--pf-primary-soft);
+  color: var(--pf-link);
   padding: 11px 16px;
   font-size: 15.5px;
   font-weight: 850;
   line-height: 1.2;
+  text-align: center;
+  box-shadow: none;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.pf-action-button:hover:not(:disabled),
+.pf-automation-action-button:hover:not(:disabled),
+.pf-intelligence-action-button:hover:not(:disabled) {
+  border-color: rgba(0, 209, 255, 0.58);
+  background: rgba(0, 209, 255, 0.14);
+  color: var(--pf-link-hover);
+  transform: translateY(-1px);
+}
+
+.pf-action-button:active:not(:disabled),
+.pf-automation-action-button:active:not(:disabled),
+.pf-intelligence-action-button:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .pf-quick-action {
@@ -733,19 +756,20 @@ dd {
   box-shadow: 0 0 0 1px var(--pf-primary);
 }
 
-.pf-topbar-actions button {
+.pf-topbar-actions .pf-icon-button {
   width: 40px;
   min-height: 40px;
   display: grid;
   place-items: center;
-  border: 0;
+  border: 1px solid transparent;
   border-radius: 999px;
   background: transparent;
   color: var(--pf-muted);
   padding: 0;
 }
 
-.pf-topbar-actions button:hover {
+.pf-topbar-actions .pf-icon-button:hover {
+  border-color: var(--pf-primary-border);
   background: var(--pf-primary-soft);
   color: var(--pf-primary);
 }
@@ -1177,18 +1201,41 @@ dd {
 .pf-dashboard-main .small-button,
 .pf-section-stack .small-button {
   min-height: 38px;
-  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid var(--pf-primary-border);
   border-radius: var(--pf-radius-sm);
-  background: var(--pf-primary);
-  color: #071113;
+  background: rgba(0, 209, 255, 0.08);
+  color: var(--pf-link);
   padding: 9px 14px;
   font-size: 15px;
   font-weight: 850;
   line-height: 1.2;
+  text-align: center;
+  vertical-align: middle;
+  white-space: normal;
+}
+
+.small-button:hover:not(:disabled),
+.pf-dashboard-main .small-button:hover:not(:disabled),
+.pf-section-stack .small-button:hover:not(:disabled) {
+  border-color: rgba(0, 209, 255, 0.58);
+  background: rgba(0, 209, 255, 0.14);
+  color: var(--pf-link-hover);
+  transform: translateY(-1px);
 }
 
 .danger-button {
-  background: rgba(255, 107, 107, 0.16);
+  border-color: rgba(255, 107, 107, 0.34);
+  background: rgba(255, 107, 107, 0.08);
+  color: var(--pf-danger);
+}
+
+.danger-button:hover:not(:disabled) {
+  border-color: rgba(255, 107, 107, 0.6);
+  background: rgba(255, 107, 107, 0.14);
   color: var(--pf-danger);
 }
 
@@ -1642,7 +1689,7 @@ dd {
   display: block;
 }
 
-.pf-intelligence-panel button {
+.pf-intelligence-panel .pf-intelligence-action-button {
   margin-top: 4px;
 }
 
@@ -2355,6 +2402,7 @@ dd {
 }
 
 .pf-real-app .pf-topbar-actions .pf-icon-button-active {
+  border-color: var(--pf-primary-border);
   background: var(--pf-primary-soft);
   color: var(--pf-primary);
 }
@@ -2428,7 +2476,7 @@ dd {
   line-height: 1.35;
 }
 
-.pf-real-app .pf-popover-header > button {
+.pf-real-app .pf-popover-header > .pf-icon-button {
   width: 34px;
   min-height: 34px;
   display: grid;
@@ -2526,7 +2574,7 @@ dd {
 }
 
 .pf-real-app .pf-segmented-control button,
-.pf-real-app .pf-settings-shortcuts button {
+.pf-real-app .pf-settings-shortcuts .pf-settings-shortcut-button {
   max-width: 100%;
   min-width: 0;
   min-height: 38px;
@@ -2545,7 +2593,7 @@ dd {
 
 .pf-real-app .pf-segmented-control button:hover,
 .pf-real-app .pf-segmented-control button.active-filter,
-.pf-real-app .pf-settings-shortcuts button:hover {
+.pf-real-app .pf-settings-shortcuts .pf-settings-shortcut-button:hover {
   border-color: var(--pf-primary-border);
   background: var(--pf-primary-soft);
   color: var(--pf-link);
@@ -3383,44 +3431,211 @@ dd {
 }
 /* Step 40F backup-code settings UI end */
 
-/* PulseFi outlined primary buttons start */
-.pf-primary-button {
+/* PulseFi precise admin button system start */
+.pf-primary-button,
+.pf-action-button,
+.pf-automation-action-button,
+.pf-intelligence-action-button,
+.pf-settings-page .pf-settings-action-button,
+.pf-settings-page .pf-settings-confirm-button,
+.pf-real-app .pf-secondary-button:not(.pf-mfa-back-button),
+.pf-real-app .pf-view-link,
+.pf-real-app .pf-refresh-button,
+.pf-real-app .secondary-button {
   border: 1px solid rgba(0, 209, 255, 0.45) !important;
   background: rgba(0, 209, 255, 0.08) !important;
-  color: var(--pf-text, #f8fafc) !important;
+  color: var(--pf-link, #4cd6ff) !important;
   box-shadow: none !important;
 }
 
 .pf-primary-button span,
-.pf-primary-button .material-symbols-outlined {
+.pf-primary-button .material-symbols-outlined,
+.pf-action-button span,
+.pf-action-button .material-symbols-outlined,
+.pf-settings-action-button span,
+.pf-settings-action-button .material-symbols-outlined,
+.pf-settings-confirm-button span,
+.pf-settings-confirm-button .material-symbols-outlined {
   color: inherit !important;
 }
 
-.pf-primary-button:hover:not(:disabled) {
+.pf-primary-button:hover:not(:disabled),
+.pf-action-button:hover:not(:disabled),
+.pf-automation-action-button:hover:not(:disabled),
+.pf-intelligence-action-button:hover:not(:disabled),
+.pf-settings-page .pf-settings-action-button:hover:not(:disabled),
+.pf-settings-page .pf-settings-confirm-button:hover:not(:disabled),
+.pf-real-app .pf-secondary-button:not(.pf-mfa-back-button):hover:not(:disabled),
+.pf-real-app .pf-view-link:hover,
+.pf-real-app .pf-refresh-button:hover:not(:disabled),
+.pf-real-app .secondary-button:hover:not(:disabled) {
   transform: translateY(-1px);
   border-color: rgba(0, 209, 255, 0.7) !important;
   background: rgba(0, 209, 255, 0.14) !important;
-  box-shadow: 0 14px 30px rgba(0, 209, 255, 0.08) !important;
+  color: var(--pf-link-hover, #a4e6ff) !important;
+  box-shadow: 0 10px 22px rgba(0, 209, 255, 0.06) !important;
 }
 
-.pf-primary-button:active:not(:disabled) {
+.pf-primary-button:active:not(:disabled),
+.pf-action-button:active:not(:disabled),
+.pf-automation-action-button:active:not(:disabled),
+.pf-intelligence-action-button:active:not(:disabled),
+.pf-settings-page .pf-settings-action-button:active:not(:disabled),
+.pf-settings-page .pf-settings-confirm-button:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.pf-primary-button:disabled {
+.pf-primary-button:disabled,
+.pf-action-button:disabled,
+.pf-automation-action-button:disabled,
+.pf-intelligence-action-button:disabled,
+.pf-settings-page .pf-settings-action-button:disabled,
+.pf-settings-page .pf-settings-confirm-button:disabled,
+.pf-real-app .pf-secondary-button:not(.pf-mfa-back-button):disabled {
+  border-color: rgba(148, 163, 184, 0.18) !important;
+  background: rgba(148, 163, 184, 0.12) !important;
+  color: rgba(226, 232, 240, 0.54) !important;
+  box-shadow: none !important;
   opacity: 0.58;
   cursor: not-allowed;
 }
 
-[data-theme="light"] .pf-primary-button {
+[data-theme="light"] .pf-primary-button,
+[data-theme="light"] .pf-action-button,
+[data-theme="light"] .pf-automation-action-button,
+[data-theme="light"] .pf-intelligence-action-button,
+[data-theme="light"] .pf-settings-page .pf-settings-action-button,
+[data-theme="light"] .pf-settings-page .pf-settings-confirm-button,
+.pf-real-app[data-theme="light"] .pf-secondary-button:not(.pf-mfa-back-button),
+.pf-real-app[data-theme="light"] .pf-view-link,
+.pf-real-app[data-theme="light"] .pf-refresh-button,
+.pf-real-app[data-theme="light"] .secondary-button {
   border-color: rgba(0, 148, 190, 0.36) !important;
   background: rgba(0, 148, 190, 0.08) !important;
-  color: #0f172a !important;
+  color: #07526b !important;
 }
 
-[data-theme="light"] .pf-primary-button:hover:not(:disabled) {
+[data-theme="light"] .pf-primary-button:hover:not(:disabled),
+[data-theme="light"] .pf-action-button:hover:not(:disabled),
+[data-theme="light"] .pf-automation-action-button:hover:not(:disabled),
+[data-theme="light"] .pf-intelligence-action-button:hover:not(:disabled),
+[data-theme="light"] .pf-settings-page .pf-settings-action-button:hover:not(:disabled),
+[data-theme="light"] .pf-settings-page .pf-settings-confirm-button:hover:not(:disabled),
+.pf-real-app[data-theme="light"] .pf-secondary-button:not(.pf-mfa-back-button):hover:not(:disabled),
+.pf-real-app[data-theme="light"] .pf-view-link:hover,
+.pf-real-app[data-theme="light"] .pf-refresh-button:hover:not(:disabled),
+.pf-real-app[data-theme="light"] .secondary-button:hover:not(:disabled) {
   border-color: rgba(0, 148, 190, 0.58) !important;
   background: rgba(0, 148, 190, 0.13) !important;
+  color: #0f5f7a !important;
   box-shadow: 0 14px 30px rgba(0, 148, 190, 0.08) !important;
 }
-/* PulseFi outlined primary buttons end */
+
+.pf-real-app .create-form > .pf-action-button,
+.pf-real-app .pf-management-form > .pf-action-button,
+.pf-real-app .pf-operations-panel > .pf-action-button,
+.pf-real-app .pf-intelligence-panel > .pf-intelligence-action-button,
+.pf-real-app .pf-intelligence-automation-panel > .pf-automation-action-button,
+.pf-real-app .pf-settings-identity-form > .pf-settings-confirm-button,
+.pf-real-app .pf-settings-verification-row > .pf-settings-action-button {
+  justify-self: start;
+  width: auto !important;
+  max-width: 100%;
+}
+
+.pf-real-app .pf-action-button,
+.pf-real-app .pf-automation-action-button,
+.pf-real-app .pf-intelligence-action-button,
+.pf-real-app .pf-refresh-button,
+.pf-real-app .secondary-button,
+.pf-real-app .pf-secondary-button,
+.pf-real-app .pf-view-link,
+.pf-real-app .small-button,
+.pf-real-app .pf-danger-outline-button {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.pf-real-app .filter-bar {
+  align-items: center;
+  gap: 10px;
+}
+
+.pf-real-app .filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
+}
+
+.pf-real-app .router-action-cell,
+.pf-real-app .pf-row-action-stack,
+.pf-real-app .pf-review-actions > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pf-real-app .pf-table-wrap td .small-button,
+.pf-real-app .table-card td .small-button {
+  max-width: min(220px, 100%);
+}
+
+.pf-real-app .router-action-cell .small-button {
+  min-width: 72px;
+}
+
+.pf-real-app .router-action-cell .pf-simulator-action-button {
+  min-width: 148px;
+}
+
+.pf-real-app .danger-button,
+.pf-real-app .pf-danger-outline-button,
+.pf-settings-page .pf-settings-danger-action {
+  border-color: rgba(255, 107, 107, 0.38) !important;
+  background: rgba(255, 107, 107, 0.08) !important;
+  color: var(--pf-danger, #ff8a8a) !important;
+  box-shadow: none !important;
+}
+
+.pf-real-app .danger-button:hover:not(:disabled),
+.pf-real-app .pf-danger-outline-button:hover:not(:disabled),
+.pf-settings-page .pf-settings-danger-action:hover:not(:disabled) {
+  border-color: rgba(255, 107, 107, 0.64) !important;
+  background: rgba(255, 107, 107, 0.14) !important;
+  color: var(--pf-danger, #ff8a8a) !important;
+}
+
+.pf-real-app[data-theme="light"] .danger-button,
+.pf-real-app[data-theme="light"] .pf-danger-outline-button,
+[data-theme="light"] .pf-settings-page .pf-settings-danger-action {
+  border-color: rgba(220, 38, 38, 0.28) !important;
+  background: rgba(220, 38, 38, 0.07) !important;
+  color: #991b1b !important;
+}
+
+[data-theme="light"] .pf-primary-button:disabled,
+[data-theme="light"] .pf-action-button:disabled,
+[data-theme="light"] .pf-automation-action-button:disabled,
+[data-theme="light"] .pf-intelligence-action-button:disabled,
+[data-theme="light"] .pf-settings-page .pf-settings-action-button:disabled,
+[data-theme="light"] .pf-settings-page .pf-settings-confirm-button:disabled,
+.pf-real-app[data-theme="light"] .pf-secondary-button:not(.pf-mfa-back-button):disabled {
+  border-color: rgba(100, 116, 139, 0.18) !important;
+  background: rgba(100, 116, 139, 0.12) !important;
+  color: rgba(15, 23, 42, 0.44) !important;
+}
+
+@media (max-width: 640px) {
+  .pf-real-app .create-form > .pf-action-button,
+  .pf-real-app .pf-management-form > .pf-action-button,
+  .pf-real-app .pf-operations-panel > .pf-action-button,
+  .pf-real-app .pf-intelligence-panel > .pf-intelligence-action-button,
+  .pf-real-app .pf-intelligence-automation-panel > .pf-automation-action-button,
+  .pf-real-app .pf-settings-identity-form > .pf-settings-confirm-button,
+  .pf-real-app .pf-settings-verification-row > .pf-settings-action-button {
+    width: 100%;
+  }
+}
+/* PulseFi precise admin button system end */

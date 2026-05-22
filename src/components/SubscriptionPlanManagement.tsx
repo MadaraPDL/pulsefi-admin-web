@@ -416,7 +416,7 @@ export function SubscriptionPlanManagement() {
             Active plan
           </label>
 
-          <button disabled={isCreating}>
+          <button className="pf-action-button" disabled={isCreating}>
             {isCreating ? "Creating..." : "Create plan"}
           </button>
         </form>
@@ -507,7 +507,7 @@ export function SubscriptionPlanManagement() {
                 Active plan
               </label>
 
-              <button disabled={isUpdating}>
+              <button className="pf-action-button" disabled={isUpdating}>
                 {isUpdating ? "Updating..." : "Update plan"}
               </button>
             </>

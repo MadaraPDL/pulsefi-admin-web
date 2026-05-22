@@ -498,7 +498,10 @@ export function RouterManagement() {
             </select>
           </label>
 
-          <button disabled={isCreating || isLoadingOptions}>
+          <button
+            className="pf-action-button"
+            disabled={isCreating || isLoadingOptions}
+          >
             {isCreating ? "Creating..." : "Add router"}
           </button>
         </form>
@@ -615,7 +618,7 @@ export function RouterManagement() {
                 </select>
               </label>
 
-              <button disabled={isUpdating}>
+              <button className="pf-action-button" disabled={isUpdating}>
                 {isUpdating ? "Updating..." : "Update router"}
               </button>
             </>
@@ -712,7 +715,7 @@ export function RouterManagement() {
                       {selectingRouterId === router.id ? "Loading..." : "View"}
                     </button>
                     <button
-                      className="small-button"
+                      className="small-button pf-simulator-action-button"
                       type="button"
                       disabled={simulatorRunningRouterId === router.id}
                       onClick={(event) => {

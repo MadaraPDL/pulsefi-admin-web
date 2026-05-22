@@ -270,7 +270,7 @@ export function AppUserManagement() {
                 </select>
               </label>
 
-              <button disabled={isUpdating}>
+              <button className="pf-action-button" disabled={isUpdating}>
                 {isUpdating ? "Updating..." : "Update App User"}
               </button>
             </>

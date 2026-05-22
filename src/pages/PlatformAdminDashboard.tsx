@@ -165,7 +165,11 @@ function PlatformTopBar({
 
       <div className="pf-topbar-actions">
         <button
-          className={activeSection === "settings" ? "pf-icon-button-active" : ""}
+          className={
+            activeSection === "settings"
+              ? "pf-icon-button pf-icon-button-active"
+              : "pf-icon-button"
+          }
           type="button"
           aria-label="Settings"
           onClick={() => onNavigate("settings")}
@@ -664,7 +668,7 @@ function ISPManagement({
               />
             </label>
 
-            <button disabled={isCreating}>
+            <button className="pf-action-button" disabled={isCreating}>
               {isCreating ? "Creating..." : "Create ISP record"}
             </button>
           </form>
@@ -711,7 +715,10 @@ function ISPManagement({
               />
             </label>
 
-            <button disabled={!selectedISP || isInviting}>
+            <button
+              className="pf-action-button"
+              disabled={!selectedISP || isInviting}
+            >
               {isInviting ? "Creating invitation..." : "Create invitation"}
             </button>
 
@@ -787,7 +794,7 @@ function ISPManagement({
                   </select>
                 </label>
 
-                <button disabled={isUpdating}>
+                <button className="pf-action-button" disabled={isUpdating}>
                   {isUpdating ? "Updating..." : "Update ISP"}
                 </button>
               </>

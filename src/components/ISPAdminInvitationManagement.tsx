@@ -266,7 +266,11 @@ export function ISPAdminInvitationManagement() {
             />
           </label>
 
-          <button type="submit" disabled={isCreating}>
+          <button
+            className="pf-action-button"
+            type="submit"
+            disabled={isCreating}
+          >
             {isCreating ? "Creating..." : "Create invitation"}
           </button>
         </form>

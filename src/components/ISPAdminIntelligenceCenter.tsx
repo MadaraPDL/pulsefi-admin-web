@@ -445,6 +445,7 @@ export function ISPAdminIntelligenceCenter() {
             </div>
 
             <button
+              className="pf-automation-action-button"
               type="button"
               onClick={() => void handleRunAutomation()}
               disabled={isRunningAutomation}
@@ -531,6 +532,7 @@ export function ISPAdminIntelligenceCenter() {
               </label>
 
               <button
+                className="pf-intelligence-action-button"
                 type="button"
                 onClick={() => void handleGeneratePrediction()}
                 disabled={isGeneratingPrediction || subscriptions.length === 0}
@@ -551,6 +553,7 @@ export function ISPAdminIntelligenceCenter() {
               <p>Generate a plan recommendation from the latest prediction result.</p>
 
               <button
+                className="pf-intelligence-action-button"
                 type="button"
                 onClick={() => void handleGenerateRecommendation()}
                 disabled={!predictionResult || isGeneratingRecommendation}

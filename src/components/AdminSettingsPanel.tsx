@@ -1010,6 +1010,7 @@ export function AdminSettingsPanel<TSection extends string>({
             {shortcuts.map((shortcut) => (
               <button
                 key={shortcut.label}
+                className="pf-settings-shortcut-button"
                 type="button"
                 onClick={() => onNavigate(shortcut.section)}
               >
