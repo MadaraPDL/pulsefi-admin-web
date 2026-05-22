@@ -1,15 +1,18 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { AdminTheme } from "../App.real";
 import {
   applyAdminMFASettingsAction,
   createAdminMFASettingsChallenge,
+  getAdminMFABackupCodeStatus,
   getAdminMFAStatus,
+  regenerateAdminMFABackupCodes,
   requestAdminIdentityVerification,
   updateAdminIdentity,
 } from "../api/adminAuth";
 import type {
   CurrentAdminResponse,
+  MFABackupCodeStatusResponse,
   MFAMethod,
   MFASettingsAction,
   MFASettingsChallengeResponse,
@@ -132,8 +135,22 @@ export function AdminSettingsPanel<TSection extends string>({
   const [settingsCode, setSettingsCode] = useState("");
   const [settingsMethod, setSettingsMethod] = useState<MFAMethod>("authenticator");
 
+  const [backupCodeStatus, setBackupCodeStatus] =
+    useState<MFABackupCodeStatusResponse | null>(null);
+  const [backupCodeMessage, setBackupCodeMessage] = useState("");
+  const [backupCodeError, setBackupCodeError] = useState("");
+  const [backupCodeAction, setBackupCodeAction] = useState<string | null>(null);
+  const [isBackupCodeFlowOpen, setIsBackupCodeFlowOpen] = useState(false);
+  const [backupCodeChallenge, setBackupCodeChallenge] =
+    useState<MFASettingsChallengeResponse | null>(null);
+  const [backupCodeVerificationMethod, setBackupCodeVerificationMethod] =
+    useState<MFAMethod>("authenticator");
+  const [backupCodeVerificationCode, setBackupCodeVerificationCode] = useState("");
+  const [generatedBackupCodes, setGeneratedBackupCodes] = useState<string[]>([]);
+
   useEffect(() => {
     void loadMFAStatus();
+    void loadBackupCodeStatus();
   }, []);
 
   async function loadMFAStatus() {
@@ -235,6 +252,122 @@ export function AdminSettingsPanel<TSection extends string>({
     }
   }
 
+  async function loadBackupCodeStatus() {
+    setBackupCodeError("");
+
+    try {
+      const status = await getAdminMFABackupCodeStatus();
+      setBackupCodeStatus(status);
+    } catch (error) {
+      setBackupCodeError(
+        getErrorMessage(error, "Could not load backup-code status.")
+      );
+    }
+  }
+
+  function startBackupCodeRegeneration() {
+    setBackupCodeError("");
+    setBackupCodeMessage("");
+    setGeneratedBackupCodes([]);
+    setIsBackupCodeFlowOpen(true);
+    setBackupCodeChallenge(null);
+    setBackupCodeVerificationCode("");
+    setBackupCodeVerificationMethod(
+      mfaStatus?.preferred_mfa_method ?? "authenticator"
+    );
+  }
+
+  async function handleSendBackupEmailCode() {
+    setBackupCodeError("");
+    setBackupCodeMessage("");
+    setBackupCodeChallenge(null);
+    setBackupCodeVerificationCode("");
+    setBackupCodeAction("backup-settings-challenge");
+
+    try {
+      const response = await createAdminMFASettingsChallenge("email");
+      setBackupCodeChallenge(response);
+      setBackupCodeMessage(response.message);
+    } catch (error) {
+      setBackupCodeError(
+        getErrorMessage(error, "Could not send email verification code.")
+      );
+    } finally {
+      setBackupCodeAction(null);
+    }
+  }
+
+  async function getAuthenticatorBackupChallenge() {
+    if (backupCodeChallenge?.method === "authenticator") {
+      return backupCodeChallenge;
+    }
+
+    const response = await createAdminMFASettingsChallenge("authenticator");
+    setBackupCodeChallenge(response);
+    return response;
+  }
+
+  async function handleRegenerateBackupCodes(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!backupCodeVerificationCode.trim()) {
+      setBackupCodeError("Enter the verification code before regenerating backup codes.");
+      return;
+    }
+
+    setBackupCodeError("");
+    setBackupCodeMessage("");
+    setBackupCodeAction("backup-codes-regenerate");
+
+    try {
+      const challengeToUse =
+        backupCodeVerificationMethod === "authenticator"
+          ? await getAuthenticatorBackupChallenge()
+          : backupCodeChallenge;
+
+      if (!challengeToUse) {
+        throw new Error("Send the email verification code first.");
+      }
+
+      const response = await regenerateAdminMFABackupCodes({
+        challenge_token: challengeToUse.challenge_token,
+        code: backupCodeVerificationCode.trim(),
+      });
+
+      setBackupCodeStatus({
+        account_type: response.account_type,
+        backup_codes_available: response.backup_codes_available,
+        available_backup_code_count: response.available_backup_code_count,
+      });
+      setGeneratedBackupCodes(response.backup_codes);
+      setBackupCodeMessage(response.message);
+      setIsBackupCodeFlowOpen(false);
+      setBackupCodeChallenge(null);
+      setBackupCodeVerificationCode("");
+    } catch (error) {
+      setBackupCodeError(
+        getErrorMessage(error, "Could not regenerate backup codes.")
+      );
+    } finally {
+      setBackupCodeAction(null);
+    }
+  }
+
+  async function handleCopyBackupCodes() {
+    setBackupCodeError("");
+
+    try {
+      if (!navigator.clipboard?.writeText) {
+        throw new Error("Clipboard API unavailable.");
+      }
+
+      await navigator.clipboard.writeText(generatedBackupCodes.join("\n"));
+      setBackupCodeMessage("Backup codes copied. Store them somewhere safe now.");
+    } catch {
+      setBackupCodeError("Could not copy automatically. Select and copy the codes manually.");
+    }
+  }
+
   async function handleRequestIdentityChallenge() {
     setIdentityError("");
     setIdentitySuccess("");
@@ -295,6 +428,13 @@ export function AdminSettingsPanel<TSection extends string>({
   const canVerifyWithAuthenticator = authenticatorMfaActive;
   const canTypeSettingsCode =
     settingsMethod === "authenticator" || Boolean(settingsChallenge);
+
+  const backupCodesAvailable = backupCodeStatus?.backup_codes_available ?? false;
+  const backupCodeCount = backupCodeStatus?.available_backup_code_count ?? 0;
+  const canVerifyBackupWithEmail = emailMfaActive;
+  const canVerifyBackupWithAuthenticator = authenticatorMfaActive;
+  const canTypeBackupVerificationCode =
+    backupCodeVerificationMethod === "authenticator" || Boolean(backupCodeChallenge);
 
   return (
     <section className="pf-content-card pf-settings-page" aria-label="Admin settings">
@@ -579,6 +719,205 @@ export function AdminSettingsPanel<TSection extends string>({
         </article>
 
         <article className="pf-settings-section pf-settings-section-wide">
+          <span className="pf-settings-label">Recovery backup codes</span>
+
+          <div className="pf-settings-recovery-header">
+            <div>
+              <h3>Backup recovery codes</h3>
+              <p>
+                Use these one-time codes only when your normal MFA method is
+                unavailable. New codes are shown once, then only hashes are stored.
+              </p>
+            </div>
+
+            <StatusPill
+              active={backupCodesAvailable}
+              activeLabel={`${backupCodeCount} available`}
+              inactiveLabel="Not generated"
+            />
+          </div>
+
+          <div className="pf-settings-action-row">
+            <button
+              className="pf-secondary-button pf-settings-action-button"
+              type="button"
+              disabled={backupCodeAction !== null}
+              onClick={() => void loadBackupCodeStatus()}
+            >
+              Refresh backup-code status
+            </button>
+
+            <button
+              className="pf-secondary-button pf-settings-action-button"
+              type="button"
+              disabled={
+                backupCodeAction !== null ||
+                (!canVerifyBackupWithEmail && !canVerifyBackupWithAuthenticator)
+              }
+              onClick={startBackupCodeRegeneration}
+            >
+              {backupCodesAvailable ? "Regenerate backup codes" : "Generate backup codes"}
+            </button>
+          </div>
+
+          {isBackupCodeFlowOpen && (
+            <form
+              className="pf-settings-mfa-verification"
+              onSubmit={handleRegenerateBackupCodes}
+            >
+              <div>
+                <h3>
+                  {backupCodesAvailable
+                    ? "Regenerate backup codes"
+                    : "Generate backup codes"}
+                </h3>
+                <p>
+                  This will revoke old unused backup codes and create a fresh set.
+                  You must verify with an active MFA method first.
+                </p>
+              </div>
+
+              <div className="pf-settings-verification-row">
+                <label>
+                  Verify with
+                  <select
+                    value={backupCodeVerificationMethod}
+                    onChange={(event) => {
+                      setBackupCodeVerificationMethod(
+                        event.target.value as MFAMethod
+                      );
+                      setBackupCodeChallenge(null);
+                      setBackupCodeVerificationCode("");
+                      setBackupCodeMessage("");
+                      setBackupCodeError("");
+                    }}
+                  >
+                    <option value="email" disabled={!canVerifyBackupWithEmail}>
+                      Email code
+                    </option>
+                    <option
+                      value="authenticator"
+                      disabled={!canVerifyBackupWithAuthenticator}
+                    >
+                      Authenticator app
+                    </option>
+                  </select>
+                </label>
+
+                {backupCodeVerificationMethod === "email" && (
+                  <button
+                    className="pf-secondary-button pf-settings-action-button"
+                    type="button"
+                    disabled={
+                      backupCodeAction !== null || Boolean(backupCodeChallenge)
+                    }
+                    onClick={() => void handleSendBackupEmailCode()}
+                  >
+                    {backupCodeAction === "backup-settings-challenge"
+                      ? "Sending..."
+                      : backupCodeChallenge
+                        ? "Code sent"
+                        : "Send verification code"}
+                  </button>
+                )}
+
+                <label>
+                  Verification code
+                  <input
+                    value={backupCodeVerificationCode}
+                    onChange={(event) =>
+                      setBackupCodeVerificationCode(event.target.value)
+                    }
+                    placeholder={
+                      backupCodeVerificationMethod === "email"
+                        ? "Email code"
+                        : "Authenticator code"
+                    }
+                    autoComplete="one-time-code"
+                    disabled={!canTypeBackupVerificationCode}
+                    required
+                  />
+                </label>
+              </div>
+
+              {backupCodeChallenge?.dev_email_code && (
+                <div className="pf-dev-box">
+                  <strong>Local DEBUG backup-code settings code</strong>
+                  <code>{backupCodeChallenge.dev_email_code}</code>
+                  <small>
+                    Production sends this code by email. It is shown here only
+                    when the backend returns it in DEBUG mode.
+                  </small>
+                </div>
+              )}
+
+              <div className="pf-settings-action-row">
+                <button
+                  className="pf-primary-button pf-settings-confirm-button"
+                  type="submit"
+                  disabled={
+                    !backupCodeVerificationCode.trim() ||
+                    backupCodeAction !== null ||
+                    (backupCodeVerificationMethod === "email" &&
+                      !backupCodeChallenge)
+                  }
+                >
+                  {backupCodeAction === "backup-codes-regenerate"
+                    ? "Generating..."
+                    : "Confirm and show backup codes"}
+                </button>
+
+                <button
+                  className="pf-secondary-button pf-settings-action-button"
+                  type="button"
+                  disabled={backupCodeAction !== null}
+                  onClick={() => {
+                    setIsBackupCodeFlowOpen(false);
+                    setBackupCodeChallenge(null);
+                    setBackupCodeVerificationCode("");
+                    setBackupCodeMessage("");
+                    setBackupCodeError("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
+
+          {generatedBackupCodes.length > 0 && (
+            <div className="pf-backup-codes-result">
+              <div>
+                <strong>Save these backup codes now</strong>
+                <p>
+                  PulseFi will not show these codes again. Each code can be used
+                  once during MFA verification.
+                </p>
+              </div>
+
+              <div className="pf-backup-codes-grid" aria-label="Generated backup codes">
+                {generatedBackupCodes.map((backupCode) => (
+                  <code key={backupCode}>{backupCode}</code>
+                ))}
+              </div>
+
+              <button
+                className="pf-secondary-button pf-settings-action-button"
+                type="button"
+                onClick={() => void handleCopyBackupCodes()}
+              >
+                Copy all backup codes
+              </button>
+            </div>
+          )}
+
+          {backupCodeError && <div className="pf-error-box">{backupCodeError}</div>}
+          {backupCodeMessage && (
+            <div className="pf-success-box">{backupCodeMessage}</div>
+          )}
+        </article>
+
+        <article className="pf-settings-section pf-settings-section-wide">
           <span className="pf-settings-label">Account identity</span>
           <form className="pf-settings-identity-form" onSubmit={handleSaveIdentity}>
             <div className="pf-settings-form-grid">
@@ -689,4 +1028,3 @@ export function AdminSettingsPanel<TSection extends string>({
     </section>
   );
 }
-

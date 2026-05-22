@@ -102,6 +102,20 @@ export type MFAStatusResponse = {
   can_disable_authenticator_mfa: boolean;
 };
 
+export type MFABackupCodeStatusResponse = {
+  account_type: "admin" | "app_user";
+  backup_codes_available: boolean;
+  available_backup_code_count: number;
+};
+
+export type MFABackupCodesRegenerateResponse = {
+  account_type: "admin" | "app_user";
+  backup_codes_available: boolean;
+  available_backup_code_count: number;
+  backup_codes: string[];
+  message: string;
+};
+
 export type MFASettingsAction =
   | "enable_email"
   | "disable_email"
@@ -345,6 +359,23 @@ export async function resetAdminPassword(
     }),
   });
 }
+export async function getAdminMFABackupCodeStatus(): Promise<MFABackupCodeStatusResponse> {
+  return apiRequest<MFABackupCodeStatusResponse>("/auth/me/mfa/backup-codes/status");
+}
+
+export async function regenerateAdminMFABackupCodes(payload: {
+  challenge_token: string;
+  code: string;
+}): Promise<MFABackupCodesRegenerateResponse> {
+  return apiRequest<MFABackupCodesRegenerateResponse>(
+    "/auth/me/mfa/backup-codes/regenerate",
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
 export async function getAdminMFAStatus(): Promise<MFAStatusResponse> {
   return apiRequest<MFAStatusResponse>("/auth/me/mfa/status");
 }
@@ -392,6 +423,3 @@ export async function applyAdminMFASettingsAction(
     body: JSON.stringify(payload),
   });
 }
-
-
-

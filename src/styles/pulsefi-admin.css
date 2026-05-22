@@ -3306,3 +3306,79 @@ dd {
   }
 }
 /* Step 40D MFA final integrated layout end */
+
+/* Step 40F backup-code settings UI start */
+.pf-settings-recovery-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.pf-settings-recovery-header h3 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.pf-settings-recovery-header p {
+  margin: 0;
+  color: var(--pf-muted, #94a3b8);
+  line-height: 1.55;
+}
+
+.pf-backup-codes-result {
+  display: grid;
+  gap: 14px;
+  border: 1px solid rgba(0, 209, 255, 0.22);
+  border-radius: 18px;
+  padding: 16px;
+  background: rgba(0, 209, 255, 0.06);
+}
+
+.pf-backup-codes-result strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.pf-backup-codes-result p {
+  margin: 0;
+  color: var(--pf-muted, #94a3b8);
+  line-height: 1.5;
+}
+
+.pf-backup-codes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 10px;
+}
+
+.pf-backup-codes-grid code {
+  display: block;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.38);
+  color: var(--pf-text, #f8fafc);
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+[data-theme="light"] .pf-backup-codes-result {
+  border-color: rgba(3, 105, 161, 0.18);
+  background: rgba(3, 105, 161, 0.05);
+}
+
+[data-theme="light"] .pf-backup-codes-grid code {
+  background: rgba(255, 255, 255, 0.82);
+  color: #0f172a;
+}
+
+@media (max-width: 720px) {
+  .pf-settings-recovery-header {
+    display: grid;
+  }
+}
+/* Step 40F backup-code settings UI end */
