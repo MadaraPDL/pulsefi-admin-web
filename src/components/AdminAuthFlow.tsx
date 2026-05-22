@@ -1,8 +1,9 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
   assertAdminSession,
   buildAdminAuthenticatedResult,
+  changeAdminMFAChallengeMethod,
   confirmAdminMFASetup,
   isMFARequiredResponse,
   isMFASetupRequiredResponse,
@@ -190,9 +191,6 @@ function AdminLoginPage({
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [mfaMethod, setMfaMethod] = useState<MFAMethod | "preferred">(
-    "preferred"
-  );
   const [isResetMode, setIsResetMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -203,11 +201,7 @@ function AdminLoginPage({
     setIsSubmitting(true);
 
     try {
-      const response = await loginAsAdmin(
-        identifier,
-        password,
-        mfaMethod === "preferred" ? undefined : mfaMethod
-      );
+      const response = await loginAsAdmin(identifier, password);
       onLoginResponse(response, identifier);
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not sign in."));
@@ -305,35 +299,6 @@ function AdminLoginPage({
                 </button>
               </div>
 
-              <div className="pf-field">
-                <label className="pf-label" htmlFor="admin-mfa-method">
-                  MFA method
-                </label>
-
-                <div className="pf-input-shell">
-                  <span className="pf-input-icon" aria-hidden="true">
-                    <span className="material-symbols-outlined">security</span>
-                  </span>
-
-                  <select
-                    id="admin-mfa-method"
-                    className="pf-input pf-admin-mfa-method-select"
-                    value={mfaMethod}
-                    onChange={(event) =>
-                      setMfaMethod(event.target.value as MFAMethod | "preferred")
-                    }
-                  >
-                    <option value="preferred">Use account preference</option>
-                    <option value="email">Email code</option>
-                    <option value="authenticator">Authenticator app</option>
-                  </select>
-                </div>
-
-                <p className="pf-auth-helper-text">
-                  Choose a method only if it is active on your account. Otherwise,
-                  keep account preference.
-                </p>
-              </div>
               {errorMessage && (
                 <div className="pf-error-box">{errorMessage}</div>
               )}
@@ -378,6 +343,8 @@ function MFAVerifyPage({
   onAuthenticated: (result: AdminAuthenticatedResult) => void;
 }) {
   const [code, setCode] = useState("");
+  const [activeChallenge, setActiveChallenge] = useState(challenge);
+  const [isBackupCodeMode, setIsBackupCodeMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -388,7 +355,7 @@ function MFAVerifyPage({
 
     try {
       const session = await verifyAdminMFA({
-        challenge_token: challenge.challenge_token,
+        challenge_token: activeChallenge.challenge_token,
         code: code.trim().replace(/\s/g, ""),
       });
 
@@ -400,6 +367,39 @@ function MFAVerifyPage({
     }
   }
 
+  async function handleChangeMethod(method: MFAMethod) {
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const nextChallenge = await changeAdminMFAChallengeMethod({
+        challenge_token: activeChallenge.challenge_token,
+        method,
+      });
+
+      setActiveChallenge(nextChallenge);
+      setIsBackupCodeMode(false);
+      setCode("");
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, "Could not switch MFA method."));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const activeMethods = activeChallenge.active_methods ?? [];
+
+  const canUseEmail =
+    activeChallenge.method !== "email" && activeMethods.includes("email");
+
+  const canUseAuthenticator =
+    activeChallenge.method !== "authenticator" &&
+    activeMethods.includes("authenticator");
+
+  const canUseBackupCode = Boolean(activeChallenge.backup_codes_available);
+  const hasFallbackOptions =
+    canUseEmail || canUseAuthenticator || canUseBackupCode;
+
   return (
     <main className="pf-auth-page">
       <AuthThemeToggle theme={theme} onSetTheme={onSetTheme} />
@@ -408,7 +408,11 @@ function MFAVerifyPage({
         <section className="pf-login-card pf-mfa-card">
           <div className="pf-auth-heading">
             <h1>MFA Verification</h1>
-            <p>{getMFAInstruction(challenge.method)}</p>
+            <p>
+              {isBackupCodeMode
+                ? "Enter one unused backup recovery code."
+                : getMFAInstruction(activeChallenge.method)}
+            </p>
           </div>
 
           <form onSubmit={handleVerifyMFA} className="pf-auth-form">
@@ -423,7 +427,7 @@ function MFAVerifyPage({
                   className="pf-input pf-input-no-icon pf-mfa-code"
                   value={code}
                   onChange={(event) => setCode(event.target.value)}
-                  placeholder="123456"
+                  placeholder={isBackupCodeMode ? "Backup code" : "123456"}
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   required
@@ -431,15 +435,60 @@ function MFAVerifyPage({
               </div>
             </div>
 
-            {import.meta.env.DEV && challenge.dev_email_code ? (
+            {import.meta.env.DEV && activeChallenge.dev_email_code ? (
               <div className="pf-dev-box">
                 <strong>Development email MFA code</strong>
-                <code>{challenge.dev_email_code}</code>
+                <code>{activeChallenge.dev_email_code}</code>
               </div>
             ) : null}
 
             {errorMessage && (
               <div className="pf-error-box">{errorMessage}</div>
+            )}
+
+            {hasFallbackOptions && (
+              <div className="pf-mfa-fallback-box">
+                <strong>Try another way</strong>
+
+                <div className="pf-mfa-fallback-actions">
+                  {canUseEmail && (
+                    <button
+                      className="pf-secondary-button"
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => void handleChangeMethod("email")}
+                    >
+                      Send code to email
+                    </button>
+                  )}
+
+                  {canUseAuthenticator && (
+                    <button
+                      className="pf-secondary-button"
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => void handleChangeMethod("authenticator")}
+                    >
+                      Use authenticator app
+                    </button>
+                  )}
+
+                  {canUseBackupCode && (
+                    <button
+                      className="pf-secondary-button"
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => {
+                        setIsBackupCodeMode(true);
+                        setCode("");
+                        setErrorMessage("");
+                      }}
+                    >
+                      Use backup code
+                    </button>
+                  )}
+                </div>
+              </div>
             )}
 
             <button
@@ -658,9 +707,3 @@ function AuthThemeToggle({
     </div>
   );
 }
-
-
-
-
-
-

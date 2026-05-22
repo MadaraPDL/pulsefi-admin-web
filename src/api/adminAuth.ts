@@ -1,4 +1,4 @@
-﻿import { apiRequest } from "./client";
+import { apiRequest } from "./client";
 
 export type AdminRole = "platform_admin" | "isp_admin";
 
@@ -13,10 +13,14 @@ export type AdminSession = {
   role: AdminRole;
 };
 
+export type MFAMethod = "email" | "authenticator";
+
 export type MFARequiredResponse = {
   mfa_required: true;
   challenge_token: string;
-  method: "email" | "authenticator";
+  method: MFAMethod;
+  active_methods: MFAMethod[];
+  backup_codes_available: boolean;
   expires_at: string;
   message: string;
   dev_email_code?: string | null;
@@ -85,8 +89,6 @@ export type UpdateAdminIdentityRequest = {
   mfa_challenge_token: string;
   mfa_code: string;
 };
-
-export type MFAMethod = "email" | "authenticator";
 
 export type MFAStatusResponse = {
   account_type: "admin" | "app_user";
@@ -232,8 +234,7 @@ export async function restoreAdminSession(
 
 export async function loginAsAdmin(
   identifier: string,
-  password: string,
-  mfaMethod?: MFAMethod
+  password: string
 ): Promise<AdminLoginResponse> {
   return apiRequest<AdminLoginResponse>("/auth/login", {
     method: "POST",
@@ -241,17 +242,15 @@ export async function loginAsAdmin(
       account_type: "admin",
       identifier,
       password,
-      ...(mfaMethod ? { mfa_method: mfaMethod } : {}),
     }),
   });
 }
 
 export async function loginAdmin(
   identifier: string,
-  password: string,
-  mfaMethod?: MFAMethod
+  password: string
 ): Promise<AdminLoginResult> {
-  const response = await loginAsAdmin(identifier, password, mfaMethod);
+  const response = await loginAsAdmin(identifier, password);
 
   if (isMFARequiredResponse(response)) {
     return {
@@ -270,6 +269,16 @@ export async function loginAdmin(
   }
 
   return buildAdminAuthenticatedResult(assertAdminSession(response), identifier);
+}
+
+export async function changeAdminMFAChallengeMethod(payload: {
+  challenge_token: string;
+  method: MFAMethod;
+}): Promise<MFARequiredResponse> {
+  return apiRequest<MFARequiredResponse>("/auth/mfa/challenge-method", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function verifyAdminMFA(

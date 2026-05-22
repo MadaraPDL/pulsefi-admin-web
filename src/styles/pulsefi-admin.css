@@ -1,4 +1,4 @@
-﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 
 :root {
@@ -3086,14 +3086,223 @@ dd {
   background: rgba(220, 38, 38, 0.07) !important;
   color: #991b1b !important;
 }
-.pf-auth-helper-text {
-  margin: 8px 0 0;
-  color: var(--pf-muted, #94a3b8);
-  font-size: 0.86rem;
-  line-height: 1.45;
+
+.pf-mfa-fallback-box {
+  display: grid;
+  gap: 12px;
+  border: 1px solid var(--pf-border, rgba(148, 163, 184, 0.28));
+  border-radius: 18px;
+  padding: 14px;
+  background: var(--pf-surface-soft, rgba(15, 23, 42, 0.04));
 }
 
-.pf-admin-mfa-method-select {
-  appearance: none;
-  cursor: pointer;
+.pf-mfa-fallback-box strong {
+  font-size: 0.92rem;
 }
+
+.pf-mfa-fallback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Step 40D MFA final integrated layout start */
+.pf-auth-wrap:has(.pf-mfa-card) {
+  width: 100%;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px !important;
+}
+
+.pf-login-card.pf-mfa-card {
+  width: 410px !important;
+  max-width: calc(100vw - 32px) !important;
+  min-height: auto !important;
+  padding: 34px 36px 32px !important;
+  border-radius: 24px !important;
+  border-color: rgba(148, 163, 184, 0.18) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)),
+    var(--pf-card, #171b20) !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-auth-heading {
+  margin-bottom: 24px !important;
+  text-align: center !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-auth-heading h1 {
+  margin: 0 0 10px !important;
+  font-size: 1.72rem !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.045em !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-auth-heading p {
+  max-width: 300px !important;
+  margin: 0 auto !important;
+  color: var(--pf-muted, #9fb5c8) !important;
+  font-size: 0.93rem !important;
+  line-height: 1.45 !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-auth-form {
+  gap: 16px !important;
+}
+
+.pf-mfa-code-field {
+  margin: 0 !important;
+  align-items: center !important;
+  text-align: center !important;
+}
+
+.pf-mfa-code-field .pf-label {
+  justify-content: center !important;
+  margin-bottom: 8px !important;
+  font-size: 0.77rem !important;
+  letter-spacing: 0.09em !important;
+  color: var(--pf-text, #f8fafc) !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-code {
+  width: 220px !important;
+  min-height: 46px !important;
+  margin: 0 auto !important;
+  border-radius: 14px !important;
+  text-align: center !important;
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.18em !important;
+  background: rgba(51, 65, 85, 0.55) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-fallback-box {
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-align: center !important;
+  display: grid !important;
+  gap: 7px !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-fallback-box strong {
+  color: rgba(226, 232, 240, 0.72) !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-fallback-actions {
+  display: flex !important;
+  justify-content: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-fallback-actions .pf-secondary-button {
+  width: auto !important;
+  min-height: 32px !important;
+  padding: 6px 13px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(0, 209, 255, 0.24) !important;
+  background: rgba(0, 209, 255, 0.045) !important;
+  color: #8beeff !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  box-shadow: none !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-fallback-actions .pf-secondary-button:hover:not(:disabled) {
+  transform: none !important;
+  border-color: rgba(0, 209, 255, 0.48) !important;
+  background: rgba(0, 209, 255, 0.09) !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-action-button,
+.pf-login-card.pf-mfa-card .pf-mfa-back-button {
+  width: 220px !important;
+  max-width: 100% !important;
+  min-height: 44px !important;
+  margin-inline: auto !important;
+  border-radius: 14px !important;
+  font-size: 0.95rem !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-action-button {
+  margin-top: 4px !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-back-button {
+  margin-top: -2px !important;
+  border: 1px solid rgba(148, 163, 184, 0.22) !important;
+  background: rgba(15, 23, 42, 0.28) !important;
+  color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: none !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-mfa-back-button:hover:not(:disabled) {
+  border-color: rgba(148, 163, 184, 0.38) !important;
+  background: rgba(30, 41, 59, 0.5) !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-dev-box {
+  width: 300px !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  display: grid !important;
+  gap: 8px !important;
+  border: 1px solid rgba(245, 158, 11, 0.24) !important;
+  border-radius: 14px !important;
+  padding: 12px !important;
+  background: rgba(245, 158, 11, 0.065) !important;
+  color: #facc15 !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-dev-box strong {
+  font-size: 0.82rem !important;
+  color: #facc15 !important;
+}
+
+.pf-login-card.pf-mfa-card .pf-dev-box code {
+  display: block !important;
+  border-radius: 10px !important;
+  padding: 9px 11px !important;
+  background: rgba(2, 6, 23, 0.6) !important;
+  color: #fde68a !important;
+}
+
+[data-theme="light"] .pf-login-card.pf-mfa-card .pf-mfa-back-button {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  background: rgba(248, 250, 252, 0.85) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .pf-login-card.pf-mfa-card .pf-mfa-fallback-box strong {
+  color: rgba(51, 65, 85, 0.72) !important;
+}
+
+[data-theme="light"] .pf-login-card.pf-mfa-card .pf-mfa-fallback-actions .pf-secondary-button {
+  color: #0369a1 !important;
+  border-color: rgba(3, 105, 161, 0.24) !important;
+  background: rgba(3, 105, 161, 0.055) !important;
+}
+
+@media (max-width: 520px) {
+  .pf-login-card.pf-mfa-card {
+    width: calc(100vw - 24px) !important;
+    padding: 28px 20px !important;
+  }
+
+  .pf-login-card.pf-mfa-card .pf-mfa-code,
+  .pf-login-card.pf-mfa-card .pf-mfa-action-button,
+  .pf-login-card.pf-mfa-card .pf-mfa-back-button {
+    width: 100% !important;
+  }
+}
+/* Step 40D MFA final integrated layout end */
