@@ -99,6 +99,27 @@ export type MFAStatusResponse = {
   can_disable_email_mfa: boolean;
   can_disable_authenticator_mfa: boolean;
 };
+
+export type MFASettingsAction =
+  | "enable_email"
+  | "disable_email"
+  | "disable_authenticator"
+  | "prefer_email"
+  | "prefer_authenticator";
+
+export type MFASettingsChallengeResponse = {
+  challenge_token: string;
+  method: MFAMethod;
+  expires_at: string;
+  message: string;
+  dev_email_code?: string | null;
+};
+
+export type MFASettingsActionRequest = {
+  action: MFASettingsAction;
+  challenge_token: string;
+  code: string;
+};
 export type AdminAuthenticatedResult = {
   kind: "authenticated";
   accessToken: string;
@@ -342,5 +363,21 @@ export async function setAdminPreferredMFAMethod(
     body: JSON.stringify({ method }),
   });
 }
+export async function createAdminMFASettingsChallenge(
+  method: MFAMethod
+): Promise<MFASettingsChallengeResponse> {
+  return apiRequest<MFASettingsChallengeResponse>("/auth/me/mfa/settings-challenge", {
+    method: "POST",
+    body: JSON.stringify({ method }),
+  });
+}
 
+export async function applyAdminMFASettingsAction(
+  payload: MFASettingsActionRequest
+): Promise<MFAStatusResponse> {
+  return apiRequest<MFAStatusResponse>("/auth/me/mfa/settings-action", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
 

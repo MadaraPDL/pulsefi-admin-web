@@ -2,17 +2,17 @@
 import type { FormEvent } from "react";
 import type { AdminTheme } from "../App.real";
 import {
-  disableAdminAuthenticatorMFA,
-  disableAdminEmailMFA,
-  enableAdminEmailMFA,
+  applyAdminMFASettingsAction,
+  createAdminMFASettingsChallenge,
   getAdminMFAStatus,
   requestAdminIdentityVerification,
-  setAdminPreferredMFAMethod,
   updateAdminIdentity,
 } from "../api/adminAuth";
 import type {
   CurrentAdminResponse,
   MFAMethod,
+  MFASettingsAction,
+  MFASettingsChallengeResponse,
   MFAStatusResponse,
   ProfileUpdateChallengeResponse,
 } from "../api/adminAuth";
@@ -22,6 +22,40 @@ import { AdminPasswordResetFlow } from "./AdminPasswordResetFlow";
 type SettingsShortcut<TSection extends string> = {
   label: string;
   section: TSection;
+};
+
+type PendingMFAAction = {
+  action: MFASettingsAction;
+  label: string;
+  description: string;
+};
+
+const MFA_ACTIONS: Record<MFASettingsAction, PendingMFAAction> = {
+  enable_email: {
+    action: "enable_email",
+    label: "Enable Email MFA",
+    description: "Enable email one-time codes as an active MFA method.",
+  },
+  disable_email: {
+    action: "disable_email",
+    label: "Disable Email MFA",
+    description: "Turn off email one-time codes for this account.",
+  },
+  disable_authenticator: {
+    action: "disable_authenticator",
+    label: "Disable Authenticator",
+    description: "Turn off authenticator app MFA for this account.",
+  },
+  prefer_email: {
+    action: "prefer_email",
+    label: "Prefer Email",
+    description: "Use email codes as the default MFA login method.",
+  },
+  prefer_authenticator: {
+    action: "prefer_authenticator",
+    label: "Prefer Authenticator",
+    description: "Use authenticator app codes as the default MFA login method.",
+  },
 };
 
 function formatMfaMethod(method: MFAMethod | null) {
@@ -91,6 +125,13 @@ export function AdminSettingsPanel<TSection extends string>({
   const [mfaStatusMessage, setMfaStatusMessage] = useState("");
   const [mfaError, setMfaError] = useState("");
   const [mfaAction, setMfaAction] = useState<string | null>(null);
+  const [pendingMFAAction, setPendingMFAAction] =
+    useState<PendingMFAAction | null>(null);
+  const [settingsChallenge, setSettingsChallenge] =
+    useState<MFASettingsChallengeResponse | null>(null);
+  const [settingsCode, setSettingsCode] = useState("");
+  const [settingsMethod, setSettingsMethod] = useState<MFAMethod>("authenticator");
+
   useEffect(() => {
     void loadMFAStatus();
   }, []);
@@ -101,26 +142,94 @@ export function AdminSettingsPanel<TSection extends string>({
     try {
       const status = await getAdminMFAStatus();
       setMfaStatus(status);
+      setSettingsMethod(status.preferred_mfa_method ?? "authenticator");
     } catch (error) {
       setMfaError(getErrorMessage(error, "Could not load MFA status."));
     }
   }
 
-  async function runMfaAction(
-    actionName: string,
-    action: () => Promise<MFAStatusResponse>,
-    successMessage: string
-  ) {
+  function startMFAAction(action: MFASettingsAction) {
     setMfaError("");
     setMfaStatusMessage("");
-    setMfaAction(actionName);
+    setPendingMFAAction(MFA_ACTIONS[action]);
+    setSettingsChallenge(null);
+    setSettingsCode("");
+    setSettingsMethod(mfaStatus?.preferred_mfa_method ?? "authenticator");
+  }
+
+  async function handleSendEmailSettingsCode() {
+    if (!pendingMFAAction) {
+      return;
+    }
+
+    setMfaError("");
+    setMfaStatusMessage("");
+    setSettingsChallenge(null);
+    setSettingsCode("");
+    setMfaAction("settings-challenge");
 
     try {
-      const status = await action();
-      setMfaStatus(status);
-      setMfaStatusMessage(successMessage);
+      const response = await createAdminMFASettingsChallenge("email");
+      setSettingsChallenge(response);
+      setMfaStatusMessage(response.message);
     } catch (error) {
-      setMfaError(getErrorMessage(error, "Could not update MFA settings."));
+      setMfaError(getErrorMessage(error, "Could not send email verification code."));
+    } finally {
+      setMfaAction(null);
+    }
+  }
+
+  async function getAuthenticatorSettingsChallenge() {
+    if (settingsChallenge?.method === "authenticator") {
+      return settingsChallenge;
+    }
+
+    const response = await createAdminMFASettingsChallenge("authenticator");
+    setSettingsChallenge(response);
+    return response;
+  }
+
+  async function handleApplySettingsAction(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!pendingMFAAction) {
+      setMfaError("Choose an MFA action before confirming.");
+      return;
+    }
+
+    if (!settingsCode.trim()) {
+      setMfaError("Enter the verification code before confirming.");
+      return;
+    }
+
+    setMfaError("");
+    setMfaStatusMessage("");
+    setMfaAction("settings-action");
+
+    try {
+      const challengeToUse =
+        settingsMethod === "authenticator"
+          ? await getAuthenticatorSettingsChallenge()
+          : settingsChallenge;
+
+      if (!challengeToUse) {
+        throw new Error("Send the email verification code first.");
+      }
+
+      const status = await applyAdminMFASettingsAction({
+        action: pendingMFAAction.action,
+        challenge_token: challengeToUse.challenge_token,
+        code: settingsCode.trim(),
+      });
+
+      setMfaStatus(status);
+      setMfaStatusMessage(`${pendingMFAAction.label} completed.`);
+      setPendingMFAAction(null);
+      setSettingsChallenge(null);
+      setSettingsCode("");
+      setSettingsMethod(status.preferred_mfa_method ?? "authenticator");
+    } catch (error) {
+      setMfaError(getErrorMessage(error, "Could not apply MFA settings action."));
     } finally {
       setMfaAction(null);
     }
@@ -182,6 +291,10 @@ export function AdminSettingsPanel<TSection extends string>({
   const emailMfaActive = mfaStatus?.email_mfa_enabled ?? false;
   const authenticatorMfaActive = mfaStatus?.authenticator_mfa_enabled ?? false;
   const preferredMethod = mfaStatus?.preferred_mfa_method ?? null;
+  const canVerifyWithEmail = emailMfaActive || pendingMFAAction?.action === "enable_email";
+  const canVerifyWithAuthenticator = authenticatorMfaActive;
+  const canTypeSettingsCode =
+    settingsMethod === "authenticator" || Boolean(settingsChallenge);
 
   return (
     <section className="pf-content-card pf-settings-page" aria-label="Admin settings">
@@ -274,102 +387,68 @@ export function AdminSettingsPanel<TSection extends string>({
 
           <div className="pf-settings-action-row">
             <button
-              className="pf-secondary-button"
+              className="pf-secondary-button pf-settings-action-button"
               type="button"
               disabled={mfaAction !== null || emailMfaActive}
-              onClick={() =>
-                void runMfaAction(
-                  "enable-email",
-                  enableAdminEmailMFA,
-                  "Email MFA enabled."
-                )
-              }
+              onClick={() => startMFAAction("enable_email")}
             >
-              {mfaAction === "enable-email" ? "Enabling..." : "Enable Email MFA"}
+              Enable Email MFA
             </button>
 
             <button
-              className="pf-secondary-button"
+              className="pf-secondary-button pf-settings-action-button pf-settings-danger-action"
               type="button"
               disabled={
                 mfaAction !== null ||
                 !emailMfaActive ||
                 mfaStatus?.can_disable_email_mfa === false
               }
-              onClick={() =>
-                void runMfaAction(
-                  "disable-email",
-                  disableAdminEmailMFA,
-                  "Email MFA disabled."
-                )
-              }
+              onClick={() => startMFAAction("disable_email")}
             >
-              {mfaAction === "disable-email" ? "Disabling..." : "Disable Email MFA"}
+              Disable Email MFA
             </button>
 
             <button
-              className="pf-secondary-button"
+              className="pf-secondary-button pf-settings-action-button pf-settings-danger-action"
               type="button"
               disabled={
                 mfaAction !== null ||
                 !authenticatorMfaActive ||
                 mfaStatus?.can_disable_authenticator_mfa === false
               }
-              onClick={() =>
-                void runMfaAction(
-                  "disable-authenticator",
-                  disableAdminAuthenticatorMFA,
-                  "Authenticator MFA disabled."
-                )
-              }
+              onClick={() => startMFAAction("disable_authenticator")}
             >
-              {mfaAction === "disable-authenticator"
-                ? "Disabling..."
-                : "Disable Authenticator"}
+              Disable Authenticator
             </button>
           </div>
 
           <div className="pf-settings-action-row">
             <button
-              className="pf-secondary-button"
+              className="pf-secondary-button pf-settings-action-button"
               type="button"
               disabled={
                 mfaAction !== null || !emailMfaActive || preferredMethod === "email"
               }
-              onClick={() =>
-                void runMfaAction(
-                  "prefer-email",
-                  () => setAdminPreferredMFAMethod("email"),
-                  "Email MFA set as preferred login method."
-                )
-              }
+              onClick={() => startMFAAction("prefer_email")}
             >
-              {mfaAction === "prefer-email" ? "Saving..." : "Prefer Email"}
+              Prefer Email
             </button>
 
             <button
-              className="pf-secondary-button"
+              className="pf-secondary-button pf-settings-action-button"
               type="button"
               disabled={
                 mfaAction !== null ||
                 !authenticatorMfaActive ||
                 preferredMethod === "authenticator"
               }
-              onClick={() =>
-                void runMfaAction(
-                  "prefer-authenticator",
-                  () => setAdminPreferredMFAMethod("authenticator"),
-                  "Authenticator MFA set as preferred login method."
-                )
-              }
+              onClick={() => startMFAAction("prefer_authenticator")}
             >
-              {mfaAction === "prefer-authenticator"
-                ? "Saving..."
-                : "Prefer Authenticator"}
+              Prefer Authenticator
             </button>
 
             <button
-              className="pf-secondary-button"
+              className="pf-secondary-button pf-settings-action-button"
               type="button"
               disabled={mfaAction !== null}
               onClick={() => void loadMFAStatus()}
@@ -377,6 +456,114 @@ export function AdminSettingsPanel<TSection extends string>({
               Refresh MFA status
             </button>
           </div>
+
+          {pendingMFAAction && (
+            <form className="pf-settings-mfa-verification" onSubmit={handleApplySettingsAction}>
+              <div>
+                <h3>{pendingMFAAction.label}</h3>
+                <p>{pendingMFAAction.description}</p>
+              </div>
+
+              <div className="pf-settings-verification-row">
+                <label>
+                  Verify with
+                  <select
+                    value={settingsMethod}
+                    onChange={(event) => {
+                      setSettingsMethod(event.target.value as MFAMethod);
+                      setSettingsChallenge(null);
+                      setSettingsCode("");
+                      setMfaStatusMessage("");
+                      setMfaError("");
+                    }}
+                  >
+                    <option value="email" disabled={!canVerifyWithEmail}>
+                      Email code
+                    </option>
+                    <option
+                      value="authenticator"
+                      disabled={!canVerifyWithAuthenticator}
+                    >
+                      Authenticator app
+                    </option>
+                  </select>
+                </label>
+
+                {settingsMethod === "email" && (
+                  <button
+                    className="pf-secondary-button pf-settings-action-button"
+                    type="button"
+                    disabled={mfaAction !== null || Boolean(settingsChallenge)}
+                    onClick={() => void handleSendEmailSettingsCode()}
+                  >
+                    {mfaAction === "settings-challenge"
+                      ? "Sending..."
+                      : settingsChallenge
+                        ? "Code sent"
+                        : "Send verification code"}
+                  </button>
+                )}
+
+                <label>
+                  Verification code
+                  <input
+                    value={settingsCode}
+                    onChange={(event) => setSettingsCode(event.target.value)}
+                    placeholder={
+                      settingsMethod === "email"
+                        ? "Email code"
+                        : "Authenticator code"
+                    }
+                    autoComplete="one-time-code"
+                    disabled={!canTypeSettingsCode}
+                    required
+                  />
+                </label>
+              </div>
+
+              {settingsChallenge?.dev_email_code && (
+                <div className="pf-dev-box">
+                  <strong>Local DEBUG MFA settings code</strong>
+                  <code>{settingsChallenge.dev_email_code}</code>
+                  <small>
+                    Production sends this code by email. It is shown here only
+                    when the backend returns it in DEBUG mode.
+                  </small>
+                </div>
+              )}
+
+              <div className="pf-settings-action-row">
+                <button
+                  className="pf-primary-button pf-settings-confirm-button"
+                  type="submit"
+                  disabled={
+                    !settingsCode.trim() ||
+                    mfaAction !== null ||
+                    (settingsMethod === "email" && !settingsChallenge)
+                  }
+                >
+                  {mfaAction === "settings-action"
+                    ? "Applying..."
+                    : `Confirm ${pendingMFAAction.label}`}
+                </button>
+
+                <button
+                  className="pf-secondary-button pf-settings-action-button"
+                  type="button"
+                  disabled={mfaAction !== null}
+                  onClick={() => {
+                    setPendingMFAAction(null);
+                    setSettingsChallenge(null);
+                    setSettingsCode("");
+                    setMfaStatusMessage("");
+                    setMfaError("");
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          )}
 
           {mfaStatus?.mfa_required && (
             <p className="pf-settings-help-text">
@@ -422,7 +609,7 @@ export function AdminSettingsPanel<TSection extends string>({
 
             <div className="pf-settings-verification-row">
               <button
-                className="pf-secondary-button"
+                className="pf-secondary-button pf-settings-action-button"
                 type="button"
                 onClick={() => void handleRequestIdentityChallenge()}
                 disabled={isRequestingChallenge}
@@ -464,7 +651,7 @@ export function AdminSettingsPanel<TSection extends string>({
             )}
 
             <button
-              className="pf-primary-button"
+              className="pf-primary-button pf-settings-confirm-button"
               type="submit"
               disabled={!challenge || isSavingIdentity}
             >
