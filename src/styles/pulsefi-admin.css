@@ -3382,3 +3382,45 @@ dd {
   }
 }
 /* Step 40F backup-code settings UI end */
+
+/* PulseFi outlined primary buttons start */
+.pf-primary-button {
+  border: 1px solid rgba(0, 209, 255, 0.45) !important;
+  background: rgba(0, 209, 255, 0.08) !important;
+  color: var(--pf-text, #f8fafc) !important;
+  box-shadow: none !important;
+}
+
+.pf-primary-button span,
+.pf-primary-button .material-symbols-outlined {
+  color: inherit !important;
+}
+
+.pf-primary-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(0, 209, 255, 0.7) !important;
+  background: rgba(0, 209, 255, 0.14) !important;
+  box-shadow: 0 14px 30px rgba(0, 209, 255, 0.08) !important;
+}
+
+.pf-primary-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pf-primary-button:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+[data-theme="light"] .pf-primary-button {
+  border-color: rgba(0, 148, 190, 0.36) !important;
+  background: rgba(0, 148, 190, 0.08) !important;
+  color: #0f172a !important;
+}
+
+[data-theme="light"] .pf-primary-button:hover:not(:disabled) {
+  border-color: rgba(0, 148, 190, 0.58) !important;
+  background: rgba(0, 148, 190, 0.13) !important;
+  box-shadow: 0 14px 30px rgba(0, 148, 190, 0.08) !important;
+}
+/* PulseFi outlined primary buttons end */
