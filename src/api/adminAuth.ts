@@ -232,7 +232,8 @@ export async function restoreAdminSession(
 
 export async function loginAsAdmin(
   identifier: string,
-  password: string
+  password: string,
+  mfaMethod?: MFAMethod
 ): Promise<AdminLoginResponse> {
   return apiRequest<AdminLoginResponse>("/auth/login", {
     method: "POST",
@@ -240,15 +241,17 @@ export async function loginAsAdmin(
       account_type: "admin",
       identifier,
       password,
+      ...(mfaMethod ? { mfa_method: mfaMethod } : {}),
     }),
   });
 }
 
 export async function loginAdmin(
   identifier: string,
-  password: string
+  password: string,
+  mfaMethod?: MFAMethod
 ): Promise<AdminLoginResult> {
-  const response = await loginAsAdmin(identifier, password);
+  const response = await loginAsAdmin(identifier, password, mfaMethod);
 
   if (isMFARequiredResponse(response)) {
     return {
@@ -380,4 +383,6 @@ export async function applyAdminMFASettingsAction(
     body: JSON.stringify(payload),
   });
 }
+
+
 

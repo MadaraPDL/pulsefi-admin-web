@@ -12,6 +12,7 @@ import {
 import type {
   AdminAuthenticatedResult,
   AdminLoginResponse,
+  MFAMethod,
   MFARequiredResponse,
   MFASetupRequiredResponse,
 } from "../api/adminAuth";
@@ -189,6 +190,9 @@ function AdminLoginPage({
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [mfaMethod, setMfaMethod] = useState<MFAMethod | "preferred">(
+    "preferred"
+  );
   const [isResetMode, setIsResetMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -199,7 +203,11 @@ function AdminLoginPage({
     setIsSubmitting(true);
 
     try {
-      const response = await loginAsAdmin(identifier, password);
+      const response = await loginAsAdmin(
+        identifier,
+        password,
+        mfaMethod === "preferred" ? undefined : mfaMethod
+      );
       onLoginResponse(response, identifier);
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not sign in."));
@@ -297,6 +305,35 @@ function AdminLoginPage({
                 </button>
               </div>
 
+              <div className="pf-field">
+                <label className="pf-label" htmlFor="admin-mfa-method">
+                  MFA method
+                </label>
+
+                <div className="pf-input-shell">
+                  <span className="pf-input-icon" aria-hidden="true">
+                    <span className="material-symbols-outlined">security</span>
+                  </span>
+
+                  <select
+                    id="admin-mfa-method"
+                    className="pf-input pf-admin-mfa-method-select"
+                    value={mfaMethod}
+                    onChange={(event) =>
+                      setMfaMethod(event.target.value as MFAMethod | "preferred")
+                    }
+                  >
+                    <option value="preferred">Use account preference</option>
+                    <option value="email">Email code</option>
+                    <option value="authenticator">Authenticator app</option>
+                  </select>
+                </div>
+
+                <p className="pf-auth-helper-text">
+                  Choose a method only if it is active on your account. Otherwise,
+                  keep account preference.
+                </p>
+              </div>
               {errorMessage && (
                 <div className="pf-error-box">{errorMessage}</div>
               )}
@@ -621,6 +658,9 @@ function AuthThemeToggle({
     </div>
   );
 }
+
+
+
 
 
 

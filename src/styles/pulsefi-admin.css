@@ -3086,3 +3086,14 @@ dd {
   background: rgba(220, 38, 38, 0.07) !important;
   color: #991b1b !important;
 }
+.pf-auth-helper-text {
+  margin: 8px 0 0;
+  color: var(--pf-muted, #94a3b8);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.pf-admin-mfa-method-select {
+  appearance: none;
+  cursor: pointer;
+}
