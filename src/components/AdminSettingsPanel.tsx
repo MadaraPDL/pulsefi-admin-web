@@ -1,12 +1,19 @@
-import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { AdminTheme } from "../App.real";
 import {
+  disableAdminAuthenticatorMFA,
+  disableAdminEmailMFA,
+  enableAdminEmailMFA,
+  getAdminMFAStatus,
   requestAdminIdentityVerification,
+  setAdminPreferredMFAMethod,
   updateAdminIdentity,
 } from "../api/adminAuth";
 import type {
   CurrentAdminResponse,
+  MFAMethod,
+  MFAStatusResponse,
   ProfileUpdateChallengeResponse,
 } from "../api/adminAuth";
 import { getErrorMessage } from "../api/errors";
@@ -16,6 +23,34 @@ type SettingsShortcut<TSection extends string> = {
   label: string;
   section: TSection;
 };
+
+function formatMfaMethod(method: MFAMethod | null) {
+  if (method === "email") {
+    return "Email code";
+  }
+
+  if (method === "authenticator") {
+    return "Authenticator app";
+  }
+
+  return "Not set";
+}
+
+function StatusPill({
+  active,
+  activeLabel = "Active",
+  inactiveLabel = "Inactive",
+}: {
+  active: boolean;
+  activeLabel?: string;
+  inactiveLabel?: string;
+}) {
+  return (
+    <span className={`status-pill ${active ? "status-active" : "status-inactive"}`}>
+      {active ? activeLabel : inactiveLabel}
+    </span>
+  );
+}
 
 export function AdminSettingsPanel<TSection extends string>({
   adminName,
@@ -51,6 +86,45 @@ export function AdminSettingsPanel<TSection extends string>({
   const [identityError, setIdentityError] = useState("");
   const [isRequestingChallenge, setIsRequestingChallenge] = useState(false);
   const [isSavingIdentity, setIsSavingIdentity] = useState(false);
+
+  const [mfaStatus, setMfaStatus] = useState<MFAStatusResponse | null>(null);
+  const [mfaStatusMessage, setMfaStatusMessage] = useState("");
+  const [mfaError, setMfaError] = useState("");
+  const [mfaAction, setMfaAction] = useState<string | null>(null);
+  useEffect(() => {
+    void loadMFAStatus();
+  }, []);
+
+  async function loadMFAStatus() {
+    setMfaError("");
+
+    try {
+      const status = await getAdminMFAStatus();
+      setMfaStatus(status);
+    } catch (error) {
+      setMfaError(getErrorMessage(error, "Could not load MFA status."));
+    }
+  }
+
+  async function runMfaAction(
+    actionName: string,
+    action: () => Promise<MFAStatusResponse>,
+    successMessage: string
+  ) {
+    setMfaError("");
+    setMfaStatusMessage("");
+    setMfaAction(actionName);
+
+    try {
+      const status = await action();
+      setMfaStatus(status);
+      setMfaStatusMessage(successMessage);
+    } catch (error) {
+      setMfaError(getErrorMessage(error, "Could not update MFA settings."));
+    } finally {
+      setMfaAction(null);
+    }
+  }
 
   async function handleRequestIdentityChallenge() {
     setIdentityError("");
@@ -104,6 +178,10 @@ export function AdminSettingsPanel<TSection extends string>({
       setIsSavingIdentity(false);
     }
   }
+
+  const emailMfaActive = mfaStatus?.email_mfa_enabled ?? false;
+  const authenticatorMfaActive = mfaStatus?.authenticator_mfa_enabled ?? false;
+  const preferredMethod = mfaStatus?.preferred_mfa_method ?? null;
 
   return (
     <section className="pf-content-card pf-settings-page" aria-label="Admin settings">
@@ -159,6 +237,158 @@ export function AdminSettingsPanel<TSection extends string>({
               <dd>{activeSectionLabel}</dd>
             </div>
           </dl>
+        </article>
+
+        <article className="pf-settings-section pf-settings-section-wide">
+          <span className="pf-settings-label">Security / MFA</span>
+
+          <div className="pf-settings-mfa-grid">
+            <div className="pf-settings-mfa-card">
+              <div>
+                <h3>Email MFA</h3>
+                <p>Receive a one-time login code by email.</p>
+              </div>
+              <StatusPill active={emailMfaActive} />
+            </div>
+
+            <div className="pf-settings-mfa-card">
+              <div>
+                <h3>Authenticator MFA</h3>
+                <p>Use a time-based code from an authenticator app.</p>
+              </div>
+              <StatusPill active={authenticatorMfaActive} />
+            </div>
+
+            <div className="pf-settings-mfa-card">
+              <div>
+                <h3>Preferred login method</h3>
+                <p>{formatMfaMethod(preferredMethod)}</p>
+              </div>
+              <StatusPill
+                active={Boolean(preferredMethod)}
+                activeLabel="Configured"
+                inactiveLabel="Not set"
+              />
+            </div>
+          </div>
+
+          <div className="pf-settings-action-row">
+            <button
+              className="pf-secondary-button"
+              type="button"
+              disabled={mfaAction !== null || emailMfaActive}
+              onClick={() =>
+                void runMfaAction(
+                  "enable-email",
+                  enableAdminEmailMFA,
+                  "Email MFA enabled."
+                )
+              }
+            >
+              {mfaAction === "enable-email" ? "Enabling..." : "Enable Email MFA"}
+            </button>
+
+            <button
+              className="pf-secondary-button"
+              type="button"
+              disabled={
+                mfaAction !== null ||
+                !emailMfaActive ||
+                mfaStatus?.can_disable_email_mfa === false
+              }
+              onClick={() =>
+                void runMfaAction(
+                  "disable-email",
+                  disableAdminEmailMFA,
+                  "Email MFA disabled."
+                )
+              }
+            >
+              {mfaAction === "disable-email" ? "Disabling..." : "Disable Email MFA"}
+            </button>
+
+            <button
+              className="pf-secondary-button"
+              type="button"
+              disabled={
+                mfaAction !== null ||
+                !authenticatorMfaActive ||
+                mfaStatus?.can_disable_authenticator_mfa === false
+              }
+              onClick={() =>
+                void runMfaAction(
+                  "disable-authenticator",
+                  disableAdminAuthenticatorMFA,
+                  "Authenticator MFA disabled."
+                )
+              }
+            >
+              {mfaAction === "disable-authenticator"
+                ? "Disabling..."
+                : "Disable Authenticator"}
+            </button>
+          </div>
+
+          <div className="pf-settings-action-row">
+            <button
+              className="pf-secondary-button"
+              type="button"
+              disabled={
+                mfaAction !== null || !emailMfaActive || preferredMethod === "email"
+              }
+              onClick={() =>
+                void runMfaAction(
+                  "prefer-email",
+                  () => setAdminPreferredMFAMethod("email"),
+                  "Email MFA set as preferred login method."
+                )
+              }
+            >
+              {mfaAction === "prefer-email" ? "Saving..." : "Prefer Email"}
+            </button>
+
+            <button
+              className="pf-secondary-button"
+              type="button"
+              disabled={
+                mfaAction !== null ||
+                !authenticatorMfaActive ||
+                preferredMethod === "authenticator"
+              }
+              onClick={() =>
+                void runMfaAction(
+                  "prefer-authenticator",
+                  () => setAdminPreferredMFAMethod("authenticator"),
+                  "Authenticator MFA set as preferred login method."
+                )
+              }
+            >
+              {mfaAction === "prefer-authenticator"
+                ? "Saving..."
+                : "Prefer Authenticator"}
+            </button>
+
+            <button
+              className="pf-secondary-button"
+              type="button"
+              disabled={mfaAction !== null}
+              onClick={() => void loadMFAStatus()}
+            >
+              Refresh MFA status
+            </button>
+          </div>
+
+          {mfaStatus?.mfa_required && (
+            <p className="pf-settings-help-text">
+              MFA is required for this account. You cannot disable the last active
+              MFA method.
+            </p>
+          )}
+
+          {mfaError && <div className="pf-error-box">{mfaError}</div>}
+          {mfaStatusMessage && (
+            <div className="pf-success-box">{mfaStatusMessage}</div>
+          )}
         </article>
 
         <article className="pf-settings-section pf-settings-section-wide">
@@ -272,3 +502,4 @@ export function AdminSettingsPanel<TSection extends string>({
     </section>
   );
 }
+

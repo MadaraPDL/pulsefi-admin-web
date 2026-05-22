@@ -1,4 +1,4 @@
-import { apiRequest } from "./client";
+﻿import { apiRequest } from "./client";
 
 export type AdminRole = "platform_admin" | "isp_admin";
 
@@ -86,6 +86,19 @@ export type UpdateAdminIdentityRequest = {
   mfa_code: string;
 };
 
+export type MFAMethod = "email" | "authenticator";
+
+export type MFAStatusResponse = {
+  account_type: "admin" | "app_user";
+  mfa_required: boolean;
+  mfa_enabled: boolean;
+  email_mfa_enabled: boolean;
+  authenticator_mfa_enabled: boolean;
+  preferred_mfa_method: MFAMethod | null;
+  active_methods: MFAMethod[];
+  can_disable_email_mfa: boolean;
+  can_disable_authenticator_mfa: boolean;
+};
 export type AdminAuthenticatedResult = {
   kind: "authenticated";
   accessToken: string;
@@ -299,3 +312,35 @@ export async function resetAdminPassword(
     }),
   });
 }
+export async function getAdminMFAStatus(): Promise<MFAStatusResponse> {
+  return apiRequest<MFAStatusResponse>("/auth/me/mfa/status");
+}
+
+export async function enableAdminEmailMFA(): Promise<MFAStatusResponse> {
+  return apiRequest<MFAStatusResponse>("/auth/me/mfa/email/enable", {
+    method: "POST",
+  });
+}
+
+export async function disableAdminEmailMFA(): Promise<MFAStatusResponse> {
+  return apiRequest<MFAStatusResponse>("/auth/me/mfa/email/disable", {
+    method: "PATCH",
+  });
+}
+
+export async function disableAdminAuthenticatorMFA(): Promise<MFAStatusResponse> {
+  return apiRequest<MFAStatusResponse>("/auth/me/mfa/authenticator/disable", {
+    method: "PATCH",
+  });
+}
+
+export async function setAdminPreferredMFAMethod(
+  method: MFAMethod
+): Promise<MFAStatusResponse> {
+  return apiRequest<MFAStatusResponse>("/auth/me/mfa/preferred-method", {
+    method: "PATCH",
+    body: JSON.stringify({ method }),
+  });
+}
+
+
