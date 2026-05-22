@@ -1,3 +1,5 @@
+const shouldShowDevCodes = import.meta.env.VITE_SHOW_DEV_CODES === "true";
+
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import type { AdminTheme } from "../App.real";
@@ -661,7 +663,7 @@ export function AdminSettingsPanel<TSection extends string>({
                 </label>
               </div>
 
-              {settingsChallenge?.dev_email_code && (
+              {shouldShowDevCodes && settingsChallenge?.dev_email_code && (
                 <div className="pf-dev-box">
                   <strong>Local DEBUG MFA settings code</strong>
                   <code>{settingsChallenge.dev_email_code}</code>
@@ -840,7 +842,7 @@ export function AdminSettingsPanel<TSection extends string>({
                 </label>
               </div>
 
-              {backupCodeChallenge?.dev_email_code && (
+              {shouldShowDevCodes && backupCodeChallenge?.dev_email_code && (
                 <div className="pf-dev-box">
                   <strong>Local DEBUG backup-code settings code</strong>
                   <code>{backupCodeChallenge.dev_email_code}</code>
