@@ -1,16 +1,20 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   getISPAdminAppUser,
   listISPAdminAppUsers,
+  listRouters,
+  listUserSubscriptions,
   updateISPAdminAppUser,
 } from "../api/ispAdmin";
 import type {
   AppUser,
   AppUserFilter,
   AppUserStatus,
+  ISPAdminRouter,
   UpdateAppUserRequest,
+  UserSubscription,
 } from "../api/ispAdmin";
 
 const appUserFilters: { label: string; value: AppUserFilter }[] = [
@@ -41,6 +45,8 @@ function formatDate(value: string | null) {
 export function AppUserManagement() {
   const [statusFilter, setStatusFilter] = useState<AppUserFilter>("all");
   const [users, setUsers] = useState<AppUser[]>([]);
+  const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
+  const [routers, setRouters] = useState<ISPAdminRouter[]>([]);
   const [selectedUser, setSelectedUser] = useState<AppUser | null>(null);
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -50,6 +56,39 @@ export function AppUserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectingUserId, setSelectingUserId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const serviceLineCountByUserId = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    for (const subscription of subscriptions) {
+      counts.set(subscription.user_id, (counts.get(subscription.user_id) ?? 0) + 1);
+    }
+
+    return counts;
+  }, [subscriptions]);
+
+  const routerCountByUserId = useMemo(() => {
+    const serviceLineUserIdById = new Map(
+      subscriptions.map((subscription) => [subscription.id, subscription.user_id])
+    );
+    const counts = new Map<string, number>();
+
+    for (const router of routers) {
+      if (!router.user_subscription_id) {
+        continue;
+      }
+
+      const userId = serviceLineUserIdById.get(router.user_subscription_id);
+
+      if (!userId) {
+        continue;
+      }
+
+      counts.set(userId, (counts.get(userId) ?? 0) + 1);
+    }
+
+    return counts;
+  }, [routers, subscriptions]);
 
   function setEditableFields(user: AppUser) {
     setFullName(user.full_name);
@@ -62,10 +101,15 @@ export function AppUserManagement() {
     setErrorMessage("");
 
     try {
-      const data = await listISPAdminAppUsers(
-        getApiStatusFilter(statusFilter)
-      );
-      setUsers(data);
+      const [userData, subscriptionData, routerData] = await Promise.all([
+        listISPAdminAppUsers(getApiStatusFilter(statusFilter)),
+        listUserSubscriptions(null, null, 100),
+        listRouters(null, null, 100),
+      ]);
+
+      setUsers(userData);
+      setSubscriptions(subscriptionData);
+      setRouters(routerData);
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not load App Users."));
     } finally {
@@ -292,6 +336,8 @@ export function AppUserManagement() {
                 <th>Email</th>
                 <th>Username</th>
                 <th>Phone</th>
+                <th>Service lines</th>
+                <th>Routers</th>
                 <th>Status</th>
                 <th>Created</th>
                 <th>Action</th>
@@ -312,6 +358,8 @@ export function AppUserManagement() {
                   <td>{user.email}</td>
                   <td>{user.username ?? "-"}</td>
                   <td>{user.phone_number ?? "-"}</td>
+                  <td>{serviceLineCountByUserId.get(user.id) ?? 0}</td>
+                  <td>{routerCountByUserId.get(user.id) ?? 0}</td>
                   <td>
                     <span className={`status-pill status-${user.status}`}>
                       {user.status}
@@ -336,7 +384,7 @@ export function AppUserManagement() {
 
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={7}>
+                  <td colSpan={9}>
                     No App Users match this filter. Create an App User
                     invitation first, then accepted accounts appear here.
                   </td>

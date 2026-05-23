@@ -4305,3 +4305,360 @@ dd {
   }
 }
 /* PulseFi overview layout polish end */
+
+/* Step 42C admin network activity table polish
+   Fixes squeezed two-column network tables where time/detail buttons overlap. */
+
+.pf-network-activity-center .pf-network-grid {
+  grid-template-columns: 1fr;
+}
+
+.pf-network-activity-center .pf-network-panel {
+  min-width: 0;
+}
+
+.pf-network-activity-center .pf-monitoring-panel-header {
+  gap: 14px;
+}
+
+.pf-network-activity-center .pf-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.pf-network-activity-center .pf-table-wrap table {
+  width: 100%;
+  min-width: 920px;
+  table-layout: fixed;
+}
+
+.pf-device-connection-log-table th:nth-child(1),
+.pf-device-connection-log-table td:nth-child(1) {
+  width: 140px;
+}
+
+.pf-device-connection-log-table th:nth-child(2),
+.pf-device-connection-log-table td:nth-child(2) {
+  width: 140px;
+}
+
+.pf-device-connection-log-table th:nth-child(3),
+.pf-device-connection-log-table td:nth-child(3) {
+  width: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pf-device-connection-log-table th:nth-child(4),
+.pf-device-connection-log-table td:nth-child(4) {
+  width: 190px;
+  white-space: nowrap;
+}
+
+.pf-device-connection-log-table th:nth-child(5),
+.pf-device-connection-log-table td:nth-child(5) {
+  width: 120px;
+  text-align: right;
+}
+
+.pf-router-action-log-table th:nth-child(1),
+.pf-router-action-log-table td:nth-child(1) {
+  width: 170px;
+}
+
+.pf-router-action-log-table th:nth-child(2),
+.pf-router-action-log-table td:nth-child(2) {
+  width: 140px;
+}
+
+.pf-router-action-log-table th:nth-child(3),
+.pf-router-action-log-table td:nth-child(3) {
+  width: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pf-router-action-log-table th:nth-child(4),
+.pf-router-action-log-table td:nth-child(4) {
+  width: 210px;
+  white-space: nowrap;
+}
+
+.pf-router-action-log-table th:nth-child(5),
+.pf-router-action-log-table td:nth-child(5) {
+  width: 120px;
+  text-align: right;
+}
+
+.pf-network-activity-center .small-button {
+  min-width: 74px;
+  white-space: nowrap;
+}
+
+.pf-network-filter-bar {
+  justify-content: flex-end;
+}
+
+@media (max-width: 900px) {
+  .pf-network-filter-bar {
+    justify-content: flex-start;
+  }
+
+  .pf-network-activity-center .pf-table-wrap table {
+    min-width: 820px;
+  }
+}
+
+/* Step 42C refinement: keep network activity lower panels side-by-side,
+   but make table columns compact enough to avoid button/date collision. */
+
+.pf-network-activity-center .pf-network-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.pf-network-activity-center .pf-network-panel-wide {
+  grid-column: 1 / -1;
+}
+
+.pf-network-activity-center .pf-network-panel {
+  min-width: 0;
+}
+
+.pf-network-activity-center .pf-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.pf-network-activity-center .pf-table-wrap table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.pf-device-connection-log-table {
+  min-width: 680px !important;
+}
+
+.pf-router-action-log-table {
+  min-width: 680px !important;
+}
+
+.pf-device-connection-log-table th:nth-child(1),
+.pf-device-connection-log-table td:nth-child(1) {
+  width: 110px;
+}
+
+.pf-device-connection-log-table th:nth-child(2),
+.pf-device-connection-log-table td:nth-child(2) {
+  width: 118px;
+}
+
+.pf-device-connection-log-table th:nth-child(3),
+.pf-device-connection-log-table td:nth-child(3) {
+  width: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pf-device-connection-log-table th:nth-child(4),
+.pf-device-connection-log-table td:nth-child(4) {
+  width: 170px;
+  white-space: nowrap;
+}
+
+.pf-device-connection-log-table th:nth-child(5),
+.pf-device-connection-log-table td:nth-child(5) {
+  width: 92px;
+  text-align: right;
+}
+
+.pf-router-action-log-table th:nth-child(1),
+.pf-router-action-log-table td:nth-child(1) {
+  width: 130px;
+}
+
+.pf-router-action-log-table th:nth-child(2),
+.pf-router-action-log-table td:nth-child(2) {
+  width: 110px;
+}
+
+.pf-router-action-log-table th:nth-child(3),
+.pf-router-action-log-table td:nth-child(3) {
+  width: 170px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pf-router-action-log-table th:nth-child(4),
+.pf-router-action-log-table td:nth-child(4) {
+  width: 170px;
+  white-space: nowrap;
+}
+
+.pf-router-action-log-table th:nth-child(5),
+.pf-router-action-log-table td:nth-child(5) {
+  width: 92px;
+  text-align: right;
+}
+
+.pf-network-activity-center .small-button {
+  min-width: 72px;
+  white-space: nowrap;
+}
+
+.pf-network-filter-bar {
+  justify-content: flex-end;
+}
+
+@media (max-width: 1280px) {
+  .pf-network-activity-center .pf-network-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-network-filter-bar {
+    justify-content: flex-start;
+  }
+}
+
+/* Step 42C final network activity layout fix.
+   Keep lower network panels side-by-side, reduce empty column spacing,
+   and prevent the View button from touching the scrollbar. */
+
+.pf-network-activity-center .pf-network-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+  gap: 18px !important;
+  align-items: start;
+}
+
+.pf-network-activity-center .pf-network-panel-wide {
+  grid-column: 1 / -1;
+}
+
+.pf-network-activity-center .pf-network-panel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pf-network-activity-center .pf-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  max-height: 520px;
+  overflow: auto;
+  padding: 10px 12px 10px 10px;
+  scrollbar-gutter: stable;
+}
+
+.pf-network-activity-center .pf-table-wrap table {
+  width: 100%;
+  min-width: 0 !important;
+  table-layout: fixed;
+}
+
+.pf-network-activity-center .pf-table-wrap th,
+.pf-network-activity-center .pf-table-wrap td {
+  padding: 14px 12px;
+  vertical-align: middle;
+}
+
+/* Device connection logs: compact columns for half-screen layout. */
+.pf-device-connection-log-table th:nth-child(1),
+.pf-device-connection-log-table td:nth-child(1) {
+  width: 105px;
+}
+
+.pf-device-connection-log-table th:nth-child(2),
+.pf-device-connection-log-table td:nth-child(2) {
+  width: 120px;
+}
+
+.pf-device-connection-log-table th:nth-child(3),
+.pf-device-connection-log-table td:nth-child(3) {
+  width: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pf-device-connection-log-table th:nth-child(4),
+.pf-device-connection-log-table td:nth-child(4) {
+  width: 178px;
+  white-space: nowrap;
+}
+
+.pf-device-connection-log-table th:nth-child(5),
+.pf-device-connection-log-table td:nth-child(5) {
+  width: 104px;
+  text-align: right;
+  padding-right: 18px;
+}
+
+/* Router action logs: reduce the empty Error -> Executed gap. */
+.pf-router-action-log-table th:nth-child(1),
+.pf-router-action-log-table td:nth-child(1) {
+  width: 150px;
+}
+
+.pf-router-action-log-table th:nth-child(2),
+.pf-router-action-log-table td:nth-child(2) {
+  width: 120px;
+}
+
+.pf-router-action-log-table th:nth-child(3),
+.pf-router-action-log-table td:nth-child(3) {
+  width: 120px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pf-router-action-log-table th:nth-child(4),
+.pf-router-action-log-table td:nth-child(4) {
+  width: 185px;
+  white-space: nowrap;
+}
+
+.pf-router-action-log-table th:nth-child(5),
+.pf-router-action-log-table td:nth-child(5) {
+  width: 104px;
+  text-align: right;
+  padding-right: 18px;
+}
+
+.pf-network-activity-center .small-button {
+  min-width: 76px;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.pf-network-filter-bar {
+  justify-content: flex-end;
+}
+
+@media (max-width: 1280px) {
+  .pf-network-activity-center .pf-network-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pf-network-filter-bar {
+    justify-content: flex-start;
+  }
+
+  .pf-network-activity-center .pf-table-wrap table {
+    min-width: 720px !important;
+  }
+}
+
+/* Step 42C service request reason visibility */
+.pf-request-reason-cell {
+  max-width: 280px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}

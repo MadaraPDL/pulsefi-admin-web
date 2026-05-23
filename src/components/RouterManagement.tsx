@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   createRouter,
+  createUserSubscription,
   getRouter,
   listISPAdminAppUsers,
   listRouters,
@@ -29,6 +30,8 @@ const routerFilters: { label: string; value: RouterFilter }[] = [
 
 const routerStatuses: RouterStatus[] = ["active", "inactive", "maintenance"];
 
+type RouterCreateMode = "new_service_line" | "existing_service_line";
+
 function getApiStatusFilter(filter: RouterFilter): RouterStatus | null {
   return filter === "all" ? null : filter;
 }
@@ -51,6 +54,10 @@ function optionalText(value: string) {
   return value.trim() || null;
 }
 
+function todayDateInputValue() {
+  return new Date().toISOString().slice(0, 10);
+}
+
 export function RouterManagement() {
   const [statusFilter, setStatusFilter] = useState<RouterFilter>("all");
   const [subscriptionFilter, setSubscriptionFilter] = useState("all");
@@ -63,6 +70,12 @@ export function RouterManagement() {
     null
   );
 
+  const [createMode, setCreateMode] =
+    useState<RouterCreateMode>("new_service_line");
+  const [createUserId, setCreateUserId] = useState("");
+  const [createPlanId, setCreatePlanId] = useState("");
+  const [createServiceLabel, setCreateServiceLabel] = useState("");
+  const [createStartDate, setCreateStartDate] = useState(todayDateInputValue);
   const [createSubscriptionId, setCreateSubscriptionId] = useState("");
   const [createName, setCreateName] = useState("");
   const [createModel, setCreateModel] = useState("");
@@ -98,26 +111,70 @@ export function RouterManagement() {
     return new Map(users.map((user) => [user.id, user.full_name]));
   }, [users]);
 
+
   const planNameById = useMemo(() => {
     return new Map(plans.map((plan) => [plan.id, plan.plan_name]));
   }, [plans]);
 
+  const activePlans = useMemo(() => {
+    return plans.filter((plan) => plan.is_active);
+  }, [plans]);
+
+  const routerCountByServiceLineId = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    for (const router of routers) {
+      if (!router.user_subscription_id) {
+        continue;
+      }
+
+      counts.set(
+        router.user_subscription_id,
+        (counts.get(router.user_subscription_id) ?? 0) + 1
+      );
+    }
+
+    return counts;
+  }, [routers]);
+
   const subscriptionLabelById = useMemo(() => {
     return new Map(
-      subscriptions.map((subscription) => {
-        const userName = userNameById.get(subscription.user_id) ?? "Unknown user";
-        const planName = planNameById.get(subscription.plan_id) ?? "Unknown plan";
-        const label = subscription.subscription_label
-          ? ` - ${subscription.subscription_label}`
-          : "";
-
-        return [
-          subscription.id,
-          `${userName} / ${planName}${label} (${subscription.status})`,
-        ];
-      })
+      subscriptions.map((subscription) => [
+        subscription.id,
+        getServiceLineLabel(subscription),
+      ])
     );
-  }, [subscriptions, userNameById, planNameById]);
+    // getServiceLineLabel depends on these maps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subscriptions, userNameById, planNameById, routerCountByServiceLineId]);
+
+  function getServiceLineLabel(subscription: UserSubscription) {
+    const userName = userNameById.get(subscription.user_id) ?? "Unknown user";
+    const planName = planNameById.get(subscription.plan_id) ?? "Unknown package";
+    const serviceLabel = subscription.subscription_label
+      ? ` / ${subscription.subscription_label}`
+      : "";
+    const routerCount = routerCountByServiceLineId.get(subscription.id) ?? 0;
+    const routerText =
+      routerCount === 0
+        ? "no router"
+        : routerCount === 1
+          ? "1 router"
+          : `${routerCount} routers`;
+
+    return `${userName}${serviceLabel} / ${planName} (${subscription.status}, ${routerText})`;
+  }
+
+  function serviceLineHasOtherRouter(
+    serviceLineId: string,
+    currentRouterId: string | null = null
+  ) {
+    return routers.some(
+      (router) =>
+        router.user_subscription_id === serviceLineId &&
+        router.id !== currentRouterId
+    );
+  }
 
   function setEditableFields(router: ISPAdminRouter) {
     setEditSubscriptionId(router.user_subscription_id ?? "");
@@ -147,21 +204,49 @@ export function RouterManagement() {
     }
   }
 
+  async function loadOptions() {
+    setIsLoadingOptions(true);
+
+    try {
+      const [subscriptionData, userData, planData, routerData] =
+        await Promise.all([
+          listUserSubscriptions(null, null, 100),
+          listISPAdminAppUsers(null, 100),
+          listSubscriptionPlans(null, 100),
+          listRouters(null, null, 100),
+        ]);
+
+      setSubscriptions(subscriptionData);
+      setUsers(userData);
+      setPlans(planData);
+      setRouters(routerData);
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, "Could not load router form options.")
+      );
+    } finally {
+      setIsLoadingOptions(false);
+    }
+  }
+
   useEffect(() => {
     let isCancelled = false;
 
     async function loadInitialOptions() {
       try {
-        const [subscriptionData, userData, planData] = await Promise.all([
-          listUserSubscriptions(null),
-          listISPAdminAppUsers(null),
-          listSubscriptionPlans(null),
-        ]);
+        const [subscriptionData, userData, planData, routerData] =
+          await Promise.all([
+            listUserSubscriptions(null, null, 100),
+            listISPAdminAppUsers(null, 100),
+            listSubscriptionPlans(null, 100),
+            listRouters(null, null, 100),
+          ]);
 
         if (!isCancelled) {
           setSubscriptions(subscriptionData);
           setUsers(userData);
           setPlans(planData);
+          setRouters(routerData);
         }
       } catch (error) {
         if (!isCancelled) {
@@ -233,11 +318,7 @@ export function RouterManagement() {
     }
   }
 
-  function validateRouterForm(subscriptionId: string, routerName: string) {
-    if (!subscriptionId) {
-      return "Select a user subscription.";
-    }
-
+  function validateRouterFields(routerName: string) {
     if (routerName.trim() && routerName.trim().length < 2) {
       return "Router name must be at least 2 characters.";
     }
@@ -248,10 +329,7 @@ export function RouterManagement() {
   async function handleCreateRouter(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const validationError = validateRouterForm(
-      createSubscriptionId,
-      createName
-    );
+    const validationError = validateRouterFields(createName);
 
     if (validationError) {
       setErrorMessage(validationError);
@@ -263,8 +341,47 @@ export function RouterManagement() {
     setIsCreating(true);
 
     try {
+      let serviceLineId = createSubscriptionId;
+
+      if (createMode === "new_service_line") {
+        if (!createUserId) {
+          setErrorMessage("Select an App User.");
+          return;
+        }
+
+        if (!createPlanId) {
+          setErrorMessage("Select a package/plan.");
+          return;
+        }
+
+        const createdServiceLine = await createUserSubscription({
+          user_id: createUserId,
+          plan_id: createPlanId,
+          subscription_label: optionalText(createServiceLabel),
+          start_date: createStartDate,
+          end_date: null,
+          status: "active",
+          auto_renew: true,
+        });
+
+        serviceLineId = createdServiceLine.id;
+        setSubscriptions((current) => [createdServiceLine, ...current]);
+      }
+
+      if (!serviceLineId) {
+        setErrorMessage("Select or create a service line for this router.");
+        return;
+      }
+
+      if (serviceLineHasOtherRouter(serviceLineId)) {
+        setErrorMessage(
+          "This service line already has a router. Create a new service line using the same package for another independent router."
+        );
+        return;
+      }
+
       const createdRouter = await createRouter({
-        user_subscription_id: createSubscriptionId,
+        user_subscription_id: serviceLineId,
         router_name: optionalText(createName),
         router_model: optionalText(createModel),
         router_ip: optionalText(createIp),
@@ -288,6 +405,10 @@ export function RouterManagement() {
       setSelectedRouter(createdRouter);
       setEditableFields(createdRouter);
 
+      setCreateUserId("");
+      setCreatePlanId("");
+      setCreateServiceLabel("");
+      setCreateStartDate(todayDateInputValue());
       setCreateSubscriptionId("");
       setCreateName("");
       setCreateModel("");
@@ -297,7 +418,11 @@ export function RouterManagement() {
       setCreateUsername("");
       setCreateStatus("active");
 
-      setSuccessMessage("Router created successfully.");
+      await loadOptions();
+
+      setSuccessMessage(
+        "Router created successfully. Independent usage will be tracked through its service line."
+      );
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not create router."));
     } finally {
@@ -313,10 +438,22 @@ export function RouterManagement() {
       return;
     }
 
-    const validationError = validateRouterForm(editSubscriptionId, editName);
+    const validationError = validateRouterFields(editName);
 
     if (validationError) {
       setErrorMessage(validationError);
+      return;
+    }
+
+    if (!editSubscriptionId) {
+      setErrorMessage("Select a service line.");
+      return;
+    }
+
+    if (serviceLineHasOtherRouter(editSubscriptionId, selectedRouter.id)) {
+      setErrorMessage(
+        "This service line already belongs to another router. Move this router to an unused service line."
+      );
       return;
     }
 
@@ -352,6 +489,8 @@ export function RouterManagement() {
                 router.user_subscription_id === subscriptionFilter)
           )
       );
+
+      await loadOptions();
 
       setSuccessMessage("Router updated successfully.");
     } catch (error) {
@@ -390,13 +529,17 @@ export function RouterManagement() {
           <p className="eyebrow">Router Records</p>
           <h2>Router Management</h2>
           <p className="muted">
-            Link routers to user subscriptions. Passwords are not collected here.
+            Create independent router service lines. Multiple routers can use the
+            same package, but each independent router needs its own service line.
           </p>
         </div>
         <button
           type="button"
           className="secondary-button pf-refresh-button"
-          onClick={loadRouters}
+          onClick={() => {
+            void loadOptions();
+            void loadRouters();
+          }}
         >
           Refresh
         </button>
@@ -406,22 +549,126 @@ export function RouterManagement() {
         <form className="create-form" onSubmit={handleCreateRouter}>
           <h3>Add router</h3>
 
-          <label>
-            User subscription
-            <select
-              value={createSubscriptionId}
-              onChange={(event) => setCreateSubscriptionId(event.target.value)}
-              required
-              disabled={isLoadingOptions}
+          <div className="filter-bar" aria-label="Router service line mode">
+            <button
+              type="button"
+              className={`filter-chip ${
+                createMode === "new_service_line" ? "active-filter" : ""
+              }`}
+              onClick={() => setCreateMode("new_service_line")}
             >
-              <option value="">Select subscription</option>
-              {subscriptions.map((subscription) => (
-                <option key={subscription.id} value={subscription.id}>
-                  {subscriptionLabelById.get(subscription.id) ?? subscription.id}
-                </option>
-              ))}
-            </select>
-          </label>
+              New service line
+            </button>
+
+            <button
+              type="button"
+              className={`filter-chip ${
+                createMode === "existing_service_line" ? "active-filter" : ""
+              }`}
+              onClick={() => setCreateMode("existing_service_line")}
+            >
+              Existing service line
+            </button>
+          </div>
+
+          {createMode === "new_service_line" ? (
+            <>
+              <p className="muted">
+                Use this for a second independent router. You may select the
+                same package as another router.
+              </p>
+
+              <label>
+                App User
+                <select
+                  value={createUserId}
+                  onChange={(event) => setCreateUserId(event.target.value)}
+                  required
+                  disabled={isLoadingOptions}
+                >
+                  <option value="">Select App User</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.full_name} / {user.email}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Package / plan
+                <select
+                  value={createPlanId}
+                  onChange={(event) => setCreatePlanId(event.target.value)}
+                  required
+                  disabled={isLoadingOptions}
+                >
+                  <option value="">Select package</option>
+                  {activePlans.map((plan) => (
+                    <option key={plan.id} value={plan.id}>
+                      {plan.plan_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label>
+                Service label
+                <input
+                  value={createServiceLabel}
+                  onChange={(event) =>
+                    setCreateServiceLabel(event.target.value)
+                  }
+                  placeholder="Home router, Work router, Upstairs..."
+                />
+              </label>
+
+              <label>
+                Start date
+                <input
+                  type="date"
+                  value={createStartDate}
+                  onChange={(event) => setCreateStartDate(event.target.value)}
+                  required
+                />
+              </label>
+            </>
+          ) : (
+            <>
+              <p className="muted">
+                Use only for an existing service line that does not already have
+                a router.
+              </p>
+
+              <label>
+                Service line
+                <select
+                  value={createSubscriptionId}
+                  onChange={(event) =>
+                    setCreateSubscriptionId(event.target.value)
+                  }
+                  required
+                  disabled={isLoadingOptions}
+                >
+                  <option value="">Select service line</option>
+                  {subscriptions.map((subscription) => {
+                    const hasRouter = serviceLineHasOtherRouter(subscription.id);
+
+                    return (
+                      <option
+                        key={subscription.id}
+                        value={subscription.id}
+                        disabled={hasRouter}
+                      >
+                        {subscriptionLabelById.get(subscription.id) ??
+                          subscription.id}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+            </>
+          )}
 
           <label>
             Router name
@@ -517,7 +764,7 @@ export function RouterManagement() {
             <>
               <div className="detail-grid">
                 <div className="detail-item">
-                  <span>Subscription</span>
+                  <span>Service line</span>
                   <strong>
                     {selectedRouter.user_subscription_id
                       ? subscriptionLabelById.get(
@@ -533,19 +780,30 @@ export function RouterManagement() {
               </div>
 
               <label>
-                User subscription
+                Service line
                 <select
                   value={editSubscriptionId}
                   onChange={(event) => setEditSubscriptionId(event.target.value)}
                   required
                 >
-                  <option value="">Select subscription</option>
-                  {subscriptions.map((subscription) => (
-                    <option key={subscription.id} value={subscription.id}>
-                      {subscriptionLabelById.get(subscription.id) ??
-                        subscription.id}
-                    </option>
-                  ))}
+                  <option value="">Select service line</option>
+                  {subscriptions.map((subscription) => {
+                    const hasOtherRouter = serviceLineHasOtherRouter(
+                      subscription.id,
+                      selectedRouter.id
+                    );
+
+                    return (
+                      <option
+                        key={subscription.id}
+                        value={subscription.id}
+                        disabled={hasOtherRouter}
+                      >
+                        {subscriptionLabelById.get(subscription.id) ??
+                          subscription.id}
+                      </option>
+                    );
+                  })}
                 </select>
               </label>
 
@@ -646,7 +904,7 @@ export function RouterManagement() {
           value={subscriptionFilter}
           onChange={(event) => setSubscriptionFilter(event.target.value)}
         >
-          <option value="all">All subscriptions</option>
+          <option value="all">All service lines</option>
           {subscriptions.map((subscription) => (
             <option key={subscription.id} value={subscription.id}>
               {subscriptionLabelById.get(subscription.id) ?? subscription.id}
@@ -666,7 +924,7 @@ export function RouterManagement() {
             <thead>
               <tr>
                 <th>Name</th>
-                <th>Subscription</th>
+                <th>Service line</th>
                 <th>Model</th>
                 <th>IP</th>
                 <th>MAC</th>
@@ -734,8 +992,8 @@ export function RouterManagement() {
               {routers.length === 0 && (
                 <tr>
                   <td colSpan={8}>
-                    No routers match this filter. Assign a subscription first,
-                    then add a router record without collecting passwords.
+                    No routers match this filter. Create an independent service
+                    line first, then attach a router without collecting passwords.
                   </td>
                 </tr>
               )}

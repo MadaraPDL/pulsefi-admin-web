@@ -378,7 +378,7 @@ export function ISPAdminOperationsCenter() {
                             </span>
                           </td>
                           <td>{formatDateTime(request.requested_at)}</td>
-                          <td>{request.reason ?? "-"}</td>
+                          <td className="pf-request-reason-cell">{request.reason ?? "-"}</td>
                           <td>
                             <div className="pf-row-action-stack">
                               <button
@@ -411,6 +411,10 @@ export function ISPAdminOperationsCenter() {
                                 <DetailLine
                                   label="Subscription ID"
                                   value={detail.user_subscription_id}
+                                />
+                                <DetailLine
+                                  label="Reason"
+                                  value={detail.reason}
                                 />
                                 <DetailLine
                                   label="Current plan ID"
