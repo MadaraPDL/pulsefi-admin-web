@@ -3763,3 +3763,52 @@ dd {
   }
 }
 /* PulseFi auth theme stabilization end */
+
+/* PulseFi authenticator QR start */
+.pf-authenticator-qr-card {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  padding: 18px;
+  margin: 16px 0;
+  border: 1px solid rgba(0, 209, 255, 0.22);
+  border-radius: 22px;
+  background: rgba(15, 23, 42, 0.22);
+  text-align: center;
+}
+
+.pf-authenticator-qr {
+  width: 196px;
+  height: 196px;
+  border-radius: 18px;
+  padding: 10px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+}
+
+.pf-authenticator-qr-placeholder {
+  display: grid;
+  place-items: center;
+  width: 196px;
+  height: 196px;
+  border: 1px dashed rgba(148, 163, 184, 0.5);
+  border-radius: 18px;
+  color: inherit;
+}
+
+.pf-authenticator-qr-card p {
+  max-width: 360px;
+  margin: 0;
+  color: inherit;
+}
+
+.pf-real-app[data-theme="light"] .pf-authenticator-qr-card {
+  background: rgba(241, 245, 249, 0.88);
+  border-color: rgba(0, 148, 190, 0.22);
+}
+
+.pf-real-app[data-theme="light"] .pf-authenticator-qr-placeholder {
+  background: #ffffff;
+  color: #52616d;
+}
+/* PulseFi authenticator QR end */

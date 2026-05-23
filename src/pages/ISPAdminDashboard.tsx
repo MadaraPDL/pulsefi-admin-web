@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
@@ -250,11 +250,6 @@ function ISPTopBar({
             {copy.subtitle} - {adminName}
           </p>
         </div>
-
-        <label className="pf-dashboard-search">
-          <span className="material-symbols-outlined">search</span>
-          <input placeholder="Search ISP data..." />
-        </label>
       </div>
 
       <div className="pf-topbar-actions">
@@ -934,5 +929,3 @@ export default function ISPAdminDashboard({
     </ISPShell>
   );
 }
-
-

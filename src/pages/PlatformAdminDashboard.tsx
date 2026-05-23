@@ -155,11 +155,6 @@ function PlatformTopBar({
           <h2>{copy.title}</h2>
           <p>{copy.subtitle} - {adminName}</p>
         </div>
-
-        <label className="pf-dashboard-search">
-          <span className="material-symbols-outlined">search</span>
-          <input placeholder="Search platform..." />
-        </label>
       </div>
 
       <div className="pf-topbar-actions">
