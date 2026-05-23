@@ -374,8 +374,7 @@ dd {
 }
 
 .pf-error-box,
-.pf-success-box,
-.pf-dev-box {
+.pf-success-box {
   border-radius: var(--pf-radius-sm);
   padding: 12px 14px;
   font-size: 14px;
@@ -395,28 +394,9 @@ dd {
   color: #4cd6ff;
 }
 
-.pf-dev-box {
-  display: grid;
-  gap: 8px;
-  border: 1px solid rgba(255, 204, 102, 0.28);
-  background: rgba(255, 204, 102, 0.12);
-  color: #92400e;
-  overflow-wrap: anywhere;
-}
-
-.pf-dev-box code,
 .pf-secret-box code,
 .pf-intelligence-run-details code {
   font-family: "JetBrains Mono", Consolas, monospace;
-}
-
-.pf-dev-box code {
-  display: block;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #1a1a1a;
-  padding: 10px;
-  font-size: 13px;
 }
 
 .pf-mfa-code {
@@ -1048,16 +1028,13 @@ dd {
 
 .pf-error-box,
 .pf-success-box,
-.pf-dev-box,
 .error-box,
-.success-box,
-.dev-token-box {
+.success-box {
   margin: 16px 24px;
 }
 
 .error-box,
-.success-box,
-.dev-token-box {
+.success-box {
   border-radius: var(--pf-radius-sm);
   padding: 12px 14px;
   font-size: 14px;
@@ -1074,37 +1051,6 @@ dd {
   border: 1px solid var(--pf-primary-border);
   background: var(--pf-primary-soft);
   color: #4cd6ff;
-}
-
-.dev-token-box {
-  display: grid;
-  gap: 8px;
-  border: 1px solid rgba(255, 204, 102, 0.28);
-  background: rgba(255, 204, 102, 0.12);
-  color: var(--pf-warning);
-}
-
-.create-form .dev-token-box {
-  margin: 0;
-}
-
-.dev-token-box code {
-  display: block;
-  border-radius: 6px;
-  background: var(--pf-surface);
-  color: #ffd98a;
-  padding: 10px;
-  font-family: "JetBrains Mono", Consolas, monospace;
-  font-size: 13px;
-  font-weight: 650;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-
-.dev-token-box small {
-  color: var(--pf-muted);
-  font-size: 13px;
-  line-height: 1.45;
 }
 
 /* Tables */
@@ -2205,18 +2151,9 @@ dd {
   white-space: normal;
 }
 
-.pf-real-app .pf-password-reset-flow > .pf-dev-box,
 .pf-real-app .pf-password-reset-flow > .pf-error-box,
 .pf-real-app .pf-password-reset-flow > .pf-success-box {
   margin: 0;
-}
-
-.pf-real-app .pf-dev-box a {
-  min-width: 0;
-  color: var(--pf-link);
-  font-weight: 850;
-  overflow-wrap: anywhere;
-  word-break: break-word;
 }
 
 /* Live admin full-width layout */
@@ -2704,13 +2641,6 @@ dd {
   margin-top: 16px;
 }
 
-.pf-real-app .pf-settings-popover .pf-dev-box code {
-  min-width: 0;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
 .pf-real-app .pf-danger-outline-button {
   border: 1px solid rgba(255, 107, 107, 0.3);
   border-radius: var(--pf-radius-sm);
@@ -3184,7 +3114,7 @@ dd {
   margin: 0 0 10px !important;
   font-size: 1.72rem !important;
   line-height: 1.08 !important;
-  letter-spacing: -0.045em !important;
+  letter-spacing: 0 !important;
 }
 
 .pf-login-card.pf-mfa-card .pf-auth-heading p {
@@ -3297,32 +3227,6 @@ dd {
 .pf-login-card.pf-mfa-card .pf-mfa-back-button:hover:not(:disabled) {
   border-color: rgba(148, 163, 184, 0.38) !important;
   background: rgba(30, 41, 59, 0.5) !important;
-}
-
-.pf-login-card.pf-mfa-card .pf-dev-box {
-  width: 300px !important;
-  max-width: 100% !important;
-  margin: 0 auto !important;
-  display: grid !important;
-  gap: 8px !important;
-  border: 1px solid rgba(245, 158, 11, 0.24) !important;
-  border-radius: 14px !important;
-  padding: 12px !important;
-  background: rgba(245, 158, 11, 0.065) !important;
-  color: #facc15 !important;
-}
-
-.pf-login-card.pf-mfa-card .pf-dev-box strong {
-  font-size: 0.82rem !important;
-  color: #facc15 !important;
-}
-
-.pf-login-card.pf-mfa-card .pf-dev-box code {
-  display: block !important;
-  border-radius: 10px !important;
-  padding: 9px 11px !important;
-  background: rgba(2, 6, 23, 0.6) !important;
-  color: #fde68a !important;
 }
 
 [data-theme="light"] .pf-login-card.pf-mfa-card .pf-mfa-back-button {
@@ -3778,6 +3682,78 @@ dd {
 .pf-real-app[data-theme="light"] .pf-auth-theme-toggle button.active-filter {
   border-color: rgba(0, 148, 190, 0.46);
   background: rgba(0, 148, 190, 0.12);
+}
+
+.pf-real-app[data-theme="dark"] .pf-auth-page .pf-logo-mark {
+  color: #f8fafc;
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-page .pf-logo-mark {
+  color: #0f172a;
+}
+
+.pf-real-app[data-theme="dark"] .pf-auth-page .pf-logo-pulse {
+  border-color: rgba(226, 232, 240, 0.9);
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-page .pf-logo-pulse {
+  border-color: rgba(15, 23, 42, 0.86);
+}
+
+.pf-real-app[data-theme="dark"] .pf-auth-page .pf-login-card.pf-mfa-card {
+  background: rgba(20, 26, 31, 0.98) !important;
+  border-color: rgba(148, 163, 184, 0.22) !important;
+  color: #f8fafc !important;
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-page .pf-login-card.pf-mfa-card {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+.pf-real-app[data-theme="dark"] .pf-auth-page .pf-secondary-button {
+  border-color: rgba(148, 163, 184, 0.24);
+  background: rgba(15, 23, 42, 0.34);
+  color: #e2e8f0;
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-page .pf-secondary-button {
+  border-color: rgba(15, 23, 42, 0.14);
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.pf-real-app[data-theme="dark"] .pf-auth-page .pf-error-box {
+  border-color: rgba(248, 113, 113, 0.34);
+  background: rgba(127, 29, 29, 0.22);
+  color: #fecaca;
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-page .pf-error-box {
+  border-color: rgba(220, 38, 38, 0.22);
+  background: rgba(254, 226, 226, 0.8);
+  color: #991b1b;
+}
+
+.pf-real-app[data-theme="dark"] .pf-auth-page .pf-success-box {
+  border-color: rgba(52, 211, 153, 0.34);
+  background: rgba(20, 83, 45, 0.24);
+  color: #bbf7d0;
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-page .pf-success-box {
+  border-color: rgba(4, 120, 87, 0.24);
+  background: rgba(209, 250, 229, 0.82);
+  color: #065f46;
+}
+
+.pf-real-app[data-theme="dark"] .pf-auth-page .pf-secret-box code {
+  color: #67e8f9;
+}
+
+.pf-real-app[data-theme="light"] .pf-auth-page .pf-secret-box code {
+  color: #0369a1;
 }
 
 @media (max-width: 720px) {

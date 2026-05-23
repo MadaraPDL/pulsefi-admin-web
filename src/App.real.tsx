@@ -147,7 +147,7 @@ export default function RealApp() {
     }
 
     if (currentPath === "/reset-password") {
-      return <ResetPasswordPage />;
+      return <ResetPasswordPage theme={theme} onSetTheme={setAdminTheme} />;
     }
 
     if (authStatus === "checking") {
@@ -217,7 +217,13 @@ function isAdminRole(role: string | null): role is "platform_admin" | "isp_admin
   return role === "platform_admin" || role === "isp_admin";
 }
 
-function ResetPasswordPage() {
+function ResetPasswordPage({
+  theme,
+  onSetTheme,
+}: {
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
+}) {
   const [token] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get("token") ?? "";
@@ -231,6 +237,8 @@ function ResetPasswordPage() {
 
   return (
     <main className="pf-auth-page">
+      <AuthThemeToggle theme={theme} onSetTheme={onSetTheme} />
+
       <div className="pf-auth-wrap">
         <section className="pf-login-card">
           <div className="pf-auth-heading">
@@ -249,6 +257,33 @@ function ResetPasswordPage() {
         </section>
       </div>
     </main>
+  );
+}
+
+function AuthThemeToggle({
+  theme,
+  onSetTheme,
+}: {
+  theme: AdminTheme;
+  onSetTheme: (theme: AdminTheme) => void;
+}) {
+  return (
+    <div className="pf-auth-theme-toggle" aria-label="Reset password page theme">
+      {(["dark", "light"] as const).map((mode) => (
+        <button
+          key={mode}
+          className={theme === mode ? "active-filter" : ""}
+          type="button"
+          onClick={() => onSetTheme(mode)}
+          aria-pressed={theme === mode}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">
+            {mode === "dark" ? "dark_mode" : "light_mode"}
+          </span>
+          {mode === "dark" ? "Dark" : "Light"}
+        </button>
+      ))}
+    </div>
   );
 }
 
