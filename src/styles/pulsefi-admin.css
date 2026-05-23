@@ -3812,3 +3812,44 @@ dd {
   color: #52616d;
 }
 /* PulseFi authenticator QR end */
+
+/* PulseFi MFA manual setup help start */
+.pf-mfa-manual-setup-box {
+  margin: 16px 0;
+  padding: 18px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 209, 255, 0.18);
+  background: rgba(15, 23, 42, 0.24);
+}
+
+.pf-mfa-manual-setup-box h4 {
+  margin: 0 0 10px;
+  font-size: 0.98rem;
+}
+
+.pf-mfa-manual-setup-box ol {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.pf-mfa-manual-setup-box li {
+  line-height: 1.55;
+}
+
+.pf-mfa-helper-note {
+  margin-top: 12px;
+  color: #9fb0bf;
+  line-height: 1.6;
+}
+
+.pf-real-app[data-theme="light"] .pf-mfa-manual-setup-box {
+  background: rgba(241, 245, 249, 0.92);
+  border-color: rgba(0, 148, 190, 0.18);
+}
+
+.pf-real-app[data-theme="light"] .pf-mfa-helper-note {
+  color: #52616d;
+}
+/* PulseFi MFA manual setup help end */
