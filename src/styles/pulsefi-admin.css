@@ -3896,3 +3896,25 @@ dd {
   color: #991b1b;
 }
 /* PulseFi lifecycle action buttons end */
+
+/* PulseFi platform ISP scroll stability start */
+.pf-platform-isp-management {
+  overflow: visible;
+}
+
+.pf-platform-isp-management .pf-table-wrap {
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: visible;
+  overscroll-behavior: auto;
+}
+
+.pf-platform-isp-management .pf-table-wrap thead th {
+  position: static;
+}
+
+.pf-platform-isp-management + .pf-content-card,
+.pf-platform-isp-management + .panel {
+  scroll-margin-top: 96px;
+}
+/* PulseFi platform ISP scroll stability end */
