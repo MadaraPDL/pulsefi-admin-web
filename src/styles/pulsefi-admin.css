@@ -3918,3 +3918,390 @@ dd {
   scroll-margin-top: 96px;
 }
 /* PulseFi platform ISP scroll stability end */
+
+/* PulseFi admin spacing polish start */
+.pf-dashboard-main {
+  max-width: calc(100vw - 280px);
+  padding-bottom: 64px;
+}
+
+.pf-section-stack {
+  gap: 28px;
+}
+
+.pf-kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+.pf-kpi-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pf-kpi-meta {
+  gap: 10px;
+  row-gap: 10px;
+}
+
+.pf-kpi-meta span {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.pf-panel-title-row,
+.section-header,
+.pf-monitoring-panel-header {
+  gap: 20px;
+  row-gap: 14px;
+}
+
+.pf-panel-title-row > div,
+.section-header > div,
+.pf-monitoring-panel-header > div {
+  min-width: 0;
+}
+
+.pf-panel-title-row h2,
+.section-header h2,
+.pf-monitoring-panel-header h2 {
+  overflow-wrap: anywhere;
+}
+
+.pf-selected-strip,
+.selected-strip {
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+
+.pf-management-grid,
+.management-grid {
+  gap: 22px;
+  align-items: start;
+}
+
+.pf-management-form,
+.create-form,
+.pf-operations-panel,
+.pf-intelligence-panel,
+.pf-monitoring-panel,
+.pf-network-panel,
+.pf-operations-table-panel,
+.pf-intelligence-result-card {
+  min-width: 0;
+}
+
+.pf-management-form,
+.create-form {
+  gap: 16px;
+}
+
+.pf-management-form label,
+.create-form label,
+.pf-operations-panel label,
+.pf-intelligence-panel label {
+  min-width: 0;
+}
+
+.pf-management-form input,
+.pf-management-form select,
+.pf-management-form textarea,
+.create-form input,
+.create-form select,
+.create-form textarea {
+  min-width: 0;
+}
+
+.detail-grid {
+  gap: 12px;
+}
+
+.detail-item {
+  min-width: 0;
+}
+
+.filter-bar {
+  gap: 12px;
+  row-gap: 12px;
+  align-items: center;
+}
+
+.panel > .filter-bar,
+.pf-content-card > .filter-bar,
+.pf-section-stack > .filter-bar {
+  margin: 20px 24px 12px;
+}
+
+.filter-chip {
+  min-height: 42px;
+  padding: 10px 16px;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.filter-select {
+  min-height: 42px;
+  max-width: 100%;
+}
+
+.pf-table-wrap,
+.table-card {
+  margin-top: 20px;
+}
+
+.pf-table-wrap table,
+.table-card table {
+  table-layout: auto;
+}
+
+.pf-table-wrap th,
+.pf-table-wrap td,
+.table-card th,
+.table-card td {
+  white-space: nowrap;
+}
+
+.pf-table-wrap td:first-child,
+.table-card td:first-child {
+  min-width: 160px;
+}
+
+.pf-table-wrap td,
+.table-card td {
+  overflow-wrap: anywhere;
+}
+
+.status-pill,
+.pf-badge,
+.pf-route-tag,
+.pf-critical-pill,
+.pf-health-pill {
+  margin: 2px 0;
+}
+
+.pf-lifecycle-actions {
+  gap: 12px;
+  row-gap: 12px;
+}
+
+.pf-lifecycle-actions .pf-action-button,
+.pf-lifecycle-actions .pf-secondary-button,
+.pf-lifecycle-actions .pf-danger-outline-button {
+  min-height: 46px;
+}
+
+.router-action-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 240px;
+}
+
+.router-action-cell .small-button {
+  flex: 1 1 110px;
+}
+
+.pf-platform-isp-form-grid,
+.app-user-management-grid,
+.plans-management-grid,
+.subscriptions-management-grid,
+.routers-management-grid {
+  align-items: start;
+}
+
+@media (max-width: 1180px) {
+  .pf-management-grid,
+  .management-grid,
+  .pf-bento-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-dashboard-main {
+    max-width: calc(100vw - 280px);
+  }
+}
+
+@media (max-width: 900px) {
+  .pf-dashboard-main {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    padding: 92px 16px 48px;
+  }
+
+  .pf-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-panel-title-row,
+  .section-header,
+  .pf-monitoring-panel-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pf-view-link,
+  .pf-refresh-button,
+  .secondary-button {
+    width: 100%;
+  }
+
+  .panel > .filter-bar,
+  .pf-content-card > .filter-bar,
+  .pf-section-stack > .filter-bar {
+    margin-inline: 16px;
+  }
+
+  .pf-table-wrap,
+  .table-card {
+    width: calc(100% - 32px);
+    margin-inline: 16px;
+  }
+}
+/* PulseFi admin spacing polish end */
+
+/* PulseFi overview layout polish start */
+.pf-dashboard-main > .pf-selected-strip {
+  margin-bottom: 24px;
+}
+
+.pf-dashboard-main > .pf-kpi-grid {
+  margin-top: 0;
+  margin-bottom: 30px;
+}
+
+.pf-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1fr);
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 30px;
+}
+
+.pf-overview-action-center,
+.pf-needs-attention-panel,
+.pf-overview-recent-activity {
+  min-width: 0;
+}
+
+.pf-overview-action-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 20px;
+}
+
+.pf-overview-action-button {
+  min-width: 0;
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface-2);
+  color: var(--pf-text);
+  padding: 16px;
+  text-align: left;
+}
+
+.pf-overview-action-button .material-symbols-outlined {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--pf-primary-border);
+  border-radius: var(--pf-radius-sm);
+  color: var(--pf-primary);
+  background: var(--pf-primary-soft);
+}
+
+.pf-overview-action-button span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.pf-overview-action-button strong,
+.pf-overview-action-button small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pf-overview-action-button strong {
+  color: var(--pf-text);
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.pf-overview-action-button small {
+  color: var(--pf-muted);
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+
+.pf-overview-action-button:hover {
+  border-color: var(--pf-primary-border);
+  background: var(--pf-primary-soft);
+}
+
+.pf-needs-attention-panel .pf-empty-state {
+  min-height: 190px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 28px;
+  text-align: center;
+}
+
+.pf-overview-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  padding: 20px;
+}
+
+.pf-overview-table-panel-wide {
+  grid-column: 1 / -1;
+}
+
+.pf-overview-table-panel .pf-table-wrap {
+  width: 100%;
+  margin: 0;
+}
+
+.pf-overview-table-panel {
+  min-width: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 1500px) {
+  .pf-overview-action-grid {
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 1280px) {
+  .pf-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-overview-recent-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .pf-overview-action-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .pf-overview-action-button {
+    min-height: 82px;
+  }
+}
+/* PulseFi overview layout polish end */
