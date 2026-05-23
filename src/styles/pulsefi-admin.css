@@ -4662,3 +4662,207 @@ dd {
   overflow-wrap: anywhere;
   line-height: 1.45;
 }
+
+/* Step 42D operations report + request context polish */
+
+.pf-report-detail-panel {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  background: var(--pf-surface-2);
+  padding: 18px;
+}
+
+.pf-report-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pf-report-detail-header h3 {
+  color: var(--pf-text);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.pf-report-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.pf-report-metric {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface);
+  padding: 14px;
+}
+
+.pf-report-metric span {
+  color: var(--pf-muted);
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pf-report-metric strong {
+  color: var(--pf-text);
+  overflow-wrap: anywhere;
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.pf-report-json-details,
+.pf-technical-id-details {
+  display: grid;
+  gap: 10px;
+}
+
+.pf-report-json-details summary,
+.pf-technical-id-details summary {
+  cursor: pointer;
+  color: var(--pf-link);
+  font-weight: 900;
+}
+
+.pf-block-muted {
+  display: block;
+  margin-top: 4px;
+  color: var(--pf-muted);
+  font-size: 12px;
+}
+
+.pf-request-reason-cell {
+  max-width: 280px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.45;
+}
+
+@media (max-width: 1280px) {
+  .pf-report-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .pf-report-detail-header {
+    flex-direction: column;
+  }
+
+  .pf-report-metric-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Step 42D actionable report insights and tables */
+
+.pf-report-insight-section,
+.pf-report-table-list,
+.pf-report-table-section {
+  display: grid;
+  gap: 12px;
+}
+
+.pf-report-insight-section h4,
+.pf-report-table-section h4 {
+  color: var(--pf-text);
+  font-size: 15px;
+  font-weight: 950;
+  text-transform: capitalize;
+}
+
+.pf-report-insight-list {
+  display: grid;
+  gap: 10px;
+}
+
+.pf-report-insight-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--pf-primary-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-primary-soft);
+  color: var(--pf-text);
+  padding: 12px;
+}
+
+.pf-report-insight-card p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.pf-report-insight-warning {
+  border-color: rgba(255, 204, 102, 0.4);
+  background: rgba(255, 204, 102, 0.1);
+}
+
+.pf-report-insight-critical {
+  border-color: rgba(255, 138, 138, 0.45);
+  background: rgba(255, 138, 138, 0.1);
+}
+
+.pf-report-insight-success {
+  border-color: var(--pf-success-border);
+  background: var(--pf-success-soft);
+}
+
+.pf-report-table-section {
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface);
+  padding: 14px;
+}
+
+.pf-report-table-section .pf-table-wrap {
+  max-height: 420px;
+}
+
+.pf-report-table-section table {
+  min-width: 820px;
+}
+
+.pf-report-table-section td {
+  max-width: 260px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Step 42D: keep raw report JSON as technical/debug details only */
+
+.pf-report-json-details {
+  border-top: 1px solid var(--pf-border);
+  padding-top: 12px;
+}
+
+.pf-report-json-details summary {
+  width: max-content;
+  border: 1px solid var(--pf-border);
+  border-radius: 999px;
+  background: var(--pf-surface);
+  color: var(--pf-muted);
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.pf-report-json-details[open] summary {
+  color: var(--pf-link);
+}
+
+.pf-json-preview {
+  max-height: 360px;
+  overflow: auto;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
+  background: var(--pf-surface);
+  padding: 14px;
+  font-size: 12px;
+  line-height: 1.5;
+}
