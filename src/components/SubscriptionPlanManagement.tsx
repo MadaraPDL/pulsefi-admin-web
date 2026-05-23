@@ -327,6 +327,66 @@ export function SubscriptionPlanManagement() {
     }
   }
 
+
+  async function handleSetPlanAvailability(isActive: boolean) {
+    if (!selectedPlan) {
+      setErrorMessage("Select a plan first.");
+      return;
+    }
+
+    const validationError = validatePlanForm(
+      editPlanName,
+      editMonthlyPrice,
+      editDataLimitGb,
+      editSpeedLimitMbps
+    );
+
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
+    setErrorMessage("");
+    setSuccessMessage("");
+    setIsUpdating(true);
+
+    const payload: UpdateSubscriptionPlanRequest = {
+      plan_name: editPlanName.trim(),
+      monthly_price: editMonthlyPrice.trim(),
+      data_limit_gb: editDataLimitGb.trim(),
+      speed_limit_mbps: editSpeedLimitMbps.trim() || null,
+      description: editDescription.trim() || null,
+      is_active: isActive,
+    };
+
+    try {
+      const updatedPlan = await updateSubscriptionPlan(selectedPlan.id, payload);
+      const apiActiveFilter = getApiActiveFilter(activeFilter);
+
+      setSelectedPlan(updatedPlan);
+      setEditableFields(updatedPlan);
+      setPlans((current) =>
+        current
+          .map((plan) => (plan.id === updatedPlan.id ? updatedPlan : plan))
+          .filter(
+            (plan) => apiActiveFilter === null || plan.is_active === apiActiveFilter
+          )
+      );
+
+      setSuccessMessage(
+        `${updatedPlan.is_active ? "Reactivated" : "Archived"} plan: ${
+          updatedPlan.plan_name
+        }.`
+      );
+    } catch (error) {
+      setErrorMessage(
+        getErrorMessage(error, "Could not update subscription plan.")
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  }
+
   return (
     <section className="panel">
       <div className="section-header">
@@ -507,9 +567,33 @@ export function SubscriptionPlanManagement() {
                 Active plan
               </label>
 
-              <button className="pf-action-button" disabled={isUpdating}>
-                {isUpdating ? "Updating..." : "Update plan"}
-              </button>
+              <div className="pf-lifecycle-actions">
+                <button
+                  className="pf-action-button"
+                  disabled={isUpdating}
+                  type="submit"
+                >
+                  {isUpdating ? "Updating..." : "Update plan"}
+                </button>
+
+                <button
+                  className="pf-secondary-button"
+                  disabled={isUpdating || selectedPlan.is_active}
+                  type="button"
+                  onClick={() => void handleSetPlanAvailability(true)}
+                >
+                  Reactivate Plan
+                </button>
+
+                <button
+                  className="pf-danger-outline-button"
+                  disabled={isUpdating || !selectedPlan.is_active}
+                  type="button"
+                  onClick={() => void handleSetPlanAvailability(false)}
+                >
+                  Archive Plan
+                </button>
+              </div>
             </>
           )}
         </form>
