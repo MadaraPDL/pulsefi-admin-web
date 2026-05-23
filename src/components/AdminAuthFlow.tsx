@@ -21,6 +21,7 @@ import type {
 import { getErrorMessage } from "../api/errors";
 import type { AdminTheme } from "../App.real";
 import { AdminPasswordResetFlow } from "./AdminPasswordResetFlow";
+import { ArrowRight } from "lucide-react";
 
 type AuthStep =
   | { kind: "login" }
@@ -311,9 +312,7 @@ function AdminLoginPage({
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? "Signing in..." : "Login"}
-                  <span className="material-symbols-outlined" aria-hidden="true">
-                    arrow_forward
-                  </span>
+                  <ArrowRight size={18} aria-hidden="true" />
                 </button>
               </div>
             </form>

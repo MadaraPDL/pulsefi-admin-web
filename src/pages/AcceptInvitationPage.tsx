@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { acceptInvitation } from "../api/auth";
 import { getErrorMessage } from "../api/errors";
 import type { AdminTheme } from "../App.real";
+import { ArrowRight } from "lucide-react";
 
 function getInvitationTokenFromUrl() {
   return new URLSearchParams(window.location.search).get("token") ?? "";
@@ -204,9 +205,7 @@ export default function AcceptInvitationPage({
               disabled={isSubmitting || !token}
             >
               {isSubmitting ? "Accepting..." : "Accept invitation"}
-              <span className="material-symbols-outlined" aria-hidden="true">
-                arrow_forward
-              </span>
+              <ArrowRight size={18} aria-hidden="true" />
             </button>
 
             <button
