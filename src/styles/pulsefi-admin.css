@@ -3853,3 +3853,46 @@ dd {
   color: #52616d;
 }
 /* PulseFi MFA manual setup help end */
+
+/* PulseFi lifecycle action buttons start */
+.pf-lifecycle-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.pf-lifecycle-actions .pf-action-button,
+.pf-lifecycle-actions .pf-secondary-button,
+.pf-lifecycle-actions .pf-danger-outline-button {
+  flex: 1 1 150px;
+  min-width: 140px;
+}
+
+.pf-danger-outline-button {
+  border: 1px solid rgba(248, 113, 113, 0.46);
+  border-radius: 14px;
+  padding: 11px 14px;
+  background: rgba(127, 29, 29, 0.12);
+  color: #fecaca;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pf-danger-outline-button:hover:not(:disabled) {
+  border-color: rgba(248, 113, 113, 0.72);
+  background: rgba(127, 29, 29, 0.2);
+}
+
+.pf-danger-outline-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.pf-real-app[data-theme="light"] .pf-danger-outline-button {
+  background: rgba(254, 242, 242, 0.92);
+  color: #991b1b;
+}
+/* PulseFi lifecycle action buttons end */

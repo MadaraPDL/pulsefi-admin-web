@@ -522,9 +522,10 @@ function ISPManagement({
     }
   }
 
-  async function handleUpdateISP(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  async function applyISPUpdate(
+    payload: UpdateISPRequest,
+    successText: (updated: ISP) => string
+  ) {
     if (!selectedISP) {
       setErrorMessage("Select an ISP first.");
       return;
@@ -534,27 +535,52 @@ function ISPManagement({
     setSuccessMessage("");
     setIsUpdating(true);
 
-    const payload: UpdateISPRequest = {
-      name: editName,
-      contact_email: editContactEmail || null,
-      phone_number: editPhoneNumber || null,
-      address: editAddress || null,
-      status: editStatus,
-    };
-
     try {
       const updated = await updateISP(selectedISP.id, payload);
       setIsps((current) =>
         current.map((isp) => (isp.id === updated.id ? updated : isp))
       );
       chooseISP(updated);
-      setSuccessMessage(`Updated ISP: ${updated.name}`);
+      setSuccessMessage(successText(updated));
       await onDataChanged();
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not update ISP."));
     } finally {
       setIsUpdating(false);
     }
+  }
+
+  async function handleUpdateISP(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    await applyISPUpdate(
+      {
+        name: editName,
+        contact_email: editContactEmail || null,
+        phone_number: editPhoneNumber || null,
+        address: editAddress || null,
+        status: editStatus,
+      },
+      (updated) => `Updated ISP: ${updated.name}`
+    );
+  }
+
+  async function handleSetISPStatus(status: ISPStatus) {
+    if (!selectedISP) {
+      setErrorMessage("Select an ISP first.");
+      return;
+    }
+
+    await applyISPUpdate(
+      {
+        name: editName,
+        contact_email: editContactEmail || null,
+        phone_number: editPhoneNumber || null,
+        address: editAddress || null,
+        status,
+      },
+      (updated) => `Set ${updated.name} to ${updated.status}.`
+    );
   }
 
   async function handleInviteISPAdmin(event: FormEvent<HTMLFormElement>) {
@@ -773,9 +799,42 @@ function ISPManagement({
                   </select>
                 </label>
 
-                <button className="pf-action-button" disabled={isUpdating}>
-                  {isUpdating ? "Updating..." : "Update ISP"}
-                </button>
+                <div className="pf-lifecycle-actions">
+                  <button
+                    className="pf-action-button"
+                    disabled={isUpdating}
+                    type="submit"
+                  >
+                    {isUpdating ? "Updating..." : "Update ISP"}
+                  </button>
+
+                  <button
+                    className="pf-secondary-button"
+                    disabled={isUpdating || selectedISP.status === "active"}
+                    type="button"
+                    onClick={() => void handleSetISPStatus("active")}
+                  >
+                    Reactivate ISP
+                  </button>
+
+                  <button
+                    className="pf-secondary-button"
+                    disabled={isUpdating || selectedISP.status === "inactive"}
+                    type="button"
+                    onClick={() => void handleSetISPStatus("inactive")}
+                  >
+                    Set inactive
+                  </button>
+
+                  <button
+                    className="pf-danger-outline-button"
+                    disabled={isUpdating || selectedISP.status === "suspended"}
+                    type="button"
+                    onClick={() => void handleSetISPStatus("suspended")}
+                  >
+                    Suspend ISP
+                  </button>
+                </div>
               </>
             )}
           </form>

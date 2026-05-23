@@ -158,30 +158,18 @@ export function PlatformISPAdminManagement({
     }
   }
 
-  async function handleUpdateAdmin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
+  async function applyAdminUpdate(
+    payload: UpdateISPAdminRequest,
+    successText: (updatedAdmin: ISPAdmin) => string
+  ) {
     if (!selectedISP || !selectedAdmin) {
       setErrorMessage("Select an ISP Admin first.");
-      return;
-    }
-
-    const trimmedFullName = fullName.trim();
-
-    if (trimmedFullName.length < 2) {
-      setErrorMessage("Full name must be at least 2 characters.");
       return;
     }
 
     setErrorMessage("");
     setSuccessMessage("");
     setIsUpdating(true);
-
-    const payload: UpdateISPAdminRequest = {
-      full_name: trimmedFullName,
-      phone_number: phoneNumber.trim() || null,
-      status: adminStatus,
-    };
 
     try {
       const updatedAdmin = await updateISPAdmin(
@@ -202,12 +190,51 @@ export function PlatformISPAdminManagement({
             (admin) => apiStatusFilter === null || admin.status === apiStatusFilter
           )
       );
-      setSuccessMessage(`Updated ISP Admin: ${updatedAdmin.full_name}.`);
+      setSuccessMessage(successText(updatedAdmin));
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not update ISP Admin."));
     } finally {
       setIsUpdating(false);
     }
+  }
+
+  async function handleUpdateAdmin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const trimmedFullName = fullName.trim();
+
+    if (trimmedFullName.length < 2) {
+      setErrorMessage("Full name must be at least 2 characters.");
+      return;
+    }
+
+    await applyAdminUpdate(
+      {
+        full_name: trimmedFullName,
+        phone_number: phoneNumber.trim() || null,
+        status: adminStatus,
+      },
+      (updatedAdmin) => `Updated ISP Admin: ${updatedAdmin.full_name}.`
+    );
+  }
+
+  async function handleSetAdminStatus(status: ISPAdminStatus) {
+    const trimmedFullName = fullName.trim();
+
+    if (trimmedFullName.length < 2) {
+      setErrorMessage("Full name must be at least 2 characters.");
+      return;
+    }
+
+    await applyAdminUpdate(
+      {
+        full_name: trimmedFullName,
+        phone_number: phoneNumber.trim() || null,
+        status,
+      },
+      (updatedAdmin) =>
+        `Set ${updatedAdmin.full_name} to ${updatedAdmin.status}.`
+    );
   }
 
   return (
@@ -333,9 +360,42 @@ export function PlatformISPAdminManagement({
                   </select>
                 </label>
 
-                <button className="pf-action-button" disabled={isUpdating}>
-                  {isUpdating ? "Updating..." : "Update ISP Admin"}
-                </button>
+                <div className="pf-lifecycle-actions">
+                  <button
+                    className="pf-action-button"
+                    disabled={isUpdating}
+                    type="submit"
+                  >
+                    {isUpdating ? "Updating..." : "Update ISP Admin"}
+                  </button>
+
+                  <button
+                    className="pf-secondary-button"
+                    disabled={isUpdating || selectedAdmin.status === "active"}
+                    type="button"
+                    onClick={() => void handleSetAdminStatus("active")}
+                  >
+                    Reactivate Admin
+                  </button>
+
+                  <button
+                    className="pf-secondary-button"
+                    disabled={isUpdating || selectedAdmin.status === "inactive"}
+                    type="button"
+                    onClick={() => void handleSetAdminStatus("inactive")}
+                  >
+                    Set inactive
+                  </button>
+
+                  <button
+                    className="pf-danger-outline-button"
+                    disabled={isUpdating || selectedAdmin.status === "suspended"}
+                    type="button"
+                    onClick={() => void handleSetAdminStatus("suspended")}
+                  >
+                    Suspend Admin
+                  </button>
+                </div>
               </>
             )}
           </form>
