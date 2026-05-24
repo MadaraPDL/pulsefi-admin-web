@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { acceptInvitation } from "../api/auth";
 import { getErrorMessage } from "../api/errors";
+import { clearSession } from "../auth/session";
 import type { AdminTheme } from "../App.real";
 import { ArrowRight } from "lucide-react";
 
@@ -10,6 +11,7 @@ function getInvitationTokenFromUrl() {
 }
 
 function goToLogin() {
+  clearSession();
   window.history.replaceState({}, "", "/");
   window.dispatchEvent(new PopStateEvent("popstate"));
 }
@@ -69,6 +71,8 @@ export default function AcceptInvitationPage({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    clearSession();
+
     const searchParams = new URLSearchParams(window.location.search);
 
     if (!searchParams.has("token")) {
