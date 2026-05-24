@@ -12,8 +12,7 @@ function getInvitationTokenFromUrl() {
 
 function goToLogin() {
   clearSession();
-  window.history.replaceState({}, "", "/");
-  window.dispatchEvent(new PopStateEvent("popstate"));
+  window.location.assign("/");
 }
 
 function PulseFiLogo() {

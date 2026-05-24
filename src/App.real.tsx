@@ -63,6 +63,7 @@ export default function RealApp() {
 
     if (!accessToken) {
       clearSession();
+      window.setTimeout(() => setAuthStatus("logged_out"), 0);
       return;
     }
 
