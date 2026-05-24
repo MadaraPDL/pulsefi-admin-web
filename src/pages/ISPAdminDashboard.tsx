@@ -25,7 +25,6 @@ import { ISPAdminInvitationManagement } from "../components/ISPAdminInvitationMa
 import { ISPNotificationsPanel } from "../components/ISPNotificationsPanel";
 import { AppUserManagement } from "../components/AppUserManagement";
 import { SubscriptionPlanManagement } from "../components/SubscriptionPlanManagement";
-import { UserSubscriptionManagement } from "../components/UserSubscriptionManagement";
 import { RouterManagement } from "../components/RouterManagement";
 import { ISPAdminMonitoringCenter } from "../components/ISPAdminMonitoringCenter";
 import { ISPAdminOperationsCenter } from "../components/ISPAdminOperationsCenter";
@@ -42,7 +41,6 @@ type ISPSection =
   | "intelligence"
   | "users"
   | "plans"
-  | "subscriptions"
   | "routers"
   | "app_invitations"
   | "admin_invitations"
@@ -58,7 +56,6 @@ const ispSectionIds: ISPSection[] = [
   "intelligence",
   "users",
   "plans",
-  "subscriptions",
   "routers",
   "app_invitations",
   "admin_invitations",
@@ -118,10 +115,6 @@ const ispSectionCopy: Record<ISPSection, { title: string; subtitle: string }> = 
     title: "Subscription Plans",
     subtitle: "Manage internet bundles and plan availability.",
   },
-  subscriptions: {
-    title: "User Subscriptions",
-    subtitle: "Assign users to plans and track subscription status.",
-  },
   routers: {
     title: "Router Management",
     subtitle: "Register customer routers and manage router metadata.",
@@ -157,7 +150,6 @@ function ISPSidebar({
     { id: "dashboard", label: "Overview", icon: "dashboard" },
     { id: "users", label: "Users", icon: "group" },
     { id: "plans", label: "Plans", icon: "package_2" },
-    { id: "subscriptions", label: "Subscriptions", icon: "assignment" },
     { id: "routers", label: "Routers", icon: "router" },
     { id: "intelligence", label: "Intelligence", icon: "psychology" },
     { id: "app_invitations", label: "User Invites", icon: "person_add" },
@@ -338,11 +330,11 @@ function ISPSummaryCards({ summary }: { summary: ISPAdminSummary }) {
       secondDetail: "ISP catalog",
     },
     {
-      label: "Subscriptions",
+      label: "Service Lines",
       icon: "assignment",
       value: summary.subscriptions.total,
       detail: `${summary.subscriptions.active} Active`,
-      secondDetail: "Assigned plans",
+      secondDetail: "Router-linked plans",
     },
     {
       label: "Routers",
@@ -454,12 +446,6 @@ function OverviewActionCenter({
       icon: "package_2",
       title: "Create Plan",
       description: "Open the ISP plan catalog.",
-    },
-    {
-      section: "subscriptions",
-      icon: "assignment",
-      title: "Assign Subscription",
-      description: "Connect users to plans.",
     },
     {
       section: "routers",
@@ -878,12 +864,6 @@ export default function ISPAdminDashboard({
       {activeSection === "plans" && (
         <SectionCard>
           <SubscriptionPlanManagement />
-        </SectionCard>
-      )}
-
-      {activeSection === "subscriptions" && (
-        <SectionCard>
-          <UserSubscriptionManagement />
         </SectionCard>
       )}
 
