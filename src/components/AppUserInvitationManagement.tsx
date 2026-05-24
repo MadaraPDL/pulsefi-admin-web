@@ -47,6 +47,12 @@ function getInvitationStatus(
   return "pending";
 }
 
+function buildAppUserAcceptInvitationLink(rawToken: string) {
+  return `${window.location.origin}/accept-invitation?token=${encodeURIComponent(
+    rawToken
+  )}&account_type=app_user`;
+}
+
 function formatDate(value: string | null) {
   if (!value) {
     return "-";
@@ -68,6 +74,8 @@ export function AppUserInvitationManagement() {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [expiresInDays, setExpiresInDays] = useState(7);
+  const [latestInvitation, setLatestInvitation] =
+    useState<AppUserInvitation | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -130,6 +138,7 @@ export function AppUserInvitationManagement() {
     event.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
+    setLatestInvitation(null);
     setIsCreating(true);
 
     const payload: CreateAppUserInvitationRequest = {
@@ -143,6 +152,7 @@ export function AppUserInvitationManagement() {
       setEmail("");
       setFullName("");
       setExpiresInDays(7);
+      setLatestInvitation(invitation);
       setSuccessMessage(`Invitation created for ${invitation.email}.`);
       await loadInvitations();
     } catch (error) {
@@ -265,6 +275,21 @@ export function AppUserInvitationManagement() {
 
       {errorMessage && <div className="error-box">{errorMessage}</div>}
       {successMessage && <div className="success-box">{successMessage}</div>}
+
+      {latestInvitation?.dev_invitation_token && (
+        <div className="success-box">
+          <strong>Demo App User invitation link:</strong>
+          <input
+            value={buildAppUserAcceptInvitationLink(
+              latestInvitation.dev_invitation_token
+            )}
+            readOnly
+          />
+          <small>
+            This appears only because the backend is running with DEBUG=True.
+          </small>
+        </div>
+      )}
 
       {isLoading && <p>Loading App User invitations...</p>}
 

@@ -213,6 +213,12 @@ function PlatformShell({
   );
 }
 
+function buildAdminAcceptInvitationLink(rawToken: string) {
+  return `${window.location.origin}/accept-invitation?token=${encodeURIComponent(
+    rawToken
+  )}&account_type=admin`;
+}
+
 function SummaryCards({ summary }: { summary: PlatformAdminSummary }) {
   const cards: Array<{
     label: string;
@@ -443,6 +449,8 @@ function ISPManagement({
   const [inviteFullName, setInviteFullName] = useState("");
   const [inviteDays, setInviteDays] = useState(7);
   const [invitationRefreshKey, setInvitationRefreshKey] = useState(0);
+  const [latestISPAdminInvitation, setLatestISPAdminInvitation] =
+    useState<Awaited<ReturnType<typeof createISPAdminInvitation>> | null>(null);
 
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -607,6 +615,7 @@ function ISPManagement({
 
     setErrorMessage("");
     setSuccessMessage("");
+    setLatestISPAdminInvitation(null);
     setIsInviting(true);
 
     try {
@@ -619,6 +628,7 @@ function ISPManagement({
       setInviteEmail("");
       setInviteFullName("");
       setInviteDays(7);
+      setLatestISPAdminInvitation(invitation);
       setSuccessMessage(`Invitation created for ${invitation.email}.`);
       setInvitationRefreshKey((current) => current + 1);
       await onDataChanged();
@@ -856,6 +866,21 @@ function ISPManagement({
 
         {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
         {successMessage && <div className="pf-success-box">{successMessage}</div>}
+
+        {latestISPAdminInvitation?.dev_invitation_token && (
+          <div className="pf-success-box">
+            <strong>Demo ISP Admin invitation link:</strong>
+            <input
+              value={buildAdminAcceptInvitationLink(
+                latestISPAdminInvitation.dev_invitation_token
+              )}
+              readOnly
+            />
+            <small>
+              This appears only because the backend is running with DEBUG=True.
+            </small>
+          </div>
+        )}
 
         {isLoading && <p className="pf-loading-text">Loading ISPs...</p>}
 
