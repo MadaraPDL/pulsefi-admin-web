@@ -1,4 +1,4 @@
-﻿import { apiRequest } from "./client";
+import { apiRequest } from "./client";
 
 export type PlatformAdminSummary = {
   total_isps: number;
@@ -78,6 +78,61 @@ export type ISPAdminInvitation = {
 export type RevokeISPAdminInvitationResponse = {
   message: string;
   invitation: ISPAdminInvitation;
+};
+
+
+export type PlatformAdminInvitationStatus =
+  | "pending"
+  | "accepted"
+  | "revoked"
+  | "expired";
+
+export type PlatformAdminInvitationFilter =
+  | PlatformAdminInvitationStatus
+  | "all";
+
+export type CreatePlatformAdminInvitationRequest = {
+  email: string;
+  full_name?: string | null;
+  expires_in_days: number;
+};
+
+export type PlatformAdminInvitation = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  account_type: string;
+  admin_role: string | null;
+  isp_id: string | null;
+  invited_by_admin_id: string | null;
+  expires_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+  dev_invitation_token: string | null;
+};
+
+export type RevokePlatformAdminInvitationResponse = {
+  message: string;
+  invitation: PlatformAdminInvitation;
+};
+
+export type PlatformAdminAccount = {
+  id: string;
+  isp_id: string | null;
+  full_name: string;
+  email: string;
+  username: string | null;
+  phone_number: string | null;
+  role: "platform_admin";
+  status: "active" | "inactive" | "suspended";
+  created_by_admin_id: string | null;
+  email_verified_at: string | null;
+  mfa_enabled: boolean;
+  mfa_required: boolean;
+  preferred_mfa_method: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type ISPAdminStatus = "active" | "inactive" | "suspended";
@@ -223,5 +278,66 @@ export async function updateISPAdmin(
       method: "PATCH",
       body: JSON.stringify(payload),
     }
+  );
+}
+
+export async function createPlatformAdminInvitation(
+  payload: CreatePlatformAdminInvitationRequest
+): Promise<PlatformAdminInvitation> {
+  return apiRequest<PlatformAdminInvitation>(
+    "/platform-admin/platform-admin-invitations",
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export async function listPlatformAdminInvitations(
+  status: PlatformAdminInvitationStatus | null = null,
+  limit = 50,
+  offset = 0
+): Promise<PlatformAdminInvitation[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  return apiRequest<PlatformAdminInvitation[]>(
+    `/platform-admin/platform-admin-invitations?${params.toString()}`
+  );
+}
+
+export async function revokePlatformAdminInvitation(
+  invitationId: string
+): Promise<RevokePlatformAdminInvitationResponse> {
+  return apiRequest<RevokePlatformAdminInvitationResponse>(
+    `/platform-admin/platform-admin-invitations/${invitationId}/revoke`,
+    {
+      method: "PATCH",
+    }
+  );
+}
+
+export async function listPlatformAdmins(
+  status: "active" | "inactive" | "suspended" | null = null,
+  limit = 50,
+  offset = 0
+): Promise<PlatformAdminAccount[]> {
+  const params = new URLSearchParams({
+    limit: String(limit),
+    offset: String(offset),
+  });
+
+  if (status) {
+    params.set("status", status);
+  }
+
+  return apiRequest<PlatformAdminAccount[]>(
+    `/platform-admin/platform-admins?${params.toString()}`
   );
 }

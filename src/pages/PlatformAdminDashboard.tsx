@@ -24,6 +24,7 @@ import {
 import { AdminSettingsPanel } from "../components/AdminSettingsPanel";
 import { PlatformISPAdminManagement } from "../components/PlatformISPAdminManagement";
 import { PlatformISPAdminInvitationManagement } from "../components/PlatformISPAdminInvitationManagement";
+import { PlatformTeamManagement } from "../components/PlatformTeamManagement";
 import type { AdminTheme } from "../App.real";
 import type { CurrentAdminResponse } from "../api/adminAuth";
 
@@ -31,6 +32,7 @@ type PlatformSection =
   | "dashboard"
   | "isps"
   | "admins"
+  | "platform_team"
   | "system_health"
   | "settings";
 
@@ -49,6 +51,10 @@ const platformSectionCopy: Record<
   admins: {
     title: "ISP Admin Accounts",
     subtitle: "Review and update ISP Admin accounts for the selected ISP.",
+  },
+  platform_team: {
+    title: "Platform Team",
+    subtitle: "Invite and review Platform Admin accounts.",
   },
   system_health: {
     title: "System Health",
@@ -77,6 +83,7 @@ function PlatformSidebar({
     { id: "dashboard", label: "Overview", icon: "dashboard" },
     { id: "isps", label: "ISPs", icon: "router" },
     { id: "admins", label: "ISP Admin Accounts", icon: "admin_panel_settings" },
+    { id: "platform_team", label: "Platform Team", icon: "supervisor_account" },
     { id: "system_health", label: "System Health", icon: "monitor_heart" },
   ];
 
@@ -357,6 +364,12 @@ function PlatformActionCenter({
         : "Select an ISP, then list, select, and update admin accounts.",
     },
     {
+      section: "platform_team",
+      icon: "supervisor_account",
+      title: "Platform Team",
+      description: "Invite additional Platform Admins through a protected flow.",
+    },
+    {
       section: "system_health",
       icon: "monitor_heart",
       title: "System Health",
@@ -397,6 +410,7 @@ function PlatformActionCenter({
         <span>ISP create/list/update</span>
         <span>ISP Admin invitations inside ISPs</span>
         <span>Admin accounts list/select/update</span>
+        <span>Platform Admin team invitations</span>
         <span>Readiness notes</span>
       </div>
     </section>
@@ -1022,6 +1036,8 @@ export default function PlatformAdminDashboard({
         <PlatformISPAdminManagement selectedISP={selectedISP} />
       )}
 
+      {activeSection === "platform_team" && <PlatformTeamManagement />}
+
       {activeSection === "system_health" && (
         <PlatformReadinessPanel />
       )}
@@ -1038,6 +1054,7 @@ export default function PlatformAdminDashboard({
             { label: "Overview", section: "dashboard" },
             { label: "ISP Management", section: "isps" },
             { label: "ISP Admin Accounts", section: "admins" },
+            { label: "Platform Team", section: "platform_team" },
             { label: "System Health", section: "system_health" },
           ]}
           onSetTheme={onSetTheme}
