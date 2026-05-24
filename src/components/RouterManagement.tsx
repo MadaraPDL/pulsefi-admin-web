@@ -120,6 +120,10 @@ export function RouterManagement() {
     return plans.filter((plan) => plan.is_active);
   }, [plans]);
 
+  const activeServiceLines = useMemo(() => {
+    return subscriptions.filter((subscription) => subscription.status === "active");
+  }, [subscriptions]);
+
   const routerCountByServiceLineId = useMemo(() => {
     const counts = new Map<string, number>();
 
@@ -500,7 +504,28 @@ export function RouterManagement() {
     }
   }
 
+  function getRouterServiceLine(router: ISPAdminRouter) {
+    if (!router.user_subscription_id) {
+      return null;
+    }
+
+    return (
+      subscriptions.find(
+        (subscription) => subscription.id === router.user_subscription_id
+      ) ?? null
+    );
+  }
+
   async function handleRunFullSimulator(router: ISPAdminRouter) {
+    const serviceLine = getRouterServiceLine(router);
+
+    if (!serviceLine || serviceLine.status !== "active") {
+      setErrorMessage(
+        "This router service line is not active. Create a new router with a new active service line, or reactivate the service line before running simulator data."
+      );
+      return;
+    }
+
     setSimulatorRunningRouterId(router.id);
     setErrorMessage("");
     setSuccessMessage("");
@@ -651,7 +676,7 @@ export function RouterManagement() {
                   disabled={isLoadingOptions}
                 >
                   <option value="">Select service line</option>
-                  {subscriptions.map((subscription) => {
+                  {activeServiceLines.map((subscription) => {
                     const hasRouter = serviceLineHasOtherRouter(subscription.id);
 
                     return (
@@ -662,6 +687,7 @@ export function RouterManagement() {
                       >
                         {subscriptionLabelById.get(subscription.id) ??
                           subscription.id}
+                        {subscription.status !== "active" ? " / NOT ACTIVE" : ""}
                       </option>
                     );
                   })}
@@ -787,7 +813,13 @@ export function RouterManagement() {
                   required
                 >
                   <option value="">Select service line</option>
-                  {subscriptions.map((subscription) => {
+                  {subscriptions
+                    .filter(
+                      (subscription) =>
+                        subscription.status === "active" ||
+                        subscription.id === selectedRouter.user_subscription_id
+                    )
+                    .map((subscription) => {
                     const hasOtherRouter = serviceLineHasOtherRouter(
                       subscription.id,
                       selectedRouter.id
@@ -801,6 +833,7 @@ export function RouterManagement() {
                       >
                         {subscriptionLabelById.get(subscription.id) ??
                           subscription.id}
+                        {subscription.status !== "active" ? " / NOT ACTIVE" : ""}
                       </option>
                     );
                   })}
