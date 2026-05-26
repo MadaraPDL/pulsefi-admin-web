@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { FormEvent } from "react";
+import type { CSSProperties, FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   getISPAdminAppUser,
@@ -14,6 +14,7 @@ import type {
   AppUserStatus,
   ISPAdminRouter,
   UpdateAppUserRequest,
+  UsageConsumptionSummary,
   UserSubscription,
 } from "../api/ispAdmin";
 
@@ -45,23 +46,6 @@ function formatNumber(value: string | number | null | undefined, suffix = "") {
   })}${suffix}`;
 }
 
-function formatUsageCell(user: AppUser) {
-  const usage = user.usage_summary;
-
-  if (!usage) {
-    return "No active plan";
-  }
-
-  if (usage.is_unlimited) {
-    return `${formatNumber(usage.current_cycle_usage_gb, " GB")} used / Unlimited`;
-  }
-
-  return `${formatNumber(usage.current_cycle_usage_gb, " GB")} / ${formatNumber(
-    usage.plan_limit_gb,
-    " GB"
-  )}`;
-}
-
 function formatUsagePercent(user: AppUser) {
   const usage = user.usage_summary;
 
@@ -70,6 +54,55 @@ function formatUsagePercent(user: AppUser) {
   }
 
   return `${formatNumber(usage.usage_percent, "%")}`;
+}
+
+
+
+function getUserUsageSummaries(user: AppUser): UsageConsumptionSummary[] {
+  if (user.usage_summaries?.length) {
+    return user.usage_summaries;
+  }
+
+  if (user.usage_summary) {
+    return [user.usage_summary];
+  }
+
+  return [];
+}
+
+function getUsagePercentValue(summary: UsageConsumptionSummary) {
+  if (summary.is_unlimited || summary.usage_percent === null) {
+    return 0;
+  }
+
+  const percent = Number(summary.usage_percent);
+
+  if (Number.isNaN(percent)) {
+    return 0;
+  }
+
+  return Math.min(Math.max(percent, 0), 100);
+}
+
+function getUsageDonutStyle(summary: UsageConsumptionSummary): CSSProperties {
+  return {
+    "--usage-progress": `${getUsagePercentValue(summary)}%`,
+  } as CSSProperties;
+}
+
+function formatSubscriptionTitle(summary: UsageConsumptionSummary, index: number) {
+  return summary.subscription_label || summary.plan_name || `Subscription ${index + 1}`;
+}
+
+function formatLimitText(summary: UsageConsumptionSummary) {
+  if (summary.is_unlimited) {
+    return "Unlimited plan";
+  }
+
+  return `${formatNumber(summary.current_cycle_usage_gb, " GB")} / ${formatNumber(
+    summary.plan_limit_gb,
+    " GB"
+  )}`;
 }
 
 
@@ -324,33 +357,77 @@ export function AppUserManagement() {
                   <span>MFA</span>
                   <strong>{selectedUser.mfa_enabled ? "enabled" : "disabled"}</strong>
                 </div>
-                <div className="detail-item">
-                  <span>Plan</span>
-                  <strong>{selectedUser.usage_summary?.plan_name ?? "No active plan"}</strong>
+              </div>
+
+              <div className="pf-selected-usage-section">
+                <div>
+                  <h4>Plan usage</h4>
+                  <p className="muted">
+                    Each service line is shown separately with usage against its own plan limit.
+                  </p>
                 </div>
-                <div className="detail-item">
-                  <span>Cycle Usage</span>
-                  <strong>{formatUsageCell(selectedUser)}</strong>
-                </div>
-                <div className="detail-item">
-                  <span>Usage %</span>
-                  <strong>{formatUsagePercent(selectedUser)}</strong>
-                </div>
-                <div className="detail-item">
-                  <span>Remaining</span>
-                  <strong>
-                    {selectedUser.usage_summary?.is_unlimited
-                      ? "Unlimited"
-                      : formatNumber(selectedUser.usage_summary?.remaining_gb, " GB")}
-                  </strong>
-                </div>
-                <div className="detail-item">
-                  <span>Today</span>
-                  <strong>{formatNumber(selectedUser.usage_summary?.today_usage_gb, " GB")}</strong>
-                </div>
-                <div className="detail-item">
-                  <span>This Month</span>
-                  <strong>{formatNumber(selectedUser.usage_summary?.monthly_usage_gb, " GB")}</strong>
+
+                {getUserUsageSummaries(selectedUser).length === 0 && (
+                  <div className="pf-empty-state pf-selected-usage-empty">
+                    <span className="material-symbols-outlined">data_usage</span>
+                    <p>No active or historical subscriptions found for this user.</p>
+                  </div>
+                )}
+
+                <div className="pf-subscription-usage-grid">
+                  {getUserUsageSummaries(selectedUser).map((summary, index) => (
+                    <article
+                      className="pf-subscription-usage-card"
+                      key={summary.subscription_id ?? `${selectedUser.id}-${index}`}
+                    >
+                      <div
+                        className="pf-usage-donut"
+                        style={getUsageDonutStyle(summary)}
+                        aria-label={`Usage ${formatUsagePercent({ ...selectedUser, usage_summary: summary })}`}
+                      >
+                        <div>
+                          <strong>
+                            {summary.is_unlimited
+                              ? "?"
+                              : formatNumber(summary.usage_percent, "%")}
+                          </strong>
+                          <span>{summary.is_unlimited ? "used" : "of plan"}</span>
+                        </div>
+                      </div>
+
+                      <div className="pf-subscription-usage-copy">
+                        <div>
+                          <h5>{formatSubscriptionTitle(summary, index)}</h5>
+                          <p>{summary.plan_name ?? "No plan name"}</p>
+                        </div>
+
+                        <strong>{formatLimitText(summary)}</strong>
+
+                        <dl>
+                          <div>
+                            <dt>Remaining</dt>
+                            <dd>
+                              {summary.is_unlimited
+                                ? "Unlimited"
+                                : formatNumber(summary.remaining_gb, " GB")}
+                            </dd>
+                          </div>
+                          <div>
+                            <dt>Today</dt>
+                            <dd>{formatNumber(summary.today_usage_gb, " GB")}</dd>
+                          </div>
+                          <div>
+                            <dt>This month</dt>
+                            <dd>{formatNumber(summary.monthly_usage_gb, " GB")}</dd>
+                          </div>
+                          <div>
+                            <dt>Total</dt>
+                            <dd>{formatNumber(summary.total_usage_gb, " GB")}</dd>
+                          </div>
+                        </dl>
+                      </div>
+                    </article>
+                  ))}
                 </div>
               </div>
 
@@ -409,9 +486,6 @@ export function AppUserManagement() {
                 <th>Email</th>
                 <th>Username</th>
                 <th>Phone</th>
-                <th>Plan</th>
-                <th>Usage</th>
-                <th>Usage %</th>
                 <th>Service lines</th>
                 <th>Routers</th>
                 <th>Status</th>
@@ -434,15 +508,6 @@ export function AppUserManagement() {
                   <td>{user.email}</td>
                   <td>{user.username ?? "-"}</td>
                   <td>{user.phone_number ?? "-"}</td>
-                  <td>{user.usage_summary?.plan_name ?? "-"}</td>
-                  <td className="pf-usage-cell">
-                    <strong>{formatUsageCell(user)}</strong>
-                    <small>
-                      Today {formatNumber(user.usage_summary?.today_usage_gb, " GB")} ? Month{" "}
-                      {formatNumber(user.usage_summary?.monthly_usage_gb, " GB")}
-                    </small>
-                  </td>
-                  <td>{formatUsagePercent(user)}</td>
                   <td>{serviceLineCountByUserId.get(user.id) ?? 0}</td>
                   <td>{routerCountByUserId.get(user.id) ?? 0}</td>
                   <td>
@@ -469,7 +534,7 @@ export function AppUserManagement() {
 
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={12}>
+                  <td colSpan={9}>
                     No App Users match this filter. Create an App User
                     invitation first, then accepted accounts appear here.
                   </td>
