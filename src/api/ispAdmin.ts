@@ -1,4 +1,4 @@
-﻿import { apiRequest } from "./client";
+import { apiRequest } from "./client";
 
 export type StatusCounts = {
   total: number;
@@ -26,6 +26,26 @@ export type AppUserInvitationStatus =
   | "expired";
 
 export type AppUserInvitationFilter = AppUserInvitationStatus | "all";
+
+export type UsageConsumptionSummary = {
+  user_id: string;
+  subscription_id: string | null;
+  plan_id: string | null;
+  plan_name: string | null;
+  subscription_label: string | null;
+  subscription_status: string | null;
+  plan_limit_gb: string | number | null;
+  today_usage_gb: string | number;
+  monthly_usage_gb: string | number;
+  current_cycle_usage_gb: string | number;
+  total_usage_gb: string | number;
+  remaining_gb: string | number | null;
+  usage_percent: string | number | null;
+  is_unlimited: boolean;
+  cycle_start: string | null;
+  cycle_end: string | null;
+  last_record_end: string | null;
+};
 
 export type AppUserStatus = "active" | "inactive" | "suspended";
 
@@ -72,6 +92,7 @@ export type AppUser = {
   mfa_enabled: boolean;
   mfa_required: boolean;
   preferred_mfa_method: string | null;
+  usage_summary: UsageConsumptionSummary | null;
 };
 
 export type UpdateAppUserRequest = {

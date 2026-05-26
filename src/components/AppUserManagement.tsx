@@ -28,6 +28,51 @@ function getApiStatusFilter(filter: AppUserFilter): AppUserStatus | null {
   return filter === "all" ? null : filter;
 }
 
+
+function formatNumber(value: string | number | null | undefined, suffix = "") {
+  if (value === null || value === undefined) {
+    return "-";
+  }
+
+  const numericValue = Number(value);
+
+  if (Number.isNaN(numericValue)) {
+    return `${value}${suffix}`;
+  }
+
+  return `${numericValue.toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+  })}${suffix}`;
+}
+
+function formatUsageCell(user: AppUser) {
+  const usage = user.usage_summary;
+
+  if (!usage) {
+    return "No active plan";
+  }
+
+  if (usage.is_unlimited) {
+    return `${formatNumber(usage.current_cycle_usage_gb, " GB")} used / Unlimited`;
+  }
+
+  return `${formatNumber(usage.current_cycle_usage_gb, " GB")} / ${formatNumber(
+    usage.plan_limit_gb,
+    " GB"
+  )}`;
+}
+
+function formatUsagePercent(user: AppUser) {
+  const usage = user.usage_summary;
+
+  if (!usage || usage.usage_percent === null || usage.usage_percent === undefined) {
+    return "-";
+  }
+
+  return `${formatNumber(usage.usage_percent, "%")}`;
+}
+
+
 function formatDate(value: string | null) {
   if (!value) {
     return "-";
@@ -279,6 +324,34 @@ export function AppUserManagement() {
                   <span>MFA</span>
                   <strong>{selectedUser.mfa_enabled ? "enabled" : "disabled"}</strong>
                 </div>
+                <div className="detail-item">
+                  <span>Plan</span>
+                  <strong>{selectedUser.usage_summary?.plan_name ?? "No active plan"}</strong>
+                </div>
+                <div className="detail-item">
+                  <span>Cycle Usage</span>
+                  <strong>{formatUsageCell(selectedUser)}</strong>
+                </div>
+                <div className="detail-item">
+                  <span>Usage %</span>
+                  <strong>{formatUsagePercent(selectedUser)}</strong>
+                </div>
+                <div className="detail-item">
+                  <span>Remaining</span>
+                  <strong>
+                    {selectedUser.usage_summary?.is_unlimited
+                      ? "Unlimited"
+                      : formatNumber(selectedUser.usage_summary?.remaining_gb, " GB")}
+                  </strong>
+                </div>
+                <div className="detail-item">
+                  <span>Today</span>
+                  <strong>{formatNumber(selectedUser.usage_summary?.today_usage_gb, " GB")}</strong>
+                </div>
+                <div className="detail-item">
+                  <span>This Month</span>
+                  <strong>{formatNumber(selectedUser.usage_summary?.monthly_usage_gb, " GB")}</strong>
+                </div>
               </div>
 
               <label>
@@ -336,6 +409,9 @@ export function AppUserManagement() {
                 <th>Email</th>
                 <th>Username</th>
                 <th>Phone</th>
+                <th>Plan</th>
+                <th>Usage</th>
+                <th>Usage %</th>
                 <th>Service lines</th>
                 <th>Routers</th>
                 <th>Status</th>
@@ -358,6 +434,15 @@ export function AppUserManagement() {
                   <td>{user.email}</td>
                   <td>{user.username ?? "-"}</td>
                   <td>{user.phone_number ?? "-"}</td>
+                  <td>{user.usage_summary?.plan_name ?? "-"}</td>
+                  <td className="pf-usage-cell">
+                    <strong>{formatUsageCell(user)}</strong>
+                    <small>
+                      Today {formatNumber(user.usage_summary?.today_usage_gb, " GB")} ? Month{" "}
+                      {formatNumber(user.usage_summary?.monthly_usage_gb, " GB")}
+                    </small>
+                  </td>
+                  <td>{formatUsagePercent(user)}</td>
                   <td>{serviceLineCountByUserId.get(user.id) ?? 0}</td>
                   <td>{routerCountByUserId.get(user.id) ?? 0}</td>
                   <td>
@@ -384,7 +469,7 @@ export function AppUserManagement() {
 
               {users.length === 0 && (
                 <tr>
-                  <td colSpan={9}>
+                  <td colSpan={12}>
                     No App Users match this filter. Create an App User
                     invitation first, then accepted accounts appear here.
                   </td>

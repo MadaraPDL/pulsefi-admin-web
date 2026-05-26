@@ -5043,3 +5043,23 @@ dd {
 }
 /* PulseFi mobile auth/invitation compact layout fix end */
 
+
+/* Step 46 ISP user usage visibility start */
+.pf-real-app .pf-usage-cell {
+  display: grid;
+  gap: 4px;
+  min-width: 190px;
+}
+
+.pf-real-app .pf-usage-cell strong {
+  color: var(--pf-text);
+  font-weight: 900;
+}
+
+.pf-real-app .pf-usage-cell small {
+  color: var(--pf-muted);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+/* Step 46 ISP user usage visibility end */
+
