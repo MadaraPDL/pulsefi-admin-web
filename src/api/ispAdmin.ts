@@ -93,6 +93,7 @@ export type AppUser = {
   mfa_required: boolean;
   preferred_mfa_method: string | null;
   usage_summary: UsageConsumptionSummary | null;
+  usage_summaries?: UsageConsumptionSummary[];
 };
 
 export type UpdateAppUserRequest = {
