@@ -36,6 +36,81 @@ type PlatformSection =
   | "system_health"
   | "settings";
 
+const PLATFORM_ACTIVE_SECTION_STORAGE_KEY = "pulsefi-platform-active-section";
+const PLATFORM_SETTINGS_RETURN_SECTION_STORAGE_KEY =
+  "pulsefi-platform-settings-return-section";
+
+const platformSectionIds: PlatformSection[] = [
+  "dashboard",
+  "isps",
+  "admins",
+  "platform_team",
+  "system_health",
+  "settings",
+];
+
+function getInitialPlatformSection(): PlatformSection {
+  try {
+    const savedSection = window.localStorage.getItem(
+      PLATFORM_ACTIVE_SECTION_STORAGE_KEY
+    );
+
+    if (platformSectionIds.includes(savedSection as PlatformSection)) {
+      return savedSection as PlatformSection;
+    }
+  } catch {
+    // Fall back to overview if storage is unavailable.
+  }
+
+  return "dashboard";
+}
+
+function getInitialPlatformSettingsReturnSection(): Exclude<
+  PlatformSection,
+  "settings"
+> {
+  try {
+    const savedSection = window.localStorage.getItem(
+      PLATFORM_SETTINGS_RETURN_SECTION_STORAGE_KEY
+    );
+
+    if (
+      savedSection &&
+      savedSection !== "settings" &&
+      platformSectionIds.includes(savedSection as PlatformSection)
+    ) {
+      return savedSection as Exclude<PlatformSection, "settings">;
+    }
+  } catch {
+    // Fall back to overview if storage is unavailable.
+  }
+
+  return "dashboard";
+}
+
+function storePlatformSection(section: PlatformSection) {
+  try {
+    window.localStorage.setItem(PLATFORM_ACTIVE_SECTION_STORAGE_KEY, section);
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
+function storePlatformSettingsReturnSection(section: PlatformSection) {
+  if (section === "settings") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(
+      PLATFORM_SETTINGS_RETURN_SECTION_STORAGE_KEY,
+      section
+    );
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
 const platformSectionCopy: Record<
   PlatformSection,
   { title: string; subtitle: string }
@@ -90,7 +165,12 @@ function PlatformSidebar({
   return (
     <nav className="pf-sidebar" aria-label="Platform Admin navigation">
       <div className="pf-sidebar-head">
-        <div className="pf-profile-row">
+        <button
+          className="pf-profile-row pf-brand-button"
+          type="button"
+          onClick={() => onNavigate("dashboard")}
+          aria-label="Go to Platform Overview"
+        >
           <div className="pf-profile-avatar">
             <span className="material-symbols-outlined">person</span>
           </div>
@@ -99,7 +179,7 @@ function PlatformSidebar({
             <h1>PulseFi</h1>
             <p>Platform Owner</p>
           </div>
-        </div>
+        </button>
 
         <button
           className="pf-quick-action"
@@ -972,7 +1052,10 @@ export default function PlatformAdminDashboard({
   const [summary, setSummary] = useState<PlatformAdminSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [activeSection, setActiveSection] =
-    useState<PlatformSection>("dashboard");
+    useState<PlatformSection>(getInitialPlatformSection);
+  const [settingsReturnSection, setSettingsReturnSection] = useState<
+    Exclude<PlatformSection, "settings">
+  >(getInitialPlatformSettingsReturnSection);
   const [selectedISP, setSelectedISP] = useState<ISP | null>(null);
 
   const adminName = getAdminName("Admin");
@@ -984,6 +1067,27 @@ export default function PlatformAdminDashboard({
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not load summary."));
     }
+  }
+
+  useEffect(() => {
+    storePlatformSection(activeSection);
+  }, [activeSection]);
+
+  function handleNavigate(section: PlatformSection) {
+    if (section === "settings") {
+      if (activeSection === "settings") {
+        setActiveSection(settingsReturnSection);
+        return;
+      }
+
+      setSettingsReturnSection(activeSection);
+      storePlatformSettingsReturnSection(activeSection);
+
+      setActiveSection("settings");
+      return;
+    }
+
+    setActiveSection(section);
   }
 
   useEffect(() => {
@@ -1019,7 +1123,7 @@ export default function PlatformAdminDashboard({
     <PlatformShell
       activeSection={activeSection}
       adminName={adminName}
-      onNavigate={setActiveSection}
+      onNavigate={handleNavigate}
       onLogout={handleLogout}
     >
       {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
@@ -1042,7 +1146,7 @@ export default function PlatformAdminDashboard({
           <section className="pf-overview-grid pf-platform-overview-grid">
             <PlatformActionCenter
               selectedISP={selectedISP}
-              onNavigate={setActiveSection}
+              onNavigate={handleNavigate}
             />
             <PlatformReadinessPanel />
           </section>
@@ -1073,7 +1177,7 @@ export default function PlatformAdminDashboard({
           adminEmail={getAdminEmail()}
           adminUsername={getAdminUsername()}
           roleLabel="Platform Admin"
-          activeSectionLabel={platformSectionCopy[activeSection].title}
+          activeSectionLabel={platformSectionCopy[settingsReturnSection].title}
           theme={theme}
           shortcuts={[
             { label: "Overview", section: "dashboard" },
@@ -1083,7 +1187,7 @@ export default function PlatformAdminDashboard({
             { label: "System Health", section: "system_health" },
           ]}
           onSetTheme={onSetTheme}
-          onNavigate={setActiveSection}
+          onNavigate={handleNavigate}
           onAdminUpdated={onAdminUpdated}
           onLogout={handleLogout}
         />

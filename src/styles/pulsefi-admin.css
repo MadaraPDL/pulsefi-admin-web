@@ -512,6 +512,21 @@ dd {
   margin-bottom: 24px;
 }
 
+.pf-brand-button {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pf-brand-button:hover h1,
+.pf-brand-button:focus-visible h1 {
+  text-decoration: underline;
+}
+
 .pf-profile-avatar {
   width: 40px;
   height: 40px;

@@ -17,6 +17,7 @@ import type {
   ISPAdminRouter,
   RouterFilter,
   RouterStatus,
+  SimulatorScenario,
   SubscriptionPlan,
   UserSubscription,
 } from "../api/ispAdmin";
@@ -29,6 +30,16 @@ const routerFilters: { label: string; value: RouterFilter }[] = [
 ];
 
 const routerStatuses: RouterStatus[] = ["active", "inactive", "maintenance"];
+
+const simulatorScenarios: { label: string; value: SimulatorScenario }[] = [
+  { label: "Normal usage", value: "normal_usage" },
+  { label: "High usage", value: "high_usage" },
+  { label: "Near plan limit", value: "near_plan_limit" },
+  { label: "Exceeded plan", value: "exceeded_plan" },
+  { label: "New device", value: "new_device" },
+  { label: "Policy failure", value: "policy_failure" },
+  { label: "Heavy device usage", value: "heavy_device_usage" },
+];
 
 type RouterCreateMode = "new_service_line" | "existing_service_line";
 
@@ -52,6 +63,10 @@ function formatDateTime(value: string | null) {
 
 function optionalText(value: string) {
   return value.trim() || null;
+}
+
+function formatScenarioLabel(value: SimulatorScenario) {
+  return value.replaceAll("_", " ");
 }
 
 function todayDateInputValue() {
@@ -106,6 +121,8 @@ export function RouterManagement() {
   const [simulatorRunningRouterId, setSimulatorRunningRouterId] = useState<
     string | null
   >(null);
+  const [simulatorScenario, setSimulatorScenario] =
+    useState<SimulatorScenario>("normal_usage");
 
   const userNameById = useMemo(() => {
     return new Map(users.map((user) => [user.id, user.full_name]));
@@ -531,12 +548,16 @@ export function RouterManagement() {
     setSuccessMessage("");
 
     try {
-      const result = await runFullSimulatorIngestionForRouter(router.id);
+      const result = await runFullSimulatorIngestionForRouter(router.id, {
+        scenario: simulatorScenario,
+      });
 
       await loadRouters();
 
       setSuccessMessage(
-        `Full simulator completed: ${result.device_ingestion.devices_seen} devices seen, ${result.usage_ingestion.records_created} usage records created, ${result.alerts_created} alerts created.`
+        `Full simulator completed (${formatScenarioLabel(
+          result.scenario
+        )}): ${result.device_ingestion.devices_seen} devices seen, ${result.usage_ingestion.records_created} usage records created, ${result.alerts_created} alerts created.`
       );
     } catch (error) {
       setErrorMessage(
@@ -941,6 +962,21 @@ export function RouterManagement() {
           {subscriptions.map((subscription) => (
             <option key={subscription.id} value={subscription.id}>
               {subscriptionLabelById.get(subscription.id) ?? subscription.id}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="filter-select"
+          value={simulatorScenario}
+          onChange={(event) =>
+            setSimulatorScenario(event.target.value as SimulatorScenario)
+          }
+          aria-label="Full simulator scenario"
+        >
+          {simulatorScenarios.map((scenario) => (
+            <option key={scenario.value} value={scenario.value}>
+              {scenario.label}
             </option>
           ))}
         </select>

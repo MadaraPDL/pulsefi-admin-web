@@ -194,6 +194,7 @@ function RecommendationList({
               </span>
               <strong>{recommendation.recommendation_text}</strong>
               <p>{recommendation.reason ?? "No reason returned."}</p>
+              <p>{recommendation.explanation}</p>
             </div>
 
             <dl>
@@ -333,7 +334,7 @@ export function ISPAdminIntelligenceCenter() {
       const result = await runISPAdminIntelligence();
       setAutomationResult(result);
       setSuccessMessage(
-        `Intelligence run complete: ${result.predictions_created} predictions and ${result.recommendations_created} recommendations.`
+        `Intelligence run complete: ${result.predictions_created} predictions, ${result.recommendations_created} recommendations, and ${result.alerts_created} alerts.`
       );
       await loadIntelligenceData();
     } catch (error) {
@@ -466,6 +467,10 @@ export function ISPAdminIntelligenceCenter() {
                 <div>
                   <span>Recommendations</span>
                   <strong>{automationResult.recommendations_created}</strong>
+                </div>
+                <div>
+                  <span>Alerts</span>
+                  <strong>{automationResult.alerts_created}</strong>
                 </div>
                 <div>
                   <span>Skipped</span>
@@ -668,6 +673,8 @@ export function ISPAdminIntelligenceCenter() {
                     {recommendationResult.recommendation.reason ??
                       "No reason returned."}
                   </p>
+
+                  <p>{recommendationResult.recommendation.explanation}</p>
 
                   <div className="pf-intelligence-detail-grid">
                     <div>

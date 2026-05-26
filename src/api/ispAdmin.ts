@@ -457,6 +457,7 @@ export type ISPAdminAlert = {
   severity: string;
   title: string;
   message: string;
+  explanation: string;
   status: string;
   read_at: string | null;
   created_at: string;
@@ -790,6 +791,7 @@ export type ISPAdminRecommendation = {
   recommendation_type: string;
   recommendation_text: string;
   reason: string | null;
+  explanation: string;
   confidence_score: string | number | null;
   status: string;
   created_at: string;
@@ -878,6 +880,7 @@ export type ISPAdminIntelligenceRunItem = {
   status: string;
   prediction_id: string | null;
   recommendation_id: string | null;
+  alerts_created: number;
   message: string | null;
 };
 
@@ -885,6 +888,7 @@ export type ISPAdminIntelligenceRunResponse = {
   subscriptions_checked: number;
   predictions_created: number;
   recommendations_created: number;
+  alerts_created: number;
   skipped: number;
   failed: number;
   items: ISPAdminIntelligenceRunItem[];
@@ -967,6 +971,7 @@ export type SimulatorDeviceIngestionResponse = {
   devices_updated: number;
   connection_logs_created: number;
   alerts_created: number;
+  scenario: SimulatorScenario;
 };
 
 export type SimulatorUsageIngestionResponse = {
@@ -980,6 +985,7 @@ export type SimulatorUsageIngestionResponse = {
   download_mb: string | number;
   total_mb: string | number;
   alerts_created: number;
+  scenario: SimulatorScenario;
 };
 
 export type SimulatorFullIngestionResponse = {
@@ -989,9 +995,24 @@ export type SimulatorFullIngestionResponse = {
   device_ingestion: SimulatorDeviceIngestionResponse;
   usage_ingestion: SimulatorUsageIngestionResponse;
   alerts_created: number;
+  scenario: SimulatorScenario;
+  policy_failure_alert_created: boolean;
 };
 
-export type SimulatorUsageIngestionRequest = Record<string, unknown>;
+export type SimulatorScenario =
+  | "normal_usage"
+  | "high_usage"
+  | "near_plan_limit"
+  | "exceeded_plan"
+  | "new_device"
+  | "policy_failure"
+  | "heavy_device_usage";
+
+export type SimulatorUsageIngestionRequest = {
+  record_start?: string | null;
+  record_end?: string | null;
+  scenario?: SimulatorScenario;
+};
 
 export async function runSimulatorUsageIngestionForRouter(
   routerId: string,

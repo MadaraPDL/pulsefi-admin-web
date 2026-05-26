@@ -47,6 +47,8 @@ type ISPSection =
   | "settings";
 
 const ISP_ACTIVE_SECTION_STORAGE_KEY = "pulsefi-isp-active-section";
+const ISP_SETTINGS_RETURN_SECTION_STORAGE_KEY =
+  "pulsefi-isp-settings-return-section";
 
 const ispSectionIds: ISPSection[] = [
   "dashboard",
@@ -81,6 +83,38 @@ function getInitialISPSection(): ISPSection {
 function storeISPSection(section: ISPSection) {
   try {
     window.localStorage.setItem(ISP_ACTIVE_SECTION_STORAGE_KEY, section);
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
+function getInitialISPSettingsReturnSection(): Exclude<ISPSection, "settings"> {
+  try {
+    const savedSection = window.localStorage.getItem(
+      ISP_SETTINGS_RETURN_SECTION_STORAGE_KEY
+    );
+
+    if (
+      savedSection &&
+      savedSection !== "settings" &&
+      ispSectionIds.includes(savedSection as ISPSection)
+    ) {
+      return savedSection as Exclude<ISPSection, "settings">;
+    }
+  } catch {
+    // Fall back to overview if storage is unavailable.
+  }
+
+  return "dashboard";
+}
+
+function storeISPSettingsReturnSection(section: ISPSection) {
+  if (section === "settings") {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(ISP_SETTINGS_RETURN_SECTION_STORAGE_KEY, section);
   } catch {
     // Ignore storage failures.
   }
@@ -162,7 +196,12 @@ function ISPSidebar({
   return (
     <nav className="pf-sidebar" aria-label="ISP Admin navigation">
       <div className="pf-sidebar-head">
-        <div className="pf-profile-row">
+        <button
+          className="pf-profile-row pf-brand-button"
+          type="button"
+          onClick={() => onNavigate("dashboard")}
+          aria-label="Go to ISP Overview"
+        >
           <div className="pf-profile-avatar">
             <span className="material-symbols-outlined">wifi</span>
           </div>
@@ -171,7 +210,7 @@ function ISPSidebar({
             <h1>PulseFi</h1>
             <p>ISP Admin</p>
           </div>
-        </div>
+        </button>
 
         <button
           className="pf-quick-action"
@@ -774,12 +813,32 @@ export default function ISPAdminDashboard({
   const [summary, setSummary] = useState<ISPAdminSummary | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [activeSection, setActiveSection] = useState<ISPSection>(getInitialISPSection);
+  const [settingsReturnSection, setSettingsReturnSection] = useState<
+    Exclude<ISPSection, "settings">
+  >(getInitialISPSettingsReturnSection);
 
   const adminName = getAdminName("ISP Admin");
 
   useEffect(() => {
     storeISPSection(activeSection);
   }, [activeSection]);
+
+  function handleNavigate(section: ISPSection) {
+    if (section === "settings") {
+      if (activeSection === "settings") {
+        setActiveSection(settingsReturnSection);
+        return;
+      }
+
+      setSettingsReturnSection(activeSection);
+      storeISPSettingsReturnSection(activeSection);
+
+      setActiveSection("settings");
+      return;
+    }
+
+    setActiveSection(section);
+  }
 
   useEffect(() => {
     async function loadSummary() {
@@ -805,7 +864,7 @@ export default function ISPAdminDashboard({
     <ISPShell
       activeSection={activeSection}
       adminName={adminName}
-      onNavigate={setActiveSection}
+      onNavigate={handleNavigate}
       onLogout={handleLogout}
     >
       {errorMessage && <div className="pf-error-box">{errorMessage}</div>}
@@ -823,7 +882,7 @@ export default function ISPAdminDashboard({
           <ISPSummaryCards summary={summary} />
 
           <section className="pf-overview-grid">
-            <OverviewActionCenter onNavigate={setActiveSection} />
+            <OverviewActionCenter onNavigate={handleNavigate} />
             <NeedsAttentionPanel />
           </section>
 
@@ -891,7 +950,7 @@ export default function ISPAdminDashboard({
           adminEmail={getAdminEmail()}
           adminUsername={getAdminUsername()}
           roleLabel="ISP Admin"
-          activeSectionLabel={ispSectionCopy[activeSection].title}
+          activeSectionLabel={ispSectionCopy[settingsReturnSection].title}
           theme={theme}
           shortcuts={[
             { label: "Overview", section: "dashboard" },
@@ -901,7 +960,7 @@ export default function ISPAdminDashboard({
             { label: "Network Activity", section: "network" },
           ]}
           onSetTheme={onSetTheme}
-          onNavigate={setActiveSection}
+          onNavigate={handleNavigate}
           onAdminUpdated={onAdminUpdated}
           onLogout={handleLogout}
         />
