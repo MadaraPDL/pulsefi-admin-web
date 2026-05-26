@@ -203,12 +203,16 @@ export function AppUserManagement() {
       setErrorMessage("");
 
       try {
-        const data = await listISPAdminAppUsers(
-          getApiStatusFilter(statusFilter)
-        );
+        const [userData, subscriptionData, routerData] = await Promise.all([
+          listISPAdminAppUsers(getApiStatusFilter(statusFilter)),
+          listUserSubscriptions(null, null, 100),
+          listRouters(null, null, 100),
+        ]);
 
         if (!isCancelled) {
-          setUsers(data);
+          setUsers(userData);
+          setSubscriptions(subscriptionData);
+          setRouters(routerData);
         }
       } catch (error) {
         if (!isCancelled) {
