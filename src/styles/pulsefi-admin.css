@@ -5203,3 +5203,207 @@ dd {
 }
 /* Step 46 selected user usage cards end */
 
+
+/* Step 46I - Selected-user Monitoring alerts final UI */
+.pf-monitoring-center .pf-monitoring-split {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 22px !important;
+}
+
+.pf-monitoring-center .pf-monitoring-panel {
+  padding: 22px !important;
+  border-radius: 24px !important;
+}
+
+.pf-monitoring-alert-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 720px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.pf-monitoring-alert-panel .pf-monitoring-panel-header {
+  margin-bottom: 16px !important;
+  padding-bottom: 14px !important;
+  border-bottom: 1px solid var(--pf-border-soft) !important;
+}
+
+.pf-monitoring-alert-panel .pf-monitoring-panel-header h3 {
+  font-size: 1.15rem !important;
+  line-height: 1.3 !important;
+}
+
+.pf-monitoring-alert-panel .pf-monitoring-panel-header p {
+  max-width: 780px !important;
+  margin: 6px 0 0 !important;
+  color: var(--pf-muted) !important;
+  line-height: 1.5 !important;
+}
+
+.pf-monitoring-user-alert-controls {
+  display: grid !important;
+  grid-template-columns: minmax(280px, 1fr) auto !important;
+  align-items: end !important;
+  gap: 18px !important;
+  margin: 0 0 18px !important;
+}
+
+.pf-monitoring-user-alert-controls label {
+  display: grid !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  color: var(--pf-text) !important;
+}
+
+.pf-monitoring-user-alert-controls select {
+  min-height: 52px !important;
+  border-radius: 14px !important;
+}
+
+.pf-monitoring-alert-panel .pf-monitoring-filter-bar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  margin: 0 !important;
+}
+
+.pf-monitoring-alert-panel .filter-chip {
+  min-height: 46px !important;
+  padding: 10px 18px !important;
+  white-space: nowrap !important;
+}
+
+.pf-monitoring-selected-user-strip,
+.pf-monitoring-selected-user-copy {
+  display: none !important;
+}
+
+.pf-monitoring-alert-loading {
+  margin: 0 0 12px !important;
+  color: var(--pf-muted) !important;
+  font-size: 0.92rem !important;
+  flex: 0 0 auto !important;
+}
+
+.pf-monitoring-alert-scroll {
+  flex: 1 1 auto !important;
+  min-height: 260px !important;
+  max-height: 430px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding: 4px 8px 4px 0 !important;
+  overscroll-behavior: contain !important;
+}
+
+.pf-monitoring-alert-scroll::-webkit-scrollbar {
+  width: 8px !important;
+}
+
+.pf-monitoring-alert-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px !important;
+  background: var(--pf-primary-border) !important;
+}
+
+.pf-monitoring-alert-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.pf-monitoring-alert-list {
+  display: grid !important;
+  gap: 14px !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-item {
+  display: grid !important;
+  grid-template-columns: 34px minmax(0, 1fr) !important;
+  gap: 16px !important;
+  align-items: start !important;
+  padding: 18px !important;
+  border: 1px solid var(--pf-border-soft) !important;
+  border-radius: 18px !important;
+  background: var(--pf-surface-2) !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-item > .material-symbols-outlined {
+  margin-top: 2px !important;
+  color: var(--pf-muted) !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-item > div {
+  display: grid !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-title-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-title-row h3 {
+  margin: 0 !important;
+  font-size: 1rem !important;
+  line-height: 1.35 !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-item p {
+  max-width: 900px !important;
+  margin: 0 !important;
+  color: var(--pf-text) !important;
+  line-height: 1.55 !important;
+}
+
+.pf-monitoring-alert-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  margin-top: 2px !important;
+  flex-wrap: wrap !important;
+}
+
+.pf-monitoring-alert-meta-line {
+  color: var(--pf-muted) !important;
+  line-height: 1.5 !important;
+}
+
+.pf-monitoring-alert-footer .small-button {
+  min-width: 136px !important;
+  margin: 0 !important;
+  flex: 0 0 auto !important;
+}
+
+@media (max-width: 900px) {
+  .pf-monitoring-user-alert-controls {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pf-monitoring-alert-panel .pf-monitoring-filter-bar {
+    justify-content: flex-start !important;
+  }
+
+  .pf-monitoring-alert-scroll {
+    max-height: 520px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .pf-monitoring-alert-panel .pf-alert-item {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pf-monitoring-alert-footer {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .pf-monitoring-alert-footer .small-button {
+    width: 100% !important;
+  }
+}
