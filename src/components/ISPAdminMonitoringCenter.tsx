@@ -317,7 +317,7 @@ export function ISPAdminMonitoringCenter() {
     try {
       const [analyticsData, appUserData] = await Promise.all([
         getISPAdminAnalyticsSummary(),
-        listISPAdminAppUsers(null, 200),
+        listISPAdminAppUsers(null, 100),
       ]);
 
       setAnalytics(analyticsData);
@@ -554,3 +554,4 @@ export function ISPAdminMonitoringCenter() {
     </section>
   );
 }
+
