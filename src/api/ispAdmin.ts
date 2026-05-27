@@ -703,6 +703,8 @@ export type ISPAdminDailyUsageByUser = {
   subscription_label: string | null;
   router_id: string;
   router_name: string | null;
+  usage_kind: string;
+  usage_note: string;
   totals: ISPAdminUsageTotals;
 };
 

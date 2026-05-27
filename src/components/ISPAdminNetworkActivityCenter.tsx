@@ -74,6 +74,17 @@ function formatMb(value: string | number | null) {
   return `${numericValue.toFixed(2)} MB`;
 }
 
+function getUsageKindLabel(kind: string | null | undefined) {
+  return kind === "official" ? "Official" : "Estimated";
+}
+
+function getUsageKindHelp(kind: string | null | undefined) {
+  return kind === "official"
+    ? "Official router/subscription total"
+    : "Estimated router/CPE device total";
+}
+
+
 function getLogStatusClass(status: string) {
   const normalized = status.toLowerCase();
 
@@ -123,9 +134,10 @@ function DailyUsageByUserTable({
       >
         <thead>
           <tr>
-            <th style={{ width: "16%" }}>User</th>
-            <th style={{ width: "16%" }}>Service / Router</th>
-            <th style={{ width: "12%" }}>Day</th>
+            <th style={{ width: "15%" }}>User</th>
+            <th style={{ width: "15%" }}>Service / Router</th>
+            <th style={{ width: "10%" }}>Kind</th>
+            <th style={{ width: "11%" }}>Day</th>
             <th className="pf-total-mb-heading" style={{ width: "13%" }}>
               Total
             </th>
@@ -188,6 +200,31 @@ function DailyUsageByUserTable({
                   </span>
                 </td>
 
+                <td style={compactCellStyle}>
+                  <strong
+                    title={row.usage_note ?? getUsageKindHelp(row.usage_kind)}
+                    style={{
+                      ...clippedTextStyle,
+                      fontWeight: 900,
+                      color: row.usage_kind === "official" ? "#8ee6b7" : "#f5c36b",
+                    }}
+                  >
+                    {getUsageKindLabel(row.usage_kind)}
+                  </strong>
+                  <span
+                    className="muted"
+                    title={row.usage_note ?? getUsageKindHelp(row.usage_kind)}
+                    style={{
+                      ...clippedTextStyle,
+                      marginTop: 4,
+                      fontSize: "0.78rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {row.usage_kind === "official" ? "Billing total" : "Simulator/CPE"}
+                  </span>
+                </td>
+
                 <td className="pf-time-cell">{formatDateLabel(row.usage_date)}</td>
                 <td className="pf-total-mb-cell">
                   {formatMb(row.totals.total_mb)}
@@ -201,7 +238,7 @@ function DailyUsageByUserTable({
 
           {rows.length === 0 && (
             <tr>
-              <td colSpan={7}>
+              <td colSpan={8}>
                 No daily usage by user yet. Run simulator ingestion or import
                 usage data to populate this view.
               </td>
