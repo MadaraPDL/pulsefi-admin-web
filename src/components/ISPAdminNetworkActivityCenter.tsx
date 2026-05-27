@@ -224,7 +224,7 @@ function DailyUsageByUserTable({
                       fontWeight: 700,
                     }}
                   >
-                    {row.usage_kind === "official" ? "Billing total" : "Simulator/CPE"}
+                    {row.usage_kind === "official" ? "Package total" : "Device estimate"}
                   </span>
                 </td>
 
@@ -719,31 +719,56 @@ export function ISPAdminNetworkActivityCenter() {
               </div>
             </div>
 
-            <div className="filter-bar pf-network-filter-bar">
-              {(["all", "official", "estimated"] as const).map((kind) => (
-                <button
-                  key={kind}
-                  className={`filter-chip ${
-                    dailyUsageKindFilter === kind ? "active-filter" : ""
-                  }`}
-                  type="button"
-                  onClick={() => setDailyUsageKindFilter(kind)}
-                >
-                  {kind === "all"
-                    ? `All (${dailyUsageByUserRows.length})`
-                    : `${kind[0].toUpperCase()}${kind.slice(1)} (${
-                        dailyUsageByUserRows.filter(
-                          (row) => row.usage_kind === kind
-                        ).length
-                      })`}
-                </button>
-              ))}
-            </div>
+            <div
+              className="pf-daily-usage-controls"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 16,
+                flexWrap: "wrap",
+                padding: "18px 0 20px",
+              }}
+            >
+              <p
+                className="muted"
+                style={{
+                  margin: 0,
+                  maxWidth: 720,
+                  lineHeight: 1.5,
+                }}
+              >
+                Official rows are package/router totals. Estimated rows are
+                per-device simulator/CPE breakdowns.
+              </p>
 
-            <p className="muted">
-              Use Official for router/package totals. Estimated rows are
-              simulator/CPE device breakdown rows.
-            </p>
+              <div
+                className="filter-bar pf-network-filter-bar"
+                style={{
+                  marginLeft: "auto",
+                  gap: 10,
+                }}
+              >
+                {(["all", "official", "estimated"] as const).map((kind) => (
+                  <button
+                    key={kind}
+                    className={`filter-chip ${
+                      dailyUsageKindFilter === kind ? "active-filter" : ""
+                    }`}
+                    type="button"
+                    onClick={() => setDailyUsageKindFilter(kind)}
+                  >
+                    {kind === "all"
+                      ? `All (${dailyUsageByUserRows.length})`
+                      : `${kind[0].toUpperCase()}${kind.slice(1)} (${
+                          dailyUsageByUserRows.filter(
+                            (row) => row.usage_kind === kind
+                          ).length
+                        })`}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <DailyUsageByUserTable rows={visibleDailyUsageByUserRows} />
           </article>
