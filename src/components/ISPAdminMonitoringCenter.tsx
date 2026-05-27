@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   getISPAdminAlert,
@@ -306,7 +306,7 @@ export function ISPAdminMonitoringCenter() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingAlerts, setIsLoadingAlerts] = useState(false);
 
-  async function loadMonitoringData() {
+  const loadMonitoringData = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage("");
 
@@ -334,9 +334,9 @@ export function ISPAdminMonitoringCenter() {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [selectedUserId]);
 
-  async function loadSelectedUserAlerts(userId: string, filter: MonitoringAlertFilter) {
+  const loadSelectedUserAlerts = useCallback(async (userId: string, filter: MonitoringAlertFilter) => {
     if (!userId) {
       setAlerts([]);
       setSelectedAlert(null);
@@ -358,7 +358,7 @@ export function ISPAdminMonitoringCenter() {
     } finally {
       setIsLoadingAlerts(false);
     }
-  }
+  }, []);
 
   async function handleViewAlertDetail(alertId: string) {
     if (selectedAlert?.id === alertId) {
@@ -385,9 +385,7 @@ export function ISPAdminMonitoringCenter() {
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-    // loadMonitoringData intentionally stays local to avoid extra renders.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadMonitoringData]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -395,9 +393,7 @@ export function ISPAdminMonitoringCenter() {
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
-    // loadSelectedUserAlerts intentionally stays local to avoid extra renders.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUserId, alertFilter]);
+  }, [selectedUserId, alertFilter, loadSelectedUserAlerts]);
 
   const selectedUser = appUsers.find((appUser) => appUser.id === selectedUserId);
 
@@ -551,3 +547,4 @@ export function ISPAdminMonitoringCenter() {
     </section>
   );
 }
+
