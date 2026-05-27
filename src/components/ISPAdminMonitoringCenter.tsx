@@ -404,8 +404,6 @@ export function ISPAdminMonitoringCenter() {
     return () => window.clearTimeout(timeoutId);
   }, [selectedUserId, alertFilter, loadSelectedUserAlerts]);
 
-  const selectedUser = appUsers.find((appUser) => appUser.id === selectedUserId);
-
   return (
     <section className="pf-content-card pf-monitoring-center">
       <div className="pf-panel-title-row">
@@ -447,7 +445,7 @@ export function ISPAdminMonitoringCenter() {
           <AnalyticsCards analytics={analytics} />
 
           <section className="pf-monitoring-split">
-            <div className="pf-monitoring-panel pf-monitoring-alert-panel">
+            <div className="pf-monitoring-panel">
               <div className="pf-monitoring-panel-header">
                 <h3>Operational Summary</h3>
               </div>
@@ -486,7 +484,7 @@ export function ISPAdminMonitoringCenter() {
               </div>
             </div>
 
-            <div className="pf-monitoring-panel">
+            <div className="pf-monitoring-panel pf-monitoring-alert-panel">
               <div className="pf-monitoring-panel-header pf-monitoring-alert-header">
                 <div>
                   <h3>Selected User Alerts</h3>
@@ -529,28 +527,19 @@ export function ISPAdminMonitoringCenter() {
                 </div>
               </div>
 
-              {selectedUser && (
-                <div className="selected-strip pf-monitoring-selected-user-strip">
-                  <div className="pf-monitoring-selected-user-copy">
-                    <strong>{selectedUser.full_name}</strong>
-                    <span>{selectedUser.email}</span>
-                  </div>
-                </div>
-              )}
-
               {isLoadingAlerts && (
-                <p className="pf-loading-text">Loading selected-user alerts...</p>
+                <p className="pf-loading-text pf-monitoring-alert-loading">
+                  Updating selected-user alerts...
+                </p>
               )}
 
-              {!isLoadingAlerts && (
-                <AlertList
-                  alerts={alerts}
-                  selectedAlert={selectedAlert}
-                  loadingAlertId={loadingAlertId}
-                  selectedUserId={selectedUserId}
-                  onViewDetail={handleViewAlertDetail}
-                />
-              )}
+              <AlertList
+                alerts={alerts}
+                selectedAlert={selectedAlert}
+                loadingAlertId={loadingAlertId}
+                selectedUserId={selectedUserId}
+                onViewDetail={handleViewAlertDetail}
+              />
             </div>
           </section>
         </>

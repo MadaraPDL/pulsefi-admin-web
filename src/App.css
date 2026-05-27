@@ -805,3 +805,122 @@ textarea {
     width: 100%;
   }
 }
+
+/* Step 46I final monitoring alert layout override */
+.pf-monitoring-split > .pf-monitoring-alert-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 620px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.pf-monitoring-alert-panel .pf-monitoring-user-alert-controls {
+  display: grid !important;
+  gap: 12px !important;
+  margin: 14px 0 12px !important;
+  flex: 0 0 auto !important;
+}
+
+.pf-monitoring-alert-panel .pf-monitoring-filter-bar {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+.pf-monitoring-alert-panel .filter-chip {
+  white-space: nowrap !important;
+}
+
+.pf-monitoring-alert-loading {
+  margin: 0 0 10px !important;
+  color: #8da2b8 !important;
+  flex: 0 0 auto !important;
+}
+
+.pf-monitoring-alert-scroll {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: 380px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 8px !important;
+  overscroll-behavior: contain !important;
+}
+
+.pf-monitoring-alert-scroll .pf-monitoring-alert-list,
+.pf-monitoring-alert-list {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-item {
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  gap: 14px !important;
+  align-items: flex-start !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-item > div {
+  display: grid !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-title-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-title-row h3 {
+  margin: 0 !important;
+  font-size: 0.98rem !important;
+  line-height: 1.3 !important;
+}
+
+.pf-monitoring-alert-panel .pf-alert-item p {
+  margin: 0 !important;
+  line-height: 1.5 !important;
+}
+
+.pf-monitoring-alert-footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+.pf-monitoring-alert-meta-line {
+  color: #8da2b8 !important;
+  line-height: 1.5 !important;
+}
+
+.pf-monitoring-alert-footer .small-button {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+
+.pf-monitoring-selected-user-strip,
+.pf-monitoring-selected-user-copy {
+  display: none !important;
+}
+
+@media (max-width: 700px) {
+  .pf-monitoring-alert-panel .pf-alert-item {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pf-monitoring-alert-footer {
+    align-items: stretch !important;
+    flex-direction: column !important;
+  }
+
+  .pf-monitoring-alert-footer .small-button {
+    width: 100% !important;
+  }
+}
