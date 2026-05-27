@@ -482,7 +482,7 @@ function MFAVerifyPage({
                       disabled={isSubmitting || isResendingCode}
                       onClick={() => void handleResendEmailCode()}
                     >
-                      {isResendingCode ? "Sending..." : "Resend email code"}
+                      {isResendingCode ? "Sending..." : "Resend code by email"}
                     </button>
                   )}
 
@@ -493,7 +493,7 @@ function MFAVerifyPage({
                       disabled={isSubmitting}
                       onClick={() => void handleChangeMethod("email")}
                     >
-                      Send code to email
+                      Send code by email
                     </button>
                   )}
 
