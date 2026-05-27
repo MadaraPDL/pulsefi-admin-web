@@ -4,7 +4,6 @@ import {
   getISPAdminDeviceConnectionLog,
   getISPAdminRouterActionLog,
   getISPAdminUsageRecord,
-  listISPAdminDailyUsage,
   listISPAdminDeviceConnectionLogs,
   listISPAdminRouterActionLogs,
   listISPAdminUsageRecords,
@@ -483,7 +482,9 @@ function RouterActionLogTable({
 }
 
 export function ISPAdminNetworkActivityCenter() {
-  const [dailyUsageRows, setDailyUsageRows] = useState<ISPAdminDailyUsage[]>([]);
+  const [dailyUsageByUserRows, setDailyUsageByUserRows] = useState<
+    ISPAdminDailyUsageByUser[]
+  >([]);
   const [usageRecords, setUsageRecords] = useState<ISPAdminUsageRecord[]>([]);
   const [connectionLogs, setConnectionLogs] = useState<
     ISPAdminDeviceConnectionLog[]
@@ -520,9 +521,9 @@ export function ISPAdminNetworkActivityCenter() {
     setErrorMessage("");
 
     try {
-      const [dailyUsageData, usageData, connectionData, actionData] =
+      const [dailyByUserData, usageData, connectionData, actionData] =
         await Promise.all([
-          listISPAdminDailyUsage({ days: 7 }),
+          listISPAdminDailyUsageByUser({ days: 7 }),
           listISPAdminUsageRecords(8),
           listISPAdminDeviceConnectionLogs(8),
           listISPAdminRouterActionLogs(
@@ -531,7 +532,7 @@ export function ISPAdminNetworkActivityCenter() {
           ),
         ]);
 
-      setDailyUsageRows(dailyUsageData);
+      setDailyUsageByUserRows(dailyByUserData);
       setUsageRecords(usageData);
       setConnectionLogs(connectionData);
       setRouterActionLogs(actionData);
