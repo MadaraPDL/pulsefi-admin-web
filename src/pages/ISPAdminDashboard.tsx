@@ -65,18 +65,9 @@ const ispSectionIds: ISPSection[] = [
 ];
 
 function getInitialISPSection(): ISPSection {
-  try {
-    const savedSection = window.localStorage.getItem(
-      ISP_ACTIVE_SECTION_STORAGE_KEY
-    );
-
-    if (ispSectionIds.includes(savedSection as ISPSection)) {
-      return savedSection as ISPSection;
-    }
-  } catch {
-    // Fall back to overview if storage is unavailable.
-  }
-
+  // Always open the ISP Admin dashboard on Overview after login.
+  // Section persistence caused admins to land on the last saved section,
+  // such as Routers, instead of starting from the main dashboard.
   return "dashboard";
 }
 
