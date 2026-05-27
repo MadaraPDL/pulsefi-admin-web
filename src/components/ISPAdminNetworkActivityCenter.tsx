@@ -98,7 +98,7 @@ function formatJson(value: Record<string, unknown> | null) {
   return JSON.stringify(value, null, 2);
 }
 
-function DailyUsageTable({ rows }: { rows: ISPAdminDailyUsage[] }) {
+: { rows: ISPAdminDailyUsage[] }) {
   return (
     <div className="pf-table-wrap">
       <table className="pf-usage-records-table">
