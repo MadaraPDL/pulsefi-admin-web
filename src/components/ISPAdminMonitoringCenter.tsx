@@ -531,24 +531,6 @@ export function ISPAdminMonitoringCenter() {
                       role="listbox"
                       aria-labelledby="pf-monitoring-user-picker-label"
                     >
-                      <button
-                        className={
-                          selectedUserId === ""
-                            ? "pf-user-picker-option pf-user-picker-option-active"
-                            : "pf-user-picker-option"
-                        }
-                        type="button"
-                        role="option"
-                        aria-selected={selectedUserId === ""}
-                        onClick={() => {
-                          setSelectedUserId("");
-                          setIsUserPickerOpen(false);
-                        }}
-                      >
-                        <strong>Select an App User</strong>
-                        <span>Choose a customer before viewing alerts.</span>
-                      </button>
-
                       {appUsers.map((appUser) => (
                         <button
                           className={

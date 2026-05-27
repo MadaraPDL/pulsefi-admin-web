@@ -5513,3 +5513,66 @@ dd {
   font-weight: 600 !important;
   overflow-wrap: anywhere !important;
 }
+
+/* Step 46I - Compact Monitoring user picker */
+.pf-monitoring-user-alert-controls {
+  grid-template-columns: minmax(260px, 520px) 1fr !important;
+  align-items: end !important;
+}
+
+.pf-monitoring-user-picker {
+  max-width: 520px !important;
+  width: 100% !important;
+}
+
+.pf-user-picker-button {
+  min-height: 46px !important;
+  padding: 10px 14px !important;
+  border-radius: 14px !important;
+  font-size: 0.95rem !important;
+}
+
+.pf-user-picker-menu {
+  width: min(520px, 100%) !important;
+  max-height: 190px !important;
+  padding: 6px !important;
+  border-radius: 14px !important;
+}
+
+.pf-user-picker-option {
+  min-height: 44px !important;
+  display: grid !important;
+  grid-template-columns: minmax(120px, 0.55fr) minmax(160px, 1fr) !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 9px 10px !important;
+  border-radius: 10px !important;
+}
+
+.pf-user-picker-option strong {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 0.9rem !important;
+}
+
+.pf-user-picker-option span {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 0.82rem !important;
+}
+
+@media (max-width: 900px) {
+  .pf-monitoring-user-alert-controls {
+    grid-template-columns: 1fr !important;
+  }
+
+  .pf-monitoring-user-picker {
+    max-width: none !important;
+  }
+
+  .pf-user-picker-menu {
+    width: 100% !important;
+  }
+}
