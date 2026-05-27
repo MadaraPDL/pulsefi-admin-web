@@ -91,7 +91,11 @@ export function AdminPasswordResetFlow({
           </label>
 
           <button className="pf-primary-button" type="submit" disabled={isRequesting}>
-            {isRequesting ? "Sending email..." : "Send reset email"}
+            {isRequesting
+              ? "Sending email..."
+              : successMessage
+                ? "Send another reset email"
+                : "Send reset email"}
           </button>
         </form>
       )}
