@@ -308,6 +308,7 @@ export function ISPAdminMonitoringCenter() {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [loadingAlertId, setLoadingAlertId] = useState<string | null>(null);
   const [alertFilter, setAlertFilter] = useState<MonitoringAlertFilter>("both");
+  const [isUserPickerOpen, setIsUserPickerOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingAlerts, setIsLoadingAlerts] = useState(false);
@@ -404,6 +405,8 @@ export function ISPAdminMonitoringCenter() {
     return () => window.clearTimeout(timeoutId);
   }, [selectedUserId, alertFilter, loadSelectedUserAlerts]);
 
+  const selectedUser = appUsers.find((appUser) => appUser.id === selectedUserId);
+
   return (
     <section className="pf-content-card pf-monitoring-center">
       <div className="pf-panel-title-row">
@@ -496,20 +499,79 @@ export function ISPAdminMonitoringCenter() {
               </div>
 
               <div className="pf-monitoring-user-alert-controls">
-                <label>
-                  App User
-                  <select
-                    value={selectedUserId}
-                    onChange={(event) => setSelectedUserId(event.target.value)}
+                <div className="pf-monitoring-user-picker">
+                  <span
+                    className="pf-monitoring-user-picker-label"
+                    id="pf-monitoring-user-picker-label"
                   >
-                    <option value="">Select an App User</option>
-                    {appUsers.map((appUser) => (
-                      <option value={appUser.id} key={appUser.id}>
-                        {appUser.full_name} - {appUser.email}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                    App User
+                  </span>
+
+                  <button
+                    className="pf-user-picker-button"
+                    type="button"
+                    aria-haspopup="listbox"
+                    aria-expanded={isUserPickerOpen}
+                    aria-labelledby="pf-monitoring-user-picker-label"
+                    onClick={() => setIsUserPickerOpen((current) => !current)}
+                  >
+                    <span>
+                      {selectedUser
+                        ? `${selectedUser.full_name} - ${selectedUser.email}`
+                        : "Select an App User"}
+                    </span>
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      expand_more
+                    </span>
+                  </button>
+
+                  {isUserPickerOpen && (
+                    <div
+                      className="pf-user-picker-menu"
+                      role="listbox"
+                      aria-labelledby="pf-monitoring-user-picker-label"
+                    >
+                      <button
+                        className={
+                          selectedUserId === ""
+                            ? "pf-user-picker-option pf-user-picker-option-active"
+                            : "pf-user-picker-option"
+                        }
+                        type="button"
+                        role="option"
+                        aria-selected={selectedUserId === ""}
+                        onClick={() => {
+                          setSelectedUserId("");
+                          setIsUserPickerOpen(false);
+                        }}
+                      >
+                        <strong>Select an App User</strong>
+                        <span>Choose a customer before viewing alerts.</span>
+                      </button>
+
+                      {appUsers.map((appUser) => (
+                        <button
+                          className={
+                            selectedUserId === appUser.id
+                              ? "pf-user-picker-option pf-user-picker-option-active"
+                              : "pf-user-picker-option"
+                          }
+                          type="button"
+                          role="option"
+                          aria-selected={selectedUserId === appUser.id}
+                          key={appUser.id}
+                          onClick={() => {
+                            setSelectedUserId(appUser.id);
+                            setIsUserPickerOpen(false);
+                          }}
+                        >
+                          <strong>{appUser.full_name}</strong>
+                          <span>{appUser.email}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 <div className="filter-bar pf-monitoring-filter-bar">
                   {monitoringAlertFilters.map((filter) => (
