@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+﻿import { useCallback, useEffect, useState } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   getISPAdminAlert,
@@ -9,8 +9,8 @@ import {
 import type {
   AppUser,
   ISPAdminAlert,
-  ISPAdminAnalyticsSummary,
   ISPAdminAlertListParams,
+  ISPAdminAnalyticsSummary,
 } from "../api/ispAdmin";
 
 type MonitoringAlertFilter = "both" | "high_usage" | "plan_exceed_risk";
@@ -179,76 +179,81 @@ function AlertList({
   }
 
   return (
-    <div className="pf-monitoring-alert-list">
-      {alerts.map((alert) => {
-        const tone = getAlertTone(alert.severity);
-        const isSelected = selectedAlert?.id === alert.id;
-        const isLoading = loadingAlertId === alert.id;
-        const detail = isSelected ? selectedAlert : alert;
+    <div className="pf-monitoring-alert-scroll">
+      <div className="pf-monitoring-alert-list">
+        {alerts.map((alert) => {
+          const tone = getAlertTone(alert.severity);
+          const isSelected = selectedAlert?.id === alert.id;
+          const isLoading = loadingAlertId === alert.id;
+          const detail = isSelected ? selectedAlert : alert;
 
-        return (
-          <article
-            className={`pf-alert-item pf-alert-${tone}`}
-            key={alert.id}
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">
-              {tone === "critical"
-                ? "error"
-                : tone === "warning"
-                  ? "warning"
-                  : "info"}
-            </span>
+          return (
+            <article
+              className={`pf-alert-item pf-alert-${tone}`}
+              key={alert.id}
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">
+                {tone === "critical"
+                  ? "error"
+                  : tone === "warning"
+                    ? "warning"
+                    : "info"}
+              </span>
 
-            <div>
-              <div className="pf-alert-title-row">
-                <h3>{alert.title}</h3>
-                <span className={`status-pill status-${tone}`}>
-                  {formatLabel(alert.severity)}
-                </span>
-              </div>
-
-              <p>{alert.message}</p>
-
-              <small>
-                {formatLabel(alert.alert_type)} - {formatLabel(alert.status)} -{" "}
-                {formatDateTime(alert.created_at)}
-              </small>
-
-              {isSelected && (
-                <div className="pf-inline-detail-panel">
-                  <DetailLine label="Alert ID" value={detail.id} />
-                  <DetailLine label="User ID" value={detail.user_id} />
-                  <DetailLine
-                    label="Subscription ID"
-                    value={detail.user_subscription_id}
-                  />
-                  <DetailLine label="Device ID" value={detail.device_id} />
-                  <DetailLine
-                    label="Connection Log ID"
-                    value={detail.connection_log_id}
-                  />
-                  <DetailLine label="Usage ID" value={detail.usage_id} />
-                  <DetailLine label="Prediction ID" value={detail.prediction_id} />
-                  <DetailLine label="Read at" value={formatDateTime(detail.read_at)} />
+              <div>
+                <div className="pf-alert-title-row">
+                  <h3>{alert.title}</h3>
+                  <span className={`status-pill status-${tone}`}>
+                    {formatLabel(alert.severity)}
+                  </span>
                 </div>
-              )}
 
-              <button
-                className="small-button"
-                type="button"
-                disabled={isLoading}
-                onClick={() => onViewDetail(alert.id)}
-              >
-                {isLoading
-                  ? "Loading..."
-                  : isSelected
-                    ? "Hide details"
-                    : "View details"}
-              </button>
-            </div>
-          </article>
-        );
-      })}
+                <p>{alert.message}</p>
+
+                <small>
+                  {formatLabel(alert.alert_type)} - {formatLabel(alert.status)} -{" "}
+                  {formatDateTime(alert.created_at)}
+                </small>
+
+                {isSelected && (
+                  <div className="pf-inline-detail-panel">
+                    <DetailLine label="Alert ID" value={detail.id} />
+                    <DetailLine label="User ID" value={detail.user_id} />
+                    <DetailLine
+                      label="Subscription ID"
+                      value={detail.user_subscription_id}
+                    />
+                    <DetailLine label="Device ID" value={detail.device_id} />
+                    <DetailLine
+                      label="Connection Log ID"
+                      value={detail.connection_log_id}
+                    />
+                    <DetailLine label="Usage ID" value={detail.usage_id} />
+                    <DetailLine label="Prediction ID" value={detail.prediction_id} />
+                    <DetailLine
+                      label="Read at"
+                      value={formatDateTime(detail.read_at)}
+                    />
+                  </div>
+                )}
+
+                <button
+                  className="small-button"
+                  type="button"
+                  disabled={isLoading}
+                  onClick={() => onViewDetail(alert.id)}
+                >
+                  {isLoading
+                    ? "Loading..."
+                    : isSelected
+                      ? "Hide details"
+                      : "View details"}
+                </button>
+              </div>
+            </article>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -300,8 +305,7 @@ export function ISPAdminMonitoringCenter() {
   const [selectedAlert, setSelectedAlert] = useState<ISPAdminAlert | null>(null);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [loadingAlertId, setLoadingAlertId] = useState<string | null>(null);
-  const [alertFilter, setAlertFilter] =
-    useState<MonitoringAlertFilter>("both");
+  const [alertFilter, setAlertFilter] = useState<MonitoringAlertFilter>("both");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingAlerts, setIsLoadingAlerts] = useState(false);
@@ -313,7 +317,7 @@ export function ISPAdminMonitoringCenter() {
     try {
       const [analyticsData, appUserData] = await Promise.all([
         getISPAdminAnalyticsSummary(),
-        listISPAdminAppUsers(null, 100),
+        listISPAdminAppUsers(null, 200),
       ]);
 
       setAnalytics(analyticsData);
@@ -336,29 +340,32 @@ export function ISPAdminMonitoringCenter() {
     }
   }, [selectedUserId]);
 
-  const loadSelectedUserAlerts = useCallback(async (userId: string, filter: MonitoringAlertFilter) => {
-    if (!userId) {
-      setAlerts([]);
-      setSelectedAlert(null);
-      return;
-    }
+  const loadSelectedUserAlerts = useCallback(
+    async (userId: string, filter: MonitoringAlertFilter) => {
+      if (!userId) {
+        setAlerts([]);
+        setSelectedAlert(null);
+        return;
+      }
 
-    setIsLoadingAlerts(true);
-    setErrorMessage("");
+      setIsLoadingAlerts(true);
+      setErrorMessage("");
 
-    try {
-      const alertsData = await listMonitoringAlertsForSelectedUser(userId, filter);
-      setAlerts(alertsData);
-      setSelectedAlert(null);
-    } catch (error) {
-      setAlerts([]);
-      setErrorMessage(
-        getErrorMessage(error, "Could not load selected-user alerts.")
-      );
-    } finally {
-      setIsLoadingAlerts(false);
-    }
-  }, []);
+      try {
+        const alertsData = await listMonitoringAlertsForSelectedUser(userId, filter);
+        setAlerts(alertsData);
+        setSelectedAlert(null);
+      } catch (error) {
+        setAlerts([]);
+        setErrorMessage(
+          getErrorMessage(error, "Could not load selected-user alerts.")
+        );
+      } finally {
+        setIsLoadingAlerts(false);
+      }
+    },
+    []
+  );
 
   async function handleViewAlertDetail(alertId: string) {
     if (selectedAlert?.id === alertId) {
@@ -547,4 +554,3 @@ export function ISPAdminMonitoringCenter() {
     </section>
   );
 }
-
