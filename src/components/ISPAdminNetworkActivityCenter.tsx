@@ -31,6 +31,9 @@ const compactCellStyle = {
   verticalAlign: "top",
 } as const;
 
+type DailyUsageKindFilter = "all" | "official" | "estimated";
+
+
 function formatDateTime(value: string | null) {
   if (!value) {
     return "-";
@@ -536,6 +539,8 @@ export function ISPAdminNetworkActivityCenter() {
   const [dailyUsageByUserRows, setDailyUsageByUserRows] = useState<
     ISPAdminDailyUsageByUser[]
   >([]);
+  const [dailyUsageKindFilter, setDailyUsageKindFilter] =
+    useState<DailyUsageKindFilter>("all");
   const [usageRecords, setUsageRecords] = useState<ISPAdminUsageRecord[]>([]);
   const [connectionLogs, setConnectionLogs] = useState<
     ISPAdminDeviceConnectionLog[]
@@ -672,6 +677,14 @@ export function ISPAdminNetworkActivityCenter() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routerActionStatus]);
 
+  const visibleDailyUsageByUserRows = dailyUsageByUserRows.filter((row) => {
+    if (dailyUsageKindFilter === "all") {
+      return true;
+    }
+
+    return row.usage_kind === dailyUsageKindFilter;
+  });
+
   return (
     <section className="pf-content-card pf-network-activity-center">
       <div className="pf-panel-title-row">
@@ -706,7 +719,33 @@ export function ISPAdminNetworkActivityCenter() {
               </div>
             </div>
 
-            <DailyUsageByUserTable rows={dailyUsageByUserRows} />
+            <div className="filter-bar pf-network-filter-bar">
+              {(["all", "official", "estimated"] as const).map((kind) => (
+                <button
+                  key={kind}
+                  className={`filter-chip ${
+                    dailyUsageKindFilter === kind ? "active-filter" : ""
+                  }`}
+                  type="button"
+                  onClick={() => setDailyUsageKindFilter(kind)}
+                >
+                  {kind === "all"
+                    ? `All (${dailyUsageByUserRows.length})`
+                    : `${kind[0].toUpperCase()}${kind.slice(1)} (${
+                        dailyUsageByUserRows.filter(
+                          (row) => row.usage_kind === kind
+                        ).length
+                      })`}
+                </button>
+              ))}
+            </div>
+
+            <p className="muted">
+              Use Official for router/package totals. Estimated rows are
+              simulator/CPE device breakdown rows.
+            </p>
+
+            <DailyUsageByUserTable rows={visibleDailyUsageByUserRows} />
           </article>
 
           <article className="pf-network-panel pf-network-panel-wide">
