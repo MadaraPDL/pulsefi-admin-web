@@ -669,6 +669,31 @@ export async function reviewPlanChangeRequest(
 }
 
 
+export type ISPAdminUsageTotals = {
+  upload_mb: string | number;
+  download_mb: string | number;
+  total_mb: string | number;
+  record_count: number;
+  first_record_start: string | null;
+  last_record_end: string | null;
+};
+
+export type ISPAdminDailyUsage = {
+  usage_date: string;
+  totals: ISPAdminUsageTotals;
+};
+
+export type ISPAdminDailyUsageFilters = {
+  router_id?: string | null;
+  user_id?: string | null;
+  user_subscription_id?: string | null;
+  device_id?: string | null;
+  source?: string | null;
+  start_at?: string | null;
+  end_at?: string | null;
+  days?: number;
+};
+
 export type ISPAdminUsageRecord = {
   id: string;
   user_id: string;
@@ -719,6 +744,30 @@ export async function listISPAdminUsageRecords(
 
   return apiRequest<ISPAdminUsageRecord[]>(
     `/isp-admin/usage-records?${params.toString()}`
+  );
+}
+
+
+export async function listISPAdminDailyUsage(
+  filters: ISPAdminDailyUsageFilters = {}
+): Promise<ISPAdminDailyUsage[]> {
+  const params = new URLSearchParams({
+    days: String(filters.days ?? 7),
+  });
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (
+      value !== undefined &&
+      value !== null &&
+      value !== "" &&
+      key !== "days"
+    ) {
+      params.set(key, String(value));
+    }
+  }
+
+  return apiRequest<ISPAdminDailyUsage[]>(
+    `/isp-admin/usage-records/daily?${params.toString()}`
   );
 }
 

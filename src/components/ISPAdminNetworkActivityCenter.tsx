@@ -4,11 +4,13 @@ import {
   getISPAdminDeviceConnectionLog,
   getISPAdminRouterActionLog,
   getISPAdminUsageRecord,
+  listISPAdminDailyUsage,
   listISPAdminDeviceConnectionLogs,
   listISPAdminRouterActionLogs,
   listISPAdminUsageRecords,
 } from "../api/ispAdmin";
 import type {
+  ISPAdminDailyUsage,
   ISPAdminDeviceConnectionLog,
   ISPAdminRouterActionLog,
   ISPAdminUsageRecord,
@@ -28,6 +30,21 @@ function formatDateTime(value: string | null) {
 
   return date.toLocaleString();
 }
+
+function formatDateLabel(value: string) {
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 
 function formatMb(value: string | number | null) {
   if (value === null) {
@@ -78,6 +95,47 @@ function formatJson(value: Record<string, unknown> | null) {
   }
 
   return JSON.stringify(value, null, 2);
+}
+
+function DailyUsageTable({ rows }: { rows: ISPAdminDailyUsage[] }) {
+  return (
+    <div className="pf-table-wrap">
+      <table className="pf-usage-records-table">
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th className="pf-total-mb-heading">Total</th>
+            <th>Download</th>
+            <th>Upload</th>
+            <th>Records</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.usage_date}>
+              <td className="pf-time-cell">{formatDateLabel(row.usage_date)}</td>
+              <td className="pf-total-mb-cell">
+                {formatMb(row.totals.total_mb)}
+              </td>
+              <td>{formatMb(row.totals.download_mb)}</td>
+              <td>{formatMb(row.totals.upload_mb)}</td>
+              <td>{row.totals.record_count}</td>
+            </tr>
+          ))}
+
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={5}>
+                No daily usage rows yet. Run simulator ingestion or import usage
+                data to populate this view.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function UsageRecordsTable({
@@ -363,6 +421,7 @@ function RouterActionLogTable({
 }
 
 export function ISPAdminNetworkActivityCenter() {
+  const [dailyUsageRows, setDailyUsageRows] = useState<ISPAdminDailyUsage[]>([]);
   const [usageRecords, setUsageRecords] = useState<ISPAdminUsageRecord[]>([]);
   const [connectionLogs, setConnectionLogs] = useState<
     ISPAdminDeviceConnectionLog[]
@@ -399,15 +458,18 @@ export function ISPAdminNetworkActivityCenter() {
     setErrorMessage("");
 
     try {
-      const [usageData, connectionData, actionData] = await Promise.all([
-        listISPAdminUsageRecords(8),
-        listISPAdminDeviceConnectionLogs(8),
-        listISPAdminRouterActionLogs(
-          routerActionStatus === "all" ? null : routerActionStatus,
-          8
-        ),
-      ]);
+      const [dailyUsageData, usageData, connectionData, actionData] =
+        await Promise.all([
+          listISPAdminDailyUsage({ days: 7 }),
+          listISPAdminUsageRecords(8),
+          listISPAdminDeviceConnectionLogs(8),
+          listISPAdminRouterActionLogs(
+            routerActionStatus === "all" ? null : routerActionStatus,
+            8
+          ),
+        ]);
 
+      setDailyUsageRows(dailyUsageData);
       setUsageRecords(usageData);
       setConnectionLogs(connectionData);
       setRouterActionLogs(actionData);
@@ -522,6 +584,17 @@ export function ISPAdminNetworkActivityCenter() {
 
       {!isLoading && (
         <section className="pf-network-grid">
+          <article className="pf-network-panel pf-network-panel-wide">
+            <div className="pf-monitoring-panel-header">
+              <div>
+                <h3>Daily Usage Summary</h3>
+                <p>Last 7 days across this ISP, scoped by backend ownership rules.</p>
+              </div>
+            </div>
+
+            <DailyUsageTable rows={dailyUsageRows} />
+          </article>
+
           <article className="pf-network-panel pf-network-panel-wide">
             <div className="pf-monitoring-panel-header">
               <h3>Recent Usage Records</h3>
