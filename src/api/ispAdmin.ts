@@ -694,6 +694,28 @@ export type ISPAdminDailyUsageFilters = {
   days?: number;
 };
 
+export type ISPAdminDailyUsageByUser = {
+  usage_date: string;
+  user_id: string;
+  user_full_name: string;
+  user_email: string;
+  user_subscription_id: string;
+  subscription_label: string | null;
+  router_id: string;
+  router_name: string | null;
+  totals: ISPAdminUsageTotals;
+};
+
+export type ISPAdminDailyUsageByUserFilters = {
+  router_id?: string | null;
+  user_id?: string | null;
+  user_subscription_id?: string | null;
+  source?: string | null;
+  start_at?: string | null;
+  end_at?: string | null;
+  days?: number;
+};
+
 export type ISPAdminUsageRecord = {
   id: string;
   user_id: string;
@@ -776,6 +798,30 @@ export async function getISPAdminUsageRecord(
 ): Promise<ISPAdminUsageRecord> {
   return apiRequest<ISPAdminUsageRecord>(
     `/isp-admin/usage-records/${usageRecordId}`
+  );
+}
+
+
+export async function listISPAdminDailyUsageByUser(
+  filters: ISPAdminDailyUsageByUserFilters = {}
+): Promise<ISPAdminDailyUsageByUser[]> {
+  const params = new URLSearchParams({
+    days: String(filters.days ?? 7),
+  });
+
+  for (const [key, value] of Object.entries(filters)) {
+    if (
+      value !== undefined &&
+      value !== null &&
+      value !== "" &&
+      key !== "days"
+    ) {
+      params.set(key, String(value));
+    }
+  }
+
+  return apiRequest<ISPAdminDailyUsageByUser[]>(
+    `/isp-admin/usage-records/daily-by-user?${params.toString()}`
   );
 }
 

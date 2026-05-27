@@ -11,6 +11,7 @@ import {
 } from "../api/ispAdmin";
 import type {
   ISPAdminDailyUsage,
+  ISPAdminDailyUsageByUser,
   ISPAdminDeviceConnectionLog,
   ISPAdminRouterActionLog,
   ISPAdminUsageRecord,
@@ -129,6 +130,67 @@ function DailyUsageTable({ rows }: { rows: ISPAdminDailyUsage[] }) {
               <td colSpan={5}>
                 No daily usage rows yet. Run simulator ingestion or import usage
                 data to populate this view.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function DailyUsageByUserTable({
+  rows,
+}: {
+  rows: ISPAdminDailyUsageByUser[];
+}) {
+  return (
+    <div className="pf-table-wrap">
+      <table className="pf-usage-records-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Service / Router</th>
+            <th>Day</th>
+            <th className="pf-total-mb-heading">Total</th>
+            <th>Download</th>
+            <th>Upload</th>
+            <th>Records</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {rows.map((row) => (
+            <tr
+              key={`${row.usage_date}-${row.user_id}-${row.user_subscription_id}-${row.router_id}`}
+            >
+              <td>
+                <strong>{row.user_full_name}</strong>
+                <br />
+                <span className="muted">{row.user_email}</span>
+              </td>
+              <td>
+                {row.subscription_label ?? "Unlabeled service line"}
+                <br />
+                <span className="muted">
+                  {row.router_name ?? "Unnamed router"} ? {row.router_id.slice(0, 8)}
+                </span>
+              </td>
+              <td className="pf-time-cell">{formatDateLabel(row.usage_date)}</td>
+              <td className="pf-total-mb-cell">
+                {formatMb(row.totals.total_mb)}
+              </td>
+              <td>{formatMb(row.totals.download_mb)}</td>
+              <td>{formatMb(row.totals.upload_mb)}</td>
+              <td>{row.totals.record_count}</td>
+            </tr>
+          ))}
+
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={7}>
+                No daily usage by user yet. Run simulator ingestion or import
+                usage data to populate this view.
               </td>
             </tr>
           )}
@@ -593,6 +655,17 @@ export function ISPAdminNetworkActivityCenter() {
             </div>
 
             <DailyUsageTable rows={dailyUsageRows} />
+          </article>
+
+          <article className="pf-network-panel pf-network-panel-wide">
+            <div className="pf-monitoring-panel-header">
+              <div>
+                <h3>Daily Usage by User</h3>
+                <p>Last 7 days grouped by App User, service line, and router.</p>
+              </div>
+            </div>
+
+            <DailyUsageByUserTable rows={dailyUsageByUserRows} />
           </article>
 
           <article className="pf-network-panel pf-network-panel-wide">
