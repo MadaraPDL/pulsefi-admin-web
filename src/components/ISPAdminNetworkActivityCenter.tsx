@@ -10,7 +10,6 @@ import {
   listISPAdminUsageRecords,
 } from "../api/ispAdmin";
 import type {
-  ISPAdminDailyUsage,
   ISPAdminDailyUsageByUser,
   ISPAdminDeviceConnectionLog,
   ISPAdminRouterActionLog,
@@ -96,47 +95,6 @@ function formatJson(value: Record<string, unknown> | null) {
   }
 
   return JSON.stringify(value, null, 2);
-}
-
-: { rows: ISPAdminDailyUsage[] }) {
-  return (
-    <div className="pf-table-wrap">
-      <table className="pf-usage-records-table">
-        <thead>
-          <tr>
-            <th>Day</th>
-            <th className="pf-total-mb-heading">Total</th>
-            <th>Download</th>
-            <th>Upload</th>
-            <th>Records</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.usage_date}>
-              <td className="pf-time-cell">{formatDateLabel(row.usage_date)}</td>
-              <td className="pf-total-mb-cell">
-                {formatMb(row.totals.total_mb)}
-              </td>
-              <td>{formatMb(row.totals.download_mb)}</td>
-              <td>{formatMb(row.totals.upload_mb)}</td>
-              <td>{row.totals.record_count}</td>
-            </tr>
-          ))}
-
-          {rows.length === 0 && (
-            <tr>
-              <td colSpan={5}>
-                No daily usage rows yet. Run simulator ingestion or import usage
-                data to populate this view.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
 }
 
 function DailyUsageByUserTable({
