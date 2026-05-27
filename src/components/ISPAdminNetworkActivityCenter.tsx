@@ -224,7 +224,7 @@ function DailyUsageByUserTable({
                       fontWeight: 700,
                     }}
                   >
-                    {row.usage_kind === "official" ? "Package total" : "Device estimate"}
+                    {row.usage_kind === "official" ? "Service total" : "Device estimate"}
                   </span>
                 </td>
 
@@ -715,7 +715,7 @@ export function ISPAdminNetworkActivityCenter() {
             <div className="pf-monitoring-panel-header">
               <div>
                 <h3>Daily Usage by User</h3>
-                <p>Last 7 days grouped by App User, service line, and router.</p>
+                <p>Last 7 days by user, service line, router, and usage type.</p>
               </div>
             </div>
 
@@ -724,25 +724,13 @@ export function ISPAdminNetworkActivityCenter() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent: "flex-end",
                 gap: 16,
                 flexWrap: "wrap",
-                padding: "18px 0 20px",
+                padding: "14px 0 18px",
               }}
             >
-              <p
-                className="muted"
-                style={{
-                  margin: 0,
-                  maxWidth: 720,
-                  lineHeight: 1.5,
-                }}
-              >
-                Official rows are package/router totals. Estimated rows are
-                per-device simulator/CPE breakdowns.
-              </p>
-
-              <div
+<div
                 className="filter-bar pf-network-filter-bar"
                 style={{
                   marginLeft: "auto",
