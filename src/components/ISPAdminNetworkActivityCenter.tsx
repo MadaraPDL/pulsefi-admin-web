@@ -17,6 +17,20 @@ import type {
   RouterActionLogStatus,
 } from "../api/ispAdmin";
 
+const clippedTextStyle = {
+  display: "block",
+  maxWidth: "100%",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+} as const;
+
+const compactCellStyle = {
+  minWidth: 0,
+  overflow: "hidden",
+  verticalAlign: "top",
+} as const;
+
 function formatDateTime(value: string | null) {
   if (!value) {
     return "-";
@@ -44,7 +58,6 @@ function formatDateLabel(value: string) {
     day: "numeric",
   });
 }
-
 
 function formatMb(value: string | number | null) {
   if (value === null) {
@@ -105,13 +118,13 @@ function DailyUsageByUserTable({
   return (
     <div className="pf-table-wrap">
       <table
-        className="pf-usage-records-table pf-daily-usage-user-table"
+        className="pf-usage-records-table"
         style={{ tableLayout: "fixed", width: "100%" }}
       >
         <thead>
           <tr>
-            <th style={{ width: "15%" }}>User</th>
-            <th style={{ width: "15%" }}>Service / Router</th>
+            <th style={{ width: "16%" }}>User</th>
+            <th style={{ width: "16%" }}>Service / Router</th>
             <th style={{ width: "12%" }}>Day</th>
             <th className="pf-total-mb-heading" style={{ width: "13%" }}>
               Total
@@ -133,39 +146,52 @@ function DailyUsageByUserTable({
               <tr
                 key={`${row.usage_date}-${row.user_id}-${row.user_subscription_id}-${row.router_id}`}
               >
-                <td className="pf-daily-user-cell">
+                <td style={compactCellStyle}>
                   <strong
-                    className="pf-daily-main-text"
                     title={row.user_full_name}
+                    style={{ ...clippedTextStyle, fontWeight: 900 }}
                   >
                     {row.user_full_name}
                   </strong>
                   <span
-                    className="pf-daily-sub-text"
+                    className="muted"
                     title={row.user_email}
+                    style={{
+                      ...clippedTextStyle,
+                      marginTop: 4,
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                    }}
                   >
                     {row.user_email}
                   </span>
                 </td>
 
-                <td className="pf-daily-service-cell">
-                  <strong className="pf-daily-main-text" title={serviceLabel}>
+                <td style={compactCellStyle}>
+                  <strong
+                    title={serviceLabel}
+                    style={{ ...clippedTextStyle, fontWeight: 900 }}
+                  >
                     {serviceLabel}
                   </strong>
                   <span
-                    className="pf-daily-sub-text"
+                    className="muted"
                     title={`${routerLabel} ID ${routerIdPrefix}`}
+                    style={{
+                      ...clippedTextStyle,
+                      marginTop: 4,
+                      fontSize: "0.82rem",
+                      fontWeight: 700,
+                    }}
                   >
                     {routerLabel} ID {routerIdPrefix}
                   </span>
                 </td>
 
                 <td className="pf-time-cell">{formatDateLabel(row.usage_date)}</td>
-
                 <td className="pf-total-mb-cell">
                   {formatMb(row.totals.total_mb)}
                 </td>
-
                 <td>{formatMb(row.totals.download_mb)}</td>
                 <td>{formatMb(row.totals.upload_mb)}</td>
                 <td>{row.totals.record_count}</td>
@@ -635,17 +661,6 @@ export function ISPAdminNetworkActivityCenter() {
 
       {!isLoading && (
         <section className="pf-network-grid">
-          <article className="pf-network-panel pf-network-panel-wide">
-            <div className="pf-monitoring-panel-header">
-              <div>
-                <h3>Daily Usage by User</h3>
-                <p>Last 7 days grouped by App User, service line, and router.</p>
-              </div>
-            </div>
-
-            <DailyUsageByUserTable rows={dailyUsageByUserRows} />
-          </article>
-
           <article className="pf-network-panel pf-network-panel-wide">
             <div className="pf-monitoring-panel-header">
               <div>
