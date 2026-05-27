@@ -195,14 +195,11 @@ function AdminLoginPage({
   const [showPassword, setShowPassword] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isResendingCode, setIsResendingCode] = useState(false);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage("");
-    setSuccessMessage("");
     setIsSubmitting(true);
 
     try {
@@ -349,7 +346,9 @@ function MFAVerifyPage({
   const [activeChallenge, setActiveChallenge] = useState(challenge);
   const [isBackupCodeMode, setIsBackupCodeMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResendingCode, setIsResendingCode] = useState(false);
 
   async function handleVerifyMFA(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -388,6 +387,28 @@ function MFAVerifyPage({
       setErrorMessage(getErrorMessage(error, "Could not switch MFA method."));
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleResendEmailCode() {
+    setErrorMessage("");
+    setSuccessMessage("");
+    setIsResendingCode(true);
+
+    try {
+      const nextChallenge = await changeAdminMFAChallengeMethod({
+        challenge_token: activeChallenge.challenge_token,
+        method: "email",
+      });
+
+      setActiveChallenge(nextChallenge);
+      setIsBackupCodeMode(false);
+      setCode("");
+      setSuccessMessage("A new verification code was sent to your email.");
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error, "Could not resend verification code."));
+    } finally {
+      setIsResendingCode(false);
     }
   }
 
