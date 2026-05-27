@@ -3,6 +3,7 @@ import type { CSSProperties, FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   getISPAdminAppUser,
+  listISPAdminAlerts,
   listISPAdminAppUsers,
   listRouters,
   listUserSubscriptions,
@@ -12,6 +13,7 @@ import type {
   AppUser,
   AppUserFilter,
   AppUserStatus,
+  ISPAdminAlert,
   ISPAdminRouter,
   UpdateAppUserRequest,
   UsageConsumptionSummary,
@@ -120,12 +122,96 @@ function formatDate(value: string | null) {
   return date.toLocaleString();
 }
 
+function formatAlertLabel(value: string | null | undefined) {
+  if (!value) {
+    return "-";
+  }
+
+  return value.replaceAll("_", " ");
+}
+
+function SelectedUserHighUsageAlerts({
+  alerts,
+  isLoading,
+  errorMessage,
+  onRefresh,
+}: {
+  alerts: ISPAdminAlert[];
+  isLoading: boolean;
+  errorMessage: string;
+  onRefresh: () => void;
+}) {
+  return (
+    <div className="pf-selected-alert-section">
+      <div className="pf-selected-alert-header">
+        <div>
+          <h4>High-usage alerts</h4>
+          <p className="muted">
+            Only high-usage alerts for the selected App User are shown here.
+          </p>
+        </div>
+
+        <button
+          className="small-button"
+          type="button"
+          onClick={onRefresh}
+          disabled={isLoading}
+        >
+          {isLoading ? "Loading..." : "Refresh alerts"}
+        </button>
+      </div>
+
+      {errorMessage && <div className="error-box">{errorMessage}</div>}
+
+      {isLoading && (
+        <p className="muted">Loading selected-user high-usage alerts...</p>
+      )}
+
+      {!isLoading && alerts.length === 0 && (
+        <div className="pf-empty-state pf-selected-alert-empty">
+          <span className="material-symbols-outlined">notifications_off</span>
+          <p>No high-usage alerts found for this selected user.</p>
+        </div>
+      )}
+
+      {!isLoading && alerts.length > 0 && (
+        <div className="pf-selected-alert-list">
+          {alerts.map((alert) => (
+            <article className="pf-selected-alert-card" key={alert.id}>
+              <div className="pf-selected-alert-card-top">
+                <h5>{alert.title}</h5>
+                <span className={`status-pill status-${alert.status}`}>
+                  {formatAlertLabel(alert.status)}
+                </span>
+              </div>
+
+              <p>{alert.message}</p>
+
+              <div className="pf-selected-alert-meta">
+                <span>{formatAlertLabel(alert.severity)}</span>
+                <span>{formatDate(alert.created_at)}</span>
+                <span>{formatAlertLabel(alert.alert_type)}</span>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AppUserManagement() {
   const [statusFilter, setStatusFilter] = useState<AppUserFilter>("all");
   const [users, setUsers] = useState<AppUser[]>([]);
   const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
   const [routers, setRouters] = useState<ISPAdminRouter[]>([]);
   const [selectedUser, setSelectedUser] = useState<AppUser | null>(null);
+  const [selectedUserHighUsageAlerts, setSelectedUserHighUsageAlerts] = useState<
+    ISPAdminAlert[]
+  >([]);
+  const [selectedUserAlertError, setSelectedUserAlertError] = useState("");
+  const [isLoadingSelectedUserAlerts, setIsLoadingSelectedUserAlerts] =
+    useState(false);
   const [fullName, setFullName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [userStatus, setUserStatus] = useState<AppUserStatus>("active");
@@ -232,15 +318,43 @@ export function AppUserManagement() {
     };
   }, [statusFilter]);
 
+  async function loadSelectedUserHighUsageAlerts(userId: string) {
+    setIsLoadingSelectedUserAlerts(true);
+    setSelectedUserAlertError("");
+
+    try {
+      const alerts = await listISPAdminAlerts({
+        user_id: userId,
+        alert_type: "high_usage",
+        limit: 8,
+      });
+
+      setSelectedUserHighUsageAlerts(alerts);
+    } catch (error) {
+      setSelectedUserHighUsageAlerts([]);
+      setSelectedUserAlertError(
+        getErrorMessage(
+          error,
+          "Could not load selected-user high-usage alerts."
+        )
+      );
+    } finally {
+      setIsLoadingSelectedUserAlerts(false);
+    }
+  }
+
   async function chooseUser(user: AppUser) {
     setSelectingUserId(user.id);
     setErrorMessage("");
     setSuccessMessage("");
+    setSelectedUserAlertError("");
+    setSelectedUserHighUsageAlerts([]);
 
     try {
       const userDetails = await getISPAdminAppUser(user.id);
       setSelectedUser(userDetails);
       setEditableFields(userDetails);
+      void loadSelectedUserHighUsageAlerts(userDetails.id);
     } catch (error) {
       setErrorMessage(getErrorMessage(error, "Could not load App User."));
     } finally {
@@ -434,6 +548,13 @@ export function AppUserManagement() {
                   ))}
                 </div>
               </div>
+
+              <SelectedUserHighUsageAlerts
+                alerts={selectedUserHighUsageAlerts}
+                isLoading={isLoadingSelectedUserAlerts}
+                errorMessage={selectedUserAlertError}
+                onRefresh={() => void loadSelectedUserHighUsageAlerts(selectedUser.id)}
+              />
 
               <label>
                 Full name
