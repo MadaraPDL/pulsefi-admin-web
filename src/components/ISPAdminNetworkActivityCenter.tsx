@@ -4,6 +4,7 @@ import {
   getISPAdminDeviceConnectionLog,
   getISPAdminRouterActionLog,
   getISPAdminUsageRecord,
+  listISPAdminDailyUsageByUser,
   listISPAdminDeviceConnectionLogs,
   listISPAdminRouterActionLogs,
   listISPAdminUsageRecords,
@@ -650,12 +651,12 @@ export function ISPAdminNetworkActivityCenter() {
           <article className="pf-network-panel pf-network-panel-wide">
             <div className="pf-monitoring-panel-header">
               <div>
-                <h3>Daily Usage Summary</h3>
-                <p>Last 7 days across this ISP, scoped by backend ownership rules.</p>
+                <h3>Daily Usage by User</h3>
+                <p>Last 7 days grouped by App User, service line, and router.</p>
               </div>
             </div>
 
-            <DailyUsageTable rows={dailyUsageRows} />
+            <DailyUsageByUserTable rows={dailyUsageByUserRows} />
           </article>
 
           <article className="pf-network-panel pf-network-panel-wide">
