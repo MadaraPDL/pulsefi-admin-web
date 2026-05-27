@@ -5576,15 +5576,3 @@ dd {
     width: 100% !important;
   }
 }
-
-
-.pf-inline-help {
-  border: 1px solid var(--pf-border, #d8e2ec);
-  border-radius: 14px;
-  padding: 10px 12px;
-  color: var(--pf-text-muted, #6b7888);
-  background: var(--pf-surface-muted, rgba(148, 163, 184, 0.08));
-  font-size: 0.9rem;
-  line-height: 1.45;
-}
-

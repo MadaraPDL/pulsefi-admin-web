@@ -677,11 +677,6 @@ export function RouterManagement() {
             />
           </label>
 
-          <div className="pf-inline-help">
-            Advanced router integration is optional for now. Use it later if
-            PulseFi connects directly to a real router API or ISP CPE system.
-          </div>
-
           <label>
             API endpoint
             <input
@@ -823,11 +818,6 @@ export function RouterManagement() {
                   required
                 />
               </label>
-
-              <div className="pf-inline-help">
-                API endpoint and router username are optional advanced
-                integration fields. Router passwords are not collected here.
-              </div>
 
               <label>
                 API endpoint
