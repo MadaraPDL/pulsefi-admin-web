@@ -349,6 +349,11 @@ export function RouterManagement() {
       return;
     }
 
+    if (!createMac.trim()) {
+      setErrorMessage("Enter the router MAC address.");
+      return;
+    }
+
     setErrorMessage("");
     setSuccessMessage("");
     setIsCreating(true);
@@ -438,6 +443,11 @@ export function RouterManagement() {
 
     if (validationError) {
       setErrorMessage(validationError);
+      return;
+    }
+
+    if (!editMac.trim()) {
+      setErrorMessage("Enter the router MAC address.");
       return;
     }
 
@@ -662,9 +672,15 @@ export function RouterManagement() {
               value={createMac}
               onChange={(event) => setCreateMac(event.target.value)}
               maxLength={50}
-              placeholder="Optional"
+              placeholder="AA:BB:CC:DD:EE:FF"
+              required
             />
           </label>
+
+          <div className="pf-inline-help">
+            Advanced router integration is optional for now. Use it later if
+            PulseFi connects directly to a real router API or ISP CPE system.
+          </div>
 
           <label>
             API endpoint
@@ -672,7 +688,7 @@ export function RouterManagement() {
               value={createApiEndpoint}
               onChange={(event) => setCreateApiEndpoint(event.target.value)}
               maxLength={1000}
-              placeholder="Optional"
+              placeholder="Optional, e.g. http://192.168.1.1/api"
             />
           </label>
 
@@ -682,7 +698,7 @@ export function RouterManagement() {
               value={createUsername}
               onChange={(event) => setCreateUsername(event.target.value)}
               maxLength={120}
-              placeholder="Optional"
+              placeholder="Optional API username"
             />
           </label>
 
@@ -803,8 +819,15 @@ export function RouterManagement() {
                   value={editMac}
                   onChange={(event) => setEditMac(event.target.value)}
                   maxLength={50}
+                  placeholder="AA:BB:CC:DD:EE:FF"
+                  required
                 />
               </label>
+
+              <div className="pf-inline-help">
+                API endpoint and router username are optional advanced
+                integration fields. Router passwords are not collected here.
+              </div>
 
               <label>
                 API endpoint
@@ -812,6 +835,7 @@ export function RouterManagement() {
                   value={editApiEndpoint}
                   onChange={(event) => setEditApiEndpoint(event.target.value)}
                   maxLength={1000}
+                  placeholder="Optional, e.g. http://192.168.1.1/api"
                 />
               </label>
 
@@ -821,6 +845,7 @@ export function RouterManagement() {
                   value={editUsername}
                   onChange={(event) => setEditUsername(event.target.value)}
                   maxLength={120}
+                  placeholder="Optional API username"
                 />
               </label>
 
