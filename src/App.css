@@ -700,3 +700,108 @@ textarea {
   display: grid;
   gap: 12px;
 }
+
+.pf-monitoring-alert-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pf-monitoring-user-alert-controls {
+  display: grid;
+  gap: 14px;
+  margin: 14px 0;
+}
+
+.pf-monitoring-user-alert-controls label {
+  display: grid;
+  gap: 8px;
+}
+
+.pf-monitoring-selected-user-strip {
+  padding: 14px 16px;
+}
+
+.pf-monitoring-selected-user-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.pf-monitoring-selected-user-copy strong {
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.pf-monitoring-selected-user-copy span {
+  color: #62758b;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.pf-monitoring-alert-scroll {
+  max-height: 420px;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+.pf-monitoring-alert-list {
+  display: grid;
+  gap: 14px;
+}
+
+.pf-alert-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.pf-alert-item > div {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pf-alert-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pf-alert-title-row h3 {
+  margin: 0;
+  line-height: 1.3;
+}
+
+.pf-monitoring-alert-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pf-monitoring-alert-meta-line {
+  display: block;
+  color: #8da2b8;
+  line-height: 1.5;
+}
+
+.pf-monitoring-alert-footer .small-button {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+@media (max-width: 700px) {
+  .pf-monitoring-alert-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pf-monitoring-alert-footer .small-button {
+    width: 100%;
+  }
+}

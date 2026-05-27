@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   getISPAdminAlert,
@@ -210,10 +210,25 @@ function AlertList({
 
                 <p>{alert.message}</p>
 
-                <small>
-                  {formatLabel(alert.alert_type)} - {formatLabel(alert.status)} -{" "}
-                  {formatDateTime(alert.created_at)}
-                </small>
+                <div className="pf-monitoring-alert-footer">
+                  <small className="pf-monitoring-alert-meta-line">
+                    {formatLabel(alert.alert_type)} - {formatLabel(alert.status)} -{" "}
+                    {formatDateTime(alert.created_at)}
+                  </small>
+
+                  <button
+                    className="small-button"
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => onViewDetail(alert.id)}
+                  >
+                    {isLoading
+                      ? "Loading..."
+                      : isSelected
+                        ? "Hide details"
+                        : "View details"}
+                  </button>
+                </div>
 
                 {isSelected && (
                   <div className="pf-inline-detail-panel">
@@ -236,19 +251,6 @@ function AlertList({
                     />
                   </div>
                 )}
-
-                <button
-                  className="small-button"
-                  type="button"
-                  disabled={isLoading}
-                  onClick={() => onViewDetail(alert.id)}
-                >
-                  {isLoading
-                    ? "Loading..."
-                    : isSelected
-                      ? "Hide details"
-                      : "View details"}
-                </button>
               </div>
             </article>
           );
@@ -445,7 +447,7 @@ export function ISPAdminMonitoringCenter() {
           <AnalyticsCards analytics={analytics} />
 
           <section className="pf-monitoring-split">
-            <div className="pf-monitoring-panel">
+            <div className="pf-monitoring-panel pf-monitoring-alert-panel">
               <div className="pf-monitoring-panel-header">
                 <h3>Operational Summary</h3>
               </div>
@@ -529,8 +531,10 @@ export function ISPAdminMonitoringCenter() {
 
               {selectedUser && (
                 <div className="selected-strip pf-monitoring-selected-user-strip">
-                  <strong>{selectedUser.full_name}</strong>
-                  <span>{selectedUser.email}</span>
+                  <div className="pf-monitoring-selected-user-copy">
+                    <strong>{selectedUser.full_name}</strong>
+                    <span>{selectedUser.email}</span>
+                  </div>
                 </div>
               )}
 
