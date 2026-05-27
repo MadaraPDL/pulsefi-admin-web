@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AdminAuthFlow } from "./components/AdminAuthFlow";
 import { restoreAdminSession } from "./api/adminAuth";
+import { ApiError } from "./api/client";
 import type {
   AdminAuthenticatedResult,
   AdminSession,
@@ -81,11 +82,19 @@ export default function RealApp() {
           saveSession(result.session);
           setAuthStatus("authenticated");
         }
-      } catch {
-        clearSession();
+      } catch (error) {
+        if (error instanceof ApiError && [401, 403].includes(error.status)) {
+          clearSession();
+
+          if (!isCancelled) {
+            setAuthStatus("logged_out");
+          }
+
+          return;
+        }
 
         if (!isCancelled) {
-          setAuthStatus("logged_out");
+          setAuthStatus("authenticated");
         }
       }
     }
