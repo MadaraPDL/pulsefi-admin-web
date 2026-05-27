@@ -631,3 +631,32 @@ textarea {
 .pf-selected-alert-empty {
   margin: 0;
 }
+
+.pf-monitoring-alert-header {
+  align-items: flex-start;
+}
+
+.pf-monitoring-alert-header p {
+  margin: 6px 0 0;
+  color: #62758b;
+  font-size: 0.9rem;
+}
+
+.pf-monitoring-user-alert-controls {
+  display: grid;
+  gap: 14px;
+  margin: 14px 0;
+}
+
+.pf-monitoring-selected-user-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pf-monitoring-selected-user-strip span {
+  color: #62758b;
+  font-weight: 700;
+}

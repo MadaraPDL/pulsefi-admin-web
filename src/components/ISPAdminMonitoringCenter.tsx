@@ -1,14 +1,28 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { getErrorMessage } from "../api/errors";
 import {
   getISPAdminAlert,
   getISPAdminAnalyticsSummary,
   listISPAdminAlerts,
+  listISPAdminAppUsers,
 } from "../api/ispAdmin";
 import type {
+  AppUser,
   ISPAdminAlert,
   ISPAdminAnalyticsSummary,
+  ISPAdminAlertListParams,
 } from "../api/ispAdmin";
+
+type MonitoringAlertFilter = "both" | "high_usage" | "plan_exceed_risk";
+
+const monitoringAlertFilters: Array<{
+  label: string;
+  value: MonitoringAlertFilter;
+}> = [
+  { label: "High usage + limit reached", value: "both" },
+  { label: "High usage only", value: "high_usage" },
+  { label: "Limit reached only", value: "plan_exceed_risk" },
+];
 
 function formatNumber(value: number | string) {
   const numericValue =
@@ -33,6 +47,14 @@ function formatDateTime(value: string | null) {
   }
 
   return date.toLocaleString();
+}
+
+function formatLabel(value: string | null | undefined) {
+  if (!value) {
+    return "-";
+  }
+
+  return value.replaceAll("_", " ");
 }
 
 function getAlertTone(severity: string) {
@@ -121,21 +143,36 @@ function AlertList({
   alerts,
   selectedAlert,
   loadingAlertId,
+  selectedUserId,
   onViewDetail,
 }: {
   alerts: ISPAdminAlert[];
   selectedAlert: ISPAdminAlert | null;
   loadingAlertId: string | null;
+  selectedUserId: string;
   onViewDetail: (alertId: string) => void;
 }) {
+  if (!selectedUserId) {
+    return (
+      <div className="pf-empty-state">
+        <span className="material-symbols-outlined">person_search</span>
+        <h3>Select a user first</h3>
+        <p>
+          Alerts in Monitoring are user-specific. Select an App User to view
+          only their high-usage and limit-reached alerts.
+        </p>
+      </div>
+    );
+  }
+
   if (alerts.length === 0) {
     return (
       <div className="pf-empty-state">
         <span className="material-symbols-outlined">notifications_off</span>
-        <h3>No alerts found</h3>
+        <h3>No matching alerts found</h3>
         <p>
-          There are no recent alerts for this ISP yet. Refresh after seeded
-          monitoring data is available.
+          This selected user has no high-usage or plan-limit alerts for the
+          current filter.
         </p>
       </div>
     );
@@ -166,14 +203,14 @@ function AlertList({
               <div className="pf-alert-title-row">
                 <h3>{alert.title}</h3>
                 <span className={`status-pill status-${tone}`}>
-                  {alert.severity}
+                  {formatLabel(alert.severity)}
                 </span>
               </div>
 
               <p>{alert.message}</p>
 
               <small>
-                {alert.alert_type} - {alert.status} -{" "}
+                {formatLabel(alert.alert_type)} - {formatLabel(alert.status)} -{" "}
                 {formatDateTime(alert.created_at)}
               </small>
 
@@ -216,45 +253,110 @@ function AlertList({
   );
 }
 
+async function listMonitoringAlertsForSelectedUser(
+  userId: string,
+  alertFilter: MonitoringAlertFilter
+) {
+  const baseFilters: ISPAdminAlertListParams = {
+    user_id: userId,
+    limit: 12,
+  };
+
+  if (alertFilter !== "both") {
+    return listISPAdminAlerts({
+      ...baseFilters,
+      alert_type: alertFilter,
+    });
+  }
+
+  const [highUsageAlerts, limitReachedAlerts] = await Promise.all([
+    listISPAdminAlerts({
+      ...baseFilters,
+      alert_type: "high_usage",
+      limit: 8,
+    }),
+    listISPAdminAlerts({
+      ...baseFilters,
+      alert_type: "plan_exceed_risk",
+      limit: 8,
+    }),
+  ]);
+
+  return [...highUsageAlerts, ...limitReachedAlerts]
+    .sort(
+      (first, second) =>
+        new Date(second.created_at).getTime() -
+        new Date(first.created_at).getTime()
+    )
+    .slice(0, 12);
+}
+
 export function ISPAdminMonitoringCenter() {
   const [analytics, setAnalytics] = useState<ISPAdminAnalyticsSummary | null>(
     null
   );
+  const [appUsers, setAppUsers] = useState<AppUser[]>([]);
   const [alerts, setAlerts] = useState<ISPAdminAlert[]>([]);
   const [selectedAlert, setSelectedAlert] = useState<ISPAdminAlert | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState("");
   const [loadingAlertId, setLoadingAlertId] = useState<string | null>(null);
-  const [alertFilter, setAlertFilter] = useState<"all" | "critical" | "unread">(
-    "all"
-  );
+  const [alertFilter, setAlertFilter] =
+    useState<MonitoringAlertFilter>("both");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingAlerts, setIsLoadingAlerts] = useState(false);
 
   async function loadMonitoringData() {
     setIsLoading(true);
     setErrorMessage("");
 
     try {
-      const alertFilters =
-        alertFilter === "critical"
-          ? { severity: "critical", limit: 8 }
-          : alertFilter === "unread"
-            ? { status: "unread", limit: 8 }
-            : { limit: 8 };
-
-      const [analyticsData, alertsData] = await Promise.all([
+      const [analyticsData, appUserData] = await Promise.all([
         getISPAdminAnalyticsSummary(),
-        listISPAdminAlerts(alertFilters),
+        listISPAdminAppUsers(null, 100),
       ]);
 
       setAnalytics(analyticsData);
-      setAlerts(alertsData);
-      setSelectedAlert(null);
+      setAppUsers(appUserData);
+
+      if (
+        selectedUserId &&
+        !appUserData.some((appUser) => appUser.id === selectedUserId)
+      ) {
+        setSelectedUserId("");
+        setAlerts([]);
+        setSelectedAlert(null);
+      }
     } catch (error) {
       setErrorMessage(
         getErrorMessage(error, "Could not load ISP monitoring data.")
       );
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function loadSelectedUserAlerts(userId: string, filter: MonitoringAlertFilter) {
+    if (!userId) {
+      setAlerts([]);
+      setSelectedAlert(null);
+      return;
+    }
+
+    setIsLoadingAlerts(true);
+    setErrorMessage("");
+
+    try {
+      const alertsData = await listMonitoringAlertsForSelectedUser(userId, filter);
+      setAlerts(alertsData);
+      setSelectedAlert(null);
+    } catch (error) {
+      setAlerts([]);
+      setErrorMessage(
+        getErrorMessage(error, "Could not load selected-user alerts.")
+      );
+    } finally {
+      setIsLoadingAlerts(false);
     }
   }
 
@@ -285,21 +387,36 @@ export function ISPAdminMonitoringCenter() {
     return () => window.clearTimeout(timeoutId);
     // loadMonitoringData intentionally stays local to avoid extra renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [alertFilter]);
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      void loadSelectedUserAlerts(selectedUserId, alertFilter);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+    // loadSelectedUserAlerts intentionally stays local to avoid extra renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUserId, alertFilter]);
+
+  const selectedUser = appUsers.find((appUser) => appUser.id === selectedUserId);
 
   return (
     <section className="pf-content-card pf-monitoring-center">
       <div className="pf-panel-title-row">
         <div>
           <h2>Monitoring Center</h2>
-          <p>Analytics, usage totals, alerts, and ISP activity signals.</p>
+          <p>Analytics, usage totals, and selected-user usage alerts.</p>
         </div>
 
         <button
           className="pf-view-link pf-refresh-button"
           type="button"
-          onClick={() => void loadMonitoringData()}
-          disabled={isLoading}
+          onClick={() => {
+            void loadMonitoringData();
+            void loadSelectedUserAlerts(selectedUserId, alertFilter);
+          }}
+          disabled={isLoading || isLoadingAlerts}
         >
           Refresh
         </button>
@@ -365,31 +482,68 @@ export function ISPAdminMonitoringCenter() {
             </div>
 
             <div className="pf-monitoring-panel">
-              <div className="pf-monitoring-panel-header">
-                <h3>Recent Alerts</h3>
+              <div className="pf-monitoring-panel-header pf-monitoring-alert-header">
+                <div>
+                  <h3>Selected User Alerts</h3>
+                  <p>
+                    Select a user to view only high-usage and limit-reached
+                    alerts for that account.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pf-monitoring-user-alert-controls">
+                <label>
+                  App User
+                  <select
+                    value={selectedUserId}
+                    onChange={(event) => setSelectedUserId(event.target.value)}
+                  >
+                    <option value="">Select an App User</option>
+                    {appUsers.map((appUser) => (
+                      <option value={appUser.id} key={appUser.id}>
+                        {appUser.full_name} - {appUser.email}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
                 <div className="filter-bar pf-monitoring-filter-bar">
-                  {(["all", "critical", "unread"] as const).map((filter) => (
+                  {monitoringAlertFilters.map((filter) => (
                     <button
-                      key={filter}
+                      key={filter.value}
                       className={`filter-chip ${
-                        alertFilter === filter ? "active-filter" : ""
+                        alertFilter === filter.value ? "active-filter" : ""
                       }`}
                       type="button"
-                      onClick={() => setAlertFilter(filter)}
+                      onClick={() => setAlertFilter(filter.value)}
                     >
-                      {filter}
+                      {filter.label}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <AlertList
-                alerts={alerts}
-                selectedAlert={selectedAlert}
-                loadingAlertId={loadingAlertId}
-                onViewDetail={handleViewAlertDetail}
-              />
+              {selectedUser && (
+                <div className="selected-strip pf-monitoring-selected-user-strip">
+                  <strong>{selectedUser.full_name}</strong>
+                  <span>{selectedUser.email}</span>
+                </div>
+              )}
+
+              {isLoadingAlerts && (
+                <p className="pf-loading-text">Loading selected-user alerts...</p>
+              )}
+
+              {!isLoadingAlerts && (
+                <AlertList
+                  alerts={alerts}
+                  selectedAlert={selectedAlert}
+                  loadingAlertId={loadingAlertId}
+                  selectedUserId={selectedUserId}
+                  onViewDetail={handleViewAlertDetail}
+                />
+              )}
             </div>
           </section>
         </>
