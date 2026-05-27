@@ -32,8 +32,10 @@ export function AdminPasswordResetFlow({
     setIsRequesting(true);
 
     try {
-      const response = await requestAdminPasswordReset(identifier.trim());
-      setSuccessMessage(response.message);
+      await requestAdminPasswordReset(identifier.trim());
+      setSuccessMessage(
+        "Password reset successfully. Go back to PulseFi and log in with your new credentials."
+      );
     } catch (error) {
       setErrorMessage(
         getErrorMessage(error, "Could not request password reset.")
@@ -148,7 +150,7 @@ export function AdminPasswordResetFlow({
 
       {onDone && (
         <button className="pf-secondary-button" type="button" onClick={onDone}>
-          Back to login
+          Done
         </button>
       )}
     </div>
