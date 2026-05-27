@@ -104,6 +104,94 @@ function DailyUsageByUserTable({
 }) {
   return (
     <div className="pf-table-wrap">
+      <table
+        className="pf-usage-records-table pf-daily-usage-user-table"
+        style={{ tableLayout: "fixed", width: "100%" }}
+      >
+        <thead>
+          <tr>
+            <th style={{ width: "15%" }}>User</th>
+            <th style={{ width: "15%" }}>Service / Router</th>
+            <th style={{ width: "12%" }}>Day</th>
+            <th className="pf-total-mb-heading" style={{ width: "13%" }}>
+              Total
+            </th>
+            <th style={{ width: "13%" }}>Download</th>
+            <th style={{ width: "13%" }}>Upload</th>
+            <th style={{ width: "9%" }}>Records</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {rows.map((row) => {
+            const routerLabel = row.router_name ?? "Unnamed router";
+            const routerIdPrefix = row.router_id.slice(0, 8);
+            const serviceLabel =
+              row.subscription_label ?? "Unlabeled service line";
+
+            return (
+              <tr
+                key={`${row.usage_date}-${row.user_id}-${row.user_subscription_id}-${row.router_id}`}
+              >
+                <td className="pf-daily-user-cell">
+                  <strong
+                    className="pf-daily-main-text"
+                    title={row.user_full_name}
+                  >
+                    {row.user_full_name}
+                  </strong>
+                  <span
+                    className="pf-daily-sub-text"
+                    title={row.user_email}
+                  >
+                    {row.user_email}
+                  </span>
+                </td>
+
+                <td className="pf-daily-service-cell">
+                  <strong className="pf-daily-main-text" title={serviceLabel}>
+                    {serviceLabel}
+                  </strong>
+                  <span
+                    className="pf-daily-sub-text"
+                    title={`${routerLabel} ID ${routerIdPrefix}`}
+                  >
+                    {routerLabel} ID {routerIdPrefix}
+                  </span>
+                </td>
+
+                <td className="pf-time-cell">{formatDateLabel(row.usage_date)}</td>
+
+                <td className="pf-total-mb-cell">
+                  {formatMb(row.totals.total_mb)}
+                </td>
+
+                <td>{formatMb(row.totals.download_mb)}</td>
+                <td>{formatMb(row.totals.upload_mb)}</td>
+                <td>{row.totals.record_count}</td>
+              </tr>
+            );
+          })}
+
+          {rows.length === 0 && (
+            <tr>
+              <td colSpan={7}>
+                No daily usage by user yet. Run simulator ingestion or import
+                usage data to populate this view.
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+: {
+  rows: ISPAdminDailyUsageByUser[];
+}) {
+  return (
+    <div className="pf-table-wrap">
       <table className="pf-usage-records-table">
         <thead>
           <tr>

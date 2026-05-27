@@ -1631,3 +1631,43 @@ button:active {
 .pf-usage-records-table td {
   vertical-align: top;
 }
+
+/* Step 50D3: fixed Daily Usage by User table readability */
+.pf-daily-usage-user-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.pf-daily-usage-user-table th,
+.pf-daily-usage-user-table td {
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.pf-daily-user-cell,
+.pf-daily-service-cell {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.pf-daily-main-text,
+.pf-daily-sub-text {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-daily-main-text {
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.pf-daily-sub-text {
+  margin-top: 4px;
+  color: var(--pf-text-muted, #9aa7b8);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
