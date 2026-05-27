@@ -195,11 +195,14 @@ function AdminLoginPage({
   const [showPassword, setShowPassword] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResendingCode, setIsResendingCode] = useState(false);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage("");
+    setSuccessMessage("");
     setIsSubmitting(true);
 
     try {
@@ -351,6 +354,7 @@ function MFAVerifyPage({
   async function handleVerifyMFA(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage("");
+    setSuccessMessage("");
     setIsSubmitting(true);
 
     try {
@@ -396,9 +400,11 @@ function MFAVerifyPage({
     activeChallenge.method !== "authenticator" &&
     activeMethods.includes("authenticator");
 
+  const canResendEmailCode =
+    activeChallenge.method === "email" && !isBackupCodeMode;
   const canUseBackupCode = Boolean(activeChallenge.backup_codes_available);
   const hasFallbackOptions =
-    canUseEmail || canUseAuthenticator || canUseBackupCode;
+    canUseEmail || canUseAuthenticator || canUseBackupCode || canResendEmailCode;
 
   return (
     <main className="pf-auth-page">
@@ -439,11 +445,26 @@ function MFAVerifyPage({
               <div className="pf-error-box">{errorMessage}</div>
             )}
 
+            {successMessage && (
+              <div className="pf-success-box">{successMessage}</div>
+            )}
+
             {hasFallbackOptions && (
               <div className="pf-mfa-fallback-box">
                 <strong>Try another way</strong>
 
                 <div className="pf-mfa-fallback-actions">
+                  {canResendEmailCode && (
+                    <button
+                      className="pf-secondary-button"
+                      type="button"
+                      disabled={isSubmitting || isResendingCode}
+                      onClick={() => void handleResendEmailCode()}
+                    >
+                      {isResendingCode ? "Sending..." : "Resend email code"}
+                    </button>
+                  )}
+
                   {canUseEmail && (
                     <button
                       className="pf-secondary-button"
