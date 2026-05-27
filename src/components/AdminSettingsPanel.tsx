@@ -633,13 +633,13 @@ export function AdminSettingsPanel<TSection extends string>({
                   <button
                     className="pf-secondary-button pf-settings-action-button"
                     type="button"
-                    disabled={mfaAction !== null || Boolean(settingsChallenge)}
+                    disabled={mfaAction !== null}
                     onClick={() => void handleSendEmailSettingsCode()}
                   >
                     {mfaAction === "settings-challenge"
                       ? "Sending..."
                       : settingsChallenge
-                        ? "Code sent"
+                        ? "Resend email code"
                         : "Send verification code"}
                   </button>
                 )}
@@ -797,15 +797,13 @@ export function AdminSettingsPanel<TSection extends string>({
                   <button
                     className="pf-secondary-button pf-settings-action-button"
                     type="button"
-                    disabled={
-                      backupCodeAction !== null || Boolean(backupCodeChallenge)
-                    }
+                    disabled={backupCodeAction !== null}
                     onClick={() => void handleSendBackupEmailCode()}
                   >
                     {backupCodeAction === "backup-settings-challenge"
                       ? "Sending..."
                       : backupCodeChallenge
-                        ? "Code sent"
+                        ? "Resend email code"
                         : "Send verification code"}
                   </button>
                 )}
@@ -931,7 +929,13 @@ export function AdminSettingsPanel<TSection extends string>({
                 onClick={() => void handleRequestIdentityChallenge()}
                 disabled={isRequestingChallenge}
               >
-                {isRequestingChallenge ? "Starting 2FA..." : "Start 2FA verification"}
+                {isRequestingChallenge
+                  ? "Sending..."
+                  : challenge?.method === "email"
+                    ? "Resend email code"
+                    : challenge
+                      ? "Restart 2FA verification"
+                      : "Start 2FA verification"}
               </button>
 
               <label>
