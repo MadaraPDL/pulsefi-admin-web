@@ -5968,7 +5968,7 @@ dd {
 }
 
 
-/* Clean final admin table layout */
+/* Stable admin management table layout */
 .pf-router-table-card,
 .pf-app-users-table-card,
 .pf-plans-table-card {
@@ -5988,8 +5988,7 @@ dd {
 
 .pf-router-management-table,
 .pf-app-users-table,
-.pf-plans-table,
-.table-card:has(.router-action-cell) table {
+.pf-plans-table {
   width: 100%;
   min-width: 0;
   table-layout: fixed;
@@ -6001,23 +6000,20 @@ dd {
 .pf-app-users-table th,
 .pf-app-users-table td,
 .pf-plans-table th,
-.pf-plans-table td,
-.table-card:has(.router-action-cell) th,
-.table-card:has(.router-action-cell) td {
-  padding: 13px 14px;
+.pf-plans-table td {
+  padding: 12px 14px;
   border-bottom: 1px solid var(--pf-row-border, var(--pf-border));
   text-align: left;
   vertical-align: middle;
   white-space: normal;
   overflow-wrap: anywhere;
   word-break: normal;
-  line-height: 1.35;
+  line-height: 1.32;
 }
 
 .pf-router-management-table th,
 .pf-app-users-table th,
-.pf-plans-table th,
-.table-card:has(.router-action-cell) th {
+.pf-plans-table th {
   color: var(--pf-muted);
   font-size: 11.5px;
   font-weight: 900;
@@ -6025,93 +6021,74 @@ dd {
   text-transform: uppercase;
 }
 
-/* Routers: no horizontal scroll, action column stays readable */
+/* Router columns */
 .pf-router-management-table th:nth-child(1),
-.pf-router-management-table td:nth-child(1),
-.table-card:has(.router-action-cell) th:nth-child(1),
-.table-card:has(.router-action-cell) td:nth-child(1) {
+.pf-router-management-table td:nth-child(1) {
   width: 9%;
 }
 
 .pf-router-management-table th:nth-child(2),
-.pf-router-management-table td:nth-child(2),
-.table-card:has(.router-action-cell) th:nth-child(2),
-.table-card:has(.router-action-cell) td:nth-child(2) {
+.pf-router-management-table td:nth-child(2) {
   width: 24%;
 }
 
 .pf-router-management-table th:nth-child(3),
-.pf-router-management-table td:nth-child(3),
-.table-card:has(.router-action-cell) th:nth-child(3),
-.table-card:has(.router-action-cell) td:nth-child(3) {
+.pf-router-management-table td:nth-child(3) {
   width: 8%;
 }
 
 .pf-router-management-table th:nth-child(4),
-.pf-router-management-table td:nth-child(4),
-.table-card:has(.router-action-cell) th:nth-child(4),
-.table-card:has(.router-action-cell) td:nth-child(4) {
+.pf-router-management-table td:nth-child(4) {
   width: 9%;
 }
 
 .pf-router-management-table th:nth-child(5),
-.pf-router-management-table td:nth-child(5),
-.table-card:has(.router-action-cell) th:nth-child(5),
-.table-card:has(.router-action-cell) td:nth-child(5) {
+.pf-router-management-table td:nth-child(5) {
   width: 5%;
 }
 
 .pf-router-management-table th:nth-child(6),
-.pf-router-management-table td:nth-child(6),
-.table-card:has(.router-action-cell) th:nth-child(6),
-.table-card:has(.router-action-cell) td:nth-child(6) {
+.pf-router-management-table td:nth-child(6) {
   width: 7%;
 }
 
 .pf-router-management-table th:nth-child(7),
-.pf-router-management-table td:nth-child(7),
-.table-card:has(.router-action-cell) th:nth-child(7),
-.table-card:has(.router-action-cell) td:nth-child(7) {
+.pf-router-management-table td:nth-child(7) {
   width: 13%;
 }
 
 .pf-router-management-table th:nth-child(8),
-.pf-router-management-table td:nth-child(8),
-.table-card:has(.router-action-cell) th:nth-child(8),
-.table-card:has(.router-action-cell) td:nth-child(8) {
+.pf-router-management-table td:nth-child(8) {
   width: 25%;
 }
 
-.pf-router-management-table td.router-action-cell,
-.table-card:has(.router-action-cell) td.router-action-cell {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  white-space: nowrap;
-  overflow: visible;
+/* IMPORTANT: keep router td as table-cell so headers align */
+.pf-router-management-table td.router-action-cell {
+  display: table-cell !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
 }
 
-.pf-router-management-table .router-action-cell .small-button,
-.table-card:has(.router-action-cell) .router-action-cell .small-button {
-  display: inline-flex;
+.pf-router-management-table .router-action-cell .small-button {
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  width: auto;
-  min-width: 82px;
-  max-width: none;
-  white-space: nowrap;
-  overflow-wrap: normal;
-  word-break: keep-all;
-  padding: 10px 13px;
+  width: auto !important;
+  min-width: 82px !important;
+  max-width: none !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  word-break: keep-all !important;
+  padding: 9px 12px !important;
+  line-height: 1.2 !important;
 }
 
-.pf-router-management-table .router-action-cell .pf-simulator-action-button,
-.table-card:has(.router-action-cell) .router-action-cell .pf-simulator-action-button {
-  min-width: 150px;
+.pf-router-management-table .router-action-cell .pf-simulator-action-button {
+  min-width: 150px !important;
+  margin-left: 8px;
 }
 
-/* Users: keep View horizontal */
+/* Users columns */
 .pf-app-users-table th:nth-child(1),
 .pf-app-users-table td:nth-child(1) {
   width: 15%;
@@ -6164,7 +6141,7 @@ dd {
   white-space: nowrap;
 }
 
-/* Plans */
+/* Plans columns */
 .pf-plans-table th:nth-child(1),
 .pf-plans-table td:nth-child(1) {
   width: 20%;
@@ -6197,7 +6174,7 @@ dd {
   white-space: nowrap;
 }
 
-/* Pagination stays visible below tables */
+/* Pagination */
 .pf-admin-table-pagination,
 .pf-admin-pagination {
   display: flex;
