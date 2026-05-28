@@ -5626,3 +5626,48 @@ dd {
   border-color: var(--pf-primary) !important;
   color: #041016 !important;
 }
+
+/* Step 50J refinement: detach pagination from table edges */
+.pf-network-activity-center .pf-network-panel .pf-admin-pagination,
+.pf-network-activity-center .pf-network-panel-wide .pf-admin-pagination {
+  width: fit-content !important;
+  max-width: 100%;
+  margin: 16px 20px 6px auto !important;
+  padding: 5px !important;
+  border: 1px solid var(--pf-border-soft) !important;
+  border-radius: 999px !important;
+  background: rgba(0, 0, 0, 0.16) !important;
+}
+
+.pf-network-activity-center .pf-page-control-button {
+  min-width: 30px !important;
+  height: 28px !important;
+  padding: 0 9px !important;
+  border-radius: 999px !important;
+  border-color: transparent !important;
+  background: transparent !important;
+  color: var(--pf-primary) !important;
+  box-shadow: none !important;
+}
+
+.pf-network-activity-center .pf-page-control-button-wide {
+  min-width: 68px !important;
+}
+
+.pf-network-activity-center .pf-page-control-button:hover:not(:disabled) {
+  background: var(--pf-primary-soft) !important;
+  border-color: transparent !important;
+  transform: none !important;
+}
+
+.pf-network-activity-center .pf-page-control-button-active {
+  background: var(--pf-primary) !important;
+  color: #041016 !important;
+  border-color: var(--pf-primary) !important;
+  box-shadow: none !important;
+}
+
+.pf-network-activity-center .pf-table-wrap + .pf-admin-pagination {
+  position: relative;
+  bottom: auto;
+}
