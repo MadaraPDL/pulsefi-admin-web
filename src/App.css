@@ -1012,3 +1012,57 @@ textarea {
 .pf-network-panel > .pf-admin-pagination {
   padding-right: 2px;
 }
+
+/* Step 50J refinement: compact table pagination buttons */
+.pf-network-activity-center .pf-admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.pf-network-activity-center .pf-page-control-button {
+  appearance: none;
+  min-width: 34px;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(0, 209, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(0, 209, 255, 0.055);
+  color: #66dff7;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.pf-network-activity-center .pf-page-control-button-wide {
+  min-width: 78px;
+}
+
+.pf-network-activity-center .pf-page-control-button:hover:not(:disabled) {
+  background: rgba(0, 209, 255, 0.12);
+  border-color: rgba(0, 209, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.pf-network-activity-center .pf-page-control-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  transform: none;
+}
+
+.pf-network-activity-center .pf-page-control-button-active {
+  background: #00d1ff;
+  border-color: #00d1ff;
+  color: #031014;
+  box-shadow: 0 8px 20px rgba(0, 209, 255, 0.18);
+}
