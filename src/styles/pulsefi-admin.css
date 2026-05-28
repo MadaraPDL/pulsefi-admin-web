@@ -5968,99 +5968,127 @@ dd {
 }
 
 
-/* Service request table layout fix */
+/* Admin table targeted polish: service requests, monitoring pager, legacy tables */
+.table-card {
+  overflow-x: auto;
+  overflow-y: visible;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  background: var(--pf-surface);
+  box-shadow: none;
+}
+
+.table-card table {
+  width: 100%;
+  min-width: 760px;
+  height: auto !important;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.table-card th,
+.table-card td {
+  height: auto !important;
+  border-bottom: 1px solid var(--pf-row-border, var(--pf-border));
+  padding: 16px 20px;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table-card th {
+  color: var(--pf-muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table-card td {
+  color: var(--pf-text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.table-card tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-card td:last-child {
+  white-space: nowrap;
+}
+
+.table-card td:last-child .small-button {
+  width: auto;
+  min-width: 84px;
+}
+
+/* Pagers should stay close to rows, not after a huge blank space */
+.pf-admin-table-pagination,
+.pf-admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 0;
+  border-top: 1px solid var(--pf-border);
+  background: var(--pf-surface);
+  padding: 12px 16px;
+}
+
+.pf-page-control-button {
+  min-width: 42px;
+  border: 1px solid var(--pf-primary-border);
+  border-radius: 10px;
+  background: var(--pf-primary-soft);
+  color: var(--pf-link);
+  padding: 9px 12px;
+  font-weight: 850;
+}
+
+.pf-page-control-button-wide {
+  min-width: 96px;
+}
+
+.pf-page-control-button-active {
+  border-color: var(--pf-primary);
+  background: var(--pf-primary);
+  color: #001217;
+}
+
+.pf-page-control-button:disabled {
+  opacity: 0.42;
+}
+
+/* Monitoring should scroll only the alert content; pagination stays outside */
+.pf-monitoring-alert-scroll {
+  display: grid;
+  gap: 12px;
+  overflow: visible;
+}
+
+.pf-monitoring-alert-list {
+  max-height: clamp(320px, 46vh, 540px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+}
+
+.pf-monitoring-pagination {
+  position: static;
+  margin: 0 18px 18px;
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius-sm);
+}
+
+/* Service requests stay as cards, not squeezed table columns */
 .pf-operations-table-panel-service .pf-table-wrap {
   overflow-x: hidden;
 }
 
-.pf-service-requests-table {
-  width: 100%;
-  min-width: 0;
-  table-layout: fixed;
-}
-
-.pf-service-requests-table th,
-.pf-service-requests-table td {
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: normal;
-  vertical-align: top;
-}
-
-.pf-service-requests-table th:nth-child(1),
-.pf-service-requests-table td:nth-child(1) {
-  width: 17%;
-}
-
-.pf-service-requests-table th:nth-child(2),
-.pf-service-requests-table td:nth-child(2) {
-  width: 11%;
-}
-
-.pf-service-requests-table th:nth-child(3),
-.pf-service-requests-table td:nth-child(3),
-.pf-service-requests-table th:nth-child(4),
-.pf-service-requests-table td:nth-child(4) {
-  width: 13%;
-}
-
-.pf-service-requests-table th:nth-child(5),
-.pf-service-requests-table td:nth-child(5) {
-  width: 10%;
-}
-
-.pf-service-requests-table th:nth-child(6),
-.pf-service-requests-table td:nth-child(6) {
-  width: 18%;
-}
-
-.pf-service-requests-table th:nth-child(7),
-.pf-service-requests-table td:nth-child(7) {
-  width: 18%;
-}
-
-.pf-service-request-action-cell {
-  min-width: 0;
-}
-
-.pf-service-request-action-cell .pf-row-action-stack,
-.pf-service-request-action-cell .pf-review-actions {
-  width: 100%;
-  min-width: 0;
-}
-
-.pf-service-request-action-cell .pf-review-actions {
-  gap: 8px;
-}
-
-.pf-service-request-action-cell textarea {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  min-height: 72px;
-  resize: vertical;
-}
-
-.pf-service-request-action-cell .pf-review-actions > div:last-child {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.pf-service-request-action-cell .small-button {
-  min-width: 0;
-}
-
-
-
-/* Service requests card layout + paginated table spacing fix */
-.pf-operations-table-panel-service .pf-table-wrap {
-  overflow-x: hidden !important;
-}
-
 .pf-operations-table-panel-service .pf-service-requests-table {
   width: 100%;
-  min-width: 0 !important;
+  min-width: 0;
   border-collapse: separate;
   border-spacing: 0;
 }
@@ -6078,21 +6106,17 @@ dd {
 .pf-service-requests-table tbody tr {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 16px;
+  gap: 14px 18px;
   border: 1px solid var(--pf-border);
   border-radius: var(--pf-radius);
   background: var(--pf-surface-2);
-  padding: 16px;
-}
-
-.pf-service-requests-table tbody tr + tr {
-  border-top: 1px solid var(--pf-border);
+  padding: 18px;
 }
 
 .pf-service-requests-table td {
   display: grid;
-  gap: 5px;
-  width: 100% !important;
+  gap: 6px;
+  width: 100%;
   border: 0 !important;
   padding: 0 !important;
   white-space: normal;
@@ -6147,13 +6171,21 @@ dd {
   content: "";
 }
 
+.pf-service-request-action-cell {
+  border-top: 1px solid var(--pf-border) !important;
+  padding-top: 14px !important;
+}
+
 .pf-service-request-action-cell .pf-row-action-stack {
   display: grid;
-  grid-template-columns: minmax(180px, 0.45fr) minmax(260px, 1fr);
+  grid-template-columns: 160px minmax(0, 1fr);
   gap: 14px;
   align-items: start;
   width: 100%;
-  min-width: 0;
+}
+
+.pf-service-request-action-cell .pf-row-action-stack > .small-button {
+  width: 150px;
 }
 
 .pf-service-request-action-cell .pf-review-actions {
@@ -6167,7 +6199,7 @@ dd {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  min-height: 78px;
+  min-height: 96px;
   resize: vertical;
 }
 
@@ -6177,195 +6209,9 @@ dd {
   gap: 8px;
 }
 
-.pf-service-request-action-cell .small-button {
-  width: fit-content;
-  min-width: 98px;
-}
-
-/* Remove large empty gaps before pagination controls in admin tables */
-.pf-content-card .pf-table-wrap {
-  min-height: 0 !important;
-}
-
-.pf-content-card table {
-  height: auto !important;
-}
-
-.pf-content-card tbody,
-.pf-content-card tr,
-.pf-content-card td {
-  height: auto;
-}
-
-.pf-content-card [class*="pagination" i],
-.pf-content-card [class*="pager" i] {
-  margin-top: 12px !important;
-  padding-top: 0 !important;
-  align-self: end;
-}
-
-.pf-content-card .pf-table-wrap + [class*="pagination" i],
-.pf-content-card .pf-table-wrap + [class*="pager" i] {
-  margin-top: 12px !important;
-}
-
-@media (max-width: 900px) {
-  .pf-service-requests-table tbody tr,
-  .pf-service-request-action-cell .pf-row-action-stack {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-
-/* Admin table consistency pass: users, routers, plans, monitoring pagination */
-.table-card {
-  border: 1px solid var(--pf-border);
-  border-radius: var(--pf-radius);
-  background: var(--pf-surface);
-  overflow: hidden;
-  box-shadow: none;
-}
-
-.table-card table {
-  width: 100%;
-  min-width: 760px;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.table-card thead {
-  background: var(--pf-surface-3);
-}
-
-.table-card th,
-.table-card td {
-  border-bottom: 1px solid var(--pf-row-border, var(--pf-border));
-  padding: 16px 20px;
-  color: var(--pf-muted);
-  text-align: left;
-  vertical-align: middle;
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-.table-card th {
-  color: var(--pf-muted);
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.table-card td {
-  color: var(--pf-text);
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-.table-card tbody tr:last-child td {
-  border-bottom: 0;
-}
-
-.table-card .small-button {
-  min-width: 82px;
-}
-
-/* Keep pagers close to their rows instead of far below the table */
-.pf-admin-table-pagination {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-  border-top: 1px solid var(--pf-border);
-  padding: 12px 16px;
-  margin: 0;
-  background: var(--pf-surface);
-}
-
-.pf-page-control-button {
-  min-width: 42px;
-  border: 1px solid var(--pf-primary-border);
-  border-radius: 10px;
-  background: var(--pf-primary-soft);
-  color: var(--pf-link);
-  padding: 9px 12px;
-  font-weight: 850;
-}
-
-.pf-page-control-button-wide {
-  min-width: 96px;
-}
-
-.pf-page-control-button-active {
-  border-color: var(--pf-primary);
-  background: var(--pf-primary);
-  color: #001217;
-}
-
-.pf-page-control-button:disabled {
-  opacity: 0.42;
-}
-
-/* Monitoring tables: keep pager visible without needing to hunt for it */
-.pf-monitoring-center .pf-table-wrap,
-.pf-monitoring-panel .pf-table-wrap {
-  max-height: none;
-}
-
-.pf-monitoring-center .pf-admin-table-pagination,
-.pf-monitoring-panel .pf-admin-table-pagination {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-}
-
-/* Service requests card refinement */
-.pf-service-requests-table tbody tr {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  padding: 18px;
-}
-
-.pf-service-request-action-cell {
-  border-top: 1px solid var(--pf-border) !important;
-  padding-top: 14px !important;
-}
-
-.pf-service-request-action-cell .pf-row-action-stack {
-  grid-template-columns: 180px minmax(0, 1fr);
-  align-items: stretch;
-}
-
-.pf-service-request-action-cell .pf-row-action-stack > .small-button {
-  align-self: start;
-  width: 154px;
-}
-
-.pf-service-request-action-cell .pf-review-actions {
-  align-self: stretch;
-}
-
-.pf-service-request-action-cell textarea {
-  min-height: 96px;
-}
-
-.pf-service-request-action-cell .pf-review-actions > div:last-child {
-  justify-content: flex-start;
-}
-
 .pf-service-request-action-cell .pf-review-actions .small-button {
+  width: auto;
   min-width: 122px;
-}
-
-/* Responsive fallback for older management tables */
-@media (max-width: 1100px) {
-  .table-card {
-    overflow-x: auto;
-  }
-
-  .table-card table {
-    min-width: 720px;
-  }
 }
 
 @media (max-width: 900px) {
@@ -6378,7 +6224,8 @@ dd {
     width: fit-content;
   }
 
-  .pf-admin-table-pagination {
+  .pf-admin-table-pagination,
+  .pf-admin-pagination {
     justify-content: center;
     flex-wrap: wrap;
   }
