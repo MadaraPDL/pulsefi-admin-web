@@ -575,13 +575,13 @@ export function ISPAdminOperationsCenter() {
             </div>
           </div>
 
-          <div className="pf-operations-table-panel">
+          <div className="pf-operations-table-panel pf-operations-table-panel-service">
             <div className="pf-monitoring-panel-header">
               <h3>Service requests</h3>
             </div>
 
             <div className="pf-table-wrap">
-              <table>
+              <table className="pf-service-requests-table">
                 <thead>
                   <tr>
                     <th>User</th>
@@ -622,7 +622,7 @@ export function ISPAdminOperationsCenter() {
                           <td className="pf-request-reason-cell">
                             {request.reason ?? "-"}
                           </td>
-                          <td>
+                          <td className="pf-service-request-action-cell">
                             <div className="pf-row-action-stack">
                               <button
                                 className="small-button"

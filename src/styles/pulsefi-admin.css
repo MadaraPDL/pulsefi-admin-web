@@ -5966,3 +5966,88 @@ dd {
   color: #041016 !important;
   box-shadow: 0 8px 20px rgba(0, 209, 255, 0.16) !important;
 }
+
+
+/* Service request table layout fix */
+.pf-operations-table-panel-service .pf-table-wrap {
+  overflow-x: hidden;
+}
+
+.pf-service-requests-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.pf-service-requests-table th,
+.pf-service-requests-table td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  vertical-align: top;
+}
+
+.pf-service-requests-table th:nth-child(1),
+.pf-service-requests-table td:nth-child(1) {
+  width: 17%;
+}
+
+.pf-service-requests-table th:nth-child(2),
+.pf-service-requests-table td:nth-child(2) {
+  width: 11%;
+}
+
+.pf-service-requests-table th:nth-child(3),
+.pf-service-requests-table td:nth-child(3),
+.pf-service-requests-table th:nth-child(4),
+.pf-service-requests-table td:nth-child(4) {
+  width: 13%;
+}
+
+.pf-service-requests-table th:nth-child(5),
+.pf-service-requests-table td:nth-child(5) {
+  width: 10%;
+}
+
+.pf-service-requests-table th:nth-child(6),
+.pf-service-requests-table td:nth-child(6) {
+  width: 18%;
+}
+
+.pf-service-requests-table th:nth-child(7),
+.pf-service-requests-table td:nth-child(7) {
+  width: 18%;
+}
+
+.pf-service-request-action-cell {
+  min-width: 0;
+}
+
+.pf-service-request-action-cell .pf-row-action-stack,
+.pf-service-request-action-cell .pf-review-actions {
+  width: 100%;
+  min-width: 0;
+}
+
+.pf-service-request-action-cell .pf-review-actions {
+  gap: 8px;
+}
+
+.pf-service-request-action-cell textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 72px;
+  resize: vertical;
+}
+
+.pf-service-request-action-cell .pf-review-actions > div:last-child {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pf-service-request-action-cell .small-button {
+  min-width: 0;
+}
+
