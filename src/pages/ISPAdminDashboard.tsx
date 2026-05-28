@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { getErrorMessage } from "../api/errors";
+import { AdminTablePagination } from "../components/AdminTablePagination";
+import { paginateRows } from "../components/adminPaginationUtils";
 import {
   getISPAdminSummary,
   listISPAdminDeviceConnectionLogs,
@@ -553,8 +555,14 @@ function NeedsAttentionPanel() {
 
 function RecentUsagePreview({
   records,
+  page,
+  pageCount,
+  onPageChange,
 }: {
   records: ISPAdminUsageRecord[];
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
 }) {
   return (
     <article className="pf-network-panel pf-overview-table-panel">
@@ -569,7 +577,8 @@ function RecentUsagePreview({
           <p>Usage records will appear here after the backend has data.</p>
         </div>
       ) : (
-        <div className="pf-table-wrap">
+        <>
+          <div className="pf-table-wrap">
           <table className="pf-usage-records-table">
             <thead>
               <tr>
@@ -593,15 +602,27 @@ function RecentUsagePreview({
             </tbody>
           </table>
         </div>
+          <AdminTablePagination
+            page={page}
+            pageCount={pageCount}
+            onPageChange={onPageChange}
+          />
+        </>
       )}
     </article>
   );
 }
 
 function RecentDeviceLogPreview({
-  logs,
+  records,
+  page,
+  pageCount,
+  onPageChange,
 }: {
-  logs: ISPAdminDeviceConnectionLog[];
+  records: ISPAdminDeviceConnectionLog[];
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
 }) {
   return (
     <article className="pf-network-panel pf-overview-table-panel">
@@ -609,14 +630,15 @@ function RecentDeviceLogPreview({
         <h3>Device Connection Logs</h3>
       </div>
 
-      {logs.length === 0 ? (
+      {records.length === 0 ? (
         <div className="pf-empty-state">
           <span className="material-symbols-outlined">devices</span>
           <h3>No device events</h3>
           <p>Connection events will appear here after devices report activity.</p>
         </div>
       ) : (
-        <div className="pf-table-wrap">
+        <>
+          <div className="pf-table-wrap">
           <table className="pf-device-connection-log-table">
             <thead>
               <tr>
@@ -626,7 +648,7 @@ function RecentDeviceLogPreview({
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
+              {records.map((log) => (
                 <tr key={log.id}>
                   <td>{formatLabel(log.event_type)}</td>
                   <td>{log.ip_address ?? "-"}</td>
@@ -636,15 +658,27 @@ function RecentDeviceLogPreview({
             </tbody>
           </table>
         </div>
+          <AdminTablePagination
+            page={page}
+            pageCount={pageCount}
+            onPageChange={onPageChange}
+          />
+        </>
       )}
     </article>
   );
 }
 
 function RecentRouterActionPreview({
-  logs,
+  records,
+  page,
+  pageCount,
+  onPageChange,
 }: {
-  logs: ISPAdminRouterActionLog[];
+  records: ISPAdminRouterActionLog[];
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
 }) {
   return (
     <article className="pf-network-panel pf-overview-table-panel pf-overview-table-panel-wide">
@@ -652,14 +686,15 @@ function RecentRouterActionPreview({
         <h3>Router Action Logs</h3>
       </div>
 
-      {logs.length === 0 ? (
+      {records.length === 0 ? (
         <div className="pf-empty-state">
           <span className="material-symbols-outlined">rule_settings</span>
           <h3>No router actions</h3>
           <p>Router policy action logs will appear here after actions run.</p>
         </div>
       ) : (
-        <div className="pf-table-wrap">
+        <>
+          <div className="pf-table-wrap">
           <table className="pf-router-action-log-table">
             <thead>
               <tr>
@@ -670,7 +705,7 @@ function RecentRouterActionPreview({
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
+              {records.map((log) => (
                 <tr key={log.id}>
                   <td>{formatLabel(log.action_type)}</td>
                   <td>
@@ -693,6 +728,12 @@ function RecentRouterActionPreview({
             </tbody>
           </table>
         </div>
+          <AdminTablePagination
+            page={page}
+            pageCount={pageCount}
+            onPageChange={onPageChange}
+          />
+        </>
       )}
     </article>
   );
@@ -706,6 +747,9 @@ function OverviewRecentActivity() {
   const [routerActionLogs, setRouterActionLogs] = useState<
     ISPAdminRouterActionLog[]
   >([]);
+  const [usagePage, setUsagePage] = useState(1);
+  const [deviceLogPage, setDeviceLogPage] = useState(1);
+  const [routerActionPage, setRouterActionPage] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -715,14 +759,17 @@ function OverviewRecentActivity() {
 
     try {
       const [usageData, deviceData, routerActionData] = await Promise.all([
-        listISPAdminUsageRecords(5, 0),
-        listISPAdminDeviceConnectionLogs(5, 0),
-        listISPAdminRouterActionLogs(null, 5, 0),
+        listISPAdminUsageRecords(25, 0),
+        listISPAdminDeviceConnectionLogs(25, 0),
+        listISPAdminRouterActionLogs(null, 25, 0),
       ]);
 
       setUsageRecords(usageData);
       setDeviceLogs(deviceData);
       setRouterActionLogs(routerActionData);
+      setUsagePage(1);
+      setDeviceLogPage(1);
+      setRouterActionPage(1);
     } catch (error) {
       setErrorMessage(
         getErrorMessage(error, "Could not load recent activity.")
@@ -744,6 +791,13 @@ function OverviewRecentActivity() {
     usageRecords.length > 0 ||
     deviceLogs.length > 0 ||
     routerActionLogs.length > 0;
+
+  const usagePagination = paginateRows(usageRecords, usagePage);
+  const deviceLogPagination = paginateRows(deviceLogs, deviceLogPage);
+  const routerActionPagination = paginateRows(
+    routerActionLogs,
+    routerActionPage
+  );
 
   return (
     <section className="pf-content-card pf-overview-recent-activity">
@@ -777,9 +831,24 @@ function OverviewRecentActivity() {
 
       {!isLoading && !errorMessage && hasRecentActivity && (
         <div className="pf-overview-recent-grid">
-          <RecentUsagePreview records={usageRecords} />
-          <RecentDeviceLogPreview logs={deviceLogs} />
-          <RecentRouterActionPreview logs={routerActionLogs} />
+          <RecentUsagePreview
+            records={usagePagination.pageRows}
+            page={usagePagination.safePage}
+            pageCount={usagePagination.pageCount}
+            onPageChange={setUsagePage}
+          />
+          <RecentDeviceLogPreview
+            records={deviceLogPagination.pageRows}
+            page={deviceLogPagination.safePage}
+            pageCount={deviceLogPagination.pageCount}
+            onPageChange={setDeviceLogPage}
+          />
+          <RecentRouterActionPreview
+            records={routerActionPagination.pageRows}
+            page={routerActionPagination.safePage}
+            pageCount={routerActionPagination.pageCount}
+            onPageChange={setRouterActionPage}
+          />
         </div>
       )}
     </section>
