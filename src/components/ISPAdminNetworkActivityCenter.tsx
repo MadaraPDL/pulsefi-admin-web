@@ -69,7 +69,7 @@ function AdminTablePagination({
   return (
     <div className="pf-admin-pagination">
       <button
-        className="small-button"
+        className="pf-page-control-button pf-page-control-button-wide"
         type="button"
         disabled={safePage <= 1}
         onClick={() => onPageChange(Math.max(safePage - 1, 1))}
@@ -82,8 +82,8 @@ function AdminTablePagination({
           key={pageNumber}
           className={
             pageNumber === safePage
-              ? "small-button pf-admin-page-button-active"
-              : "small-button"
+              ? "pf-page-control-button pf-page-control-button-active"
+              : "pf-page-control-button"
           }
           type="button"
           onClick={() => onPageChange(pageNumber)}
@@ -93,7 +93,7 @@ function AdminTablePagination({
       ))}
 
       <button
-        className="small-button"
+        className="pf-page-control-button pf-page-control-button-wide"
         type="button"
         disabled={safePage >= pageCount}
         onClick={() => onPageChange(Math.min(safePage + 1, pageCount))}
@@ -103,7 +103,6 @@ function AdminTablePagination({
     </div>
   );
 }
-
 
 function formatDateTime(value: string | null) {
   if (!value) {

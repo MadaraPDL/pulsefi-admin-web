@@ -5576,3 +5576,53 @@ dd {
     width: 100% !important;
   }
 }
+
+/* Step 50J refinement: compact admin table pagination */
+.pf-network-activity-center .pf-admin-pagination {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.pf-network-activity-center .pf-page-control-button {
+  appearance: none !important;
+  min-width: 32px !important;
+  width: auto !important;
+  height: 30px !important;
+  padding: 0 10px !important;
+  border: 1px solid var(--pf-primary-border) !important;
+  border-radius: 999px !important;
+  background: var(--pf-primary-soft) !important;
+  color: var(--pf-primary) !important;
+  box-shadow: none !important;
+  font: inherit !important;
+  font-size: 0.74rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  cursor: pointer;
+}
+
+.pf-network-activity-center .pf-page-control-button-wide {
+  min-width: 72px !important;
+}
+
+.pf-network-activity-center .pf-page-control-button:hover:not(:disabled) {
+  background: rgba(0, 209, 255, 0.16) !important;
+  border-color: rgba(0, 209, 255, 0.58) !important;
+}
+
+.pf-network-activity-center .pf-page-control-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.pf-network-activity-center .pf-page-control-button-active {
+  background: var(--pf-primary) !important;
+  border-color: var(--pf-primary) !important;
+  color: #041016 !important;
+}
