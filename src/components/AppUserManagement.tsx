@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties, FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
+import { AdminTablePagination } from "./AdminTablePagination";
+import { paginateRows } from "./adminPaginationUtils";
 import {
   getISPAdminAppUser,
   listISPAdminAppUsers,
@@ -134,6 +136,7 @@ export function AppUserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectingUserId, setSelectingUserId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [usersPage, setUsersPage] = useState(1);
 
   const serviceLineCountByUserId = useMemo(() => {
     const counts = new Map<string, number>();
@@ -167,6 +170,8 @@ export function AppUserManagement() {
 
     return counts;
   }, [routers, subscriptions]);
+
+  const usersPagination = paginateRows(users, usersPage);
 
   function setEditableFields(user: AppUser) {
     setFullName(user.full_name);
@@ -327,7 +332,10 @@ export function AppUserManagement() {
                   statusFilter === filter.value ? "active-filter" : ""
                 }`}
                 aria-pressed={statusFilter === filter.value}
-                onClick={() => setStatusFilter(filter.value)}
+                onClick={() => {
+                  setUsersPage(1);
+                  setStatusFilter(filter.value);
+                }}
               >
                 {filter.label}
               </button>
@@ -499,7 +507,7 @@ export function AppUserManagement() {
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => (
+              {usersPagination.pageRows.map((user) => (
                 <tr
                   key={user.id}
                   className={
@@ -547,6 +555,11 @@ export function AppUserManagement() {
               )}
             </tbody>
           </table>
+          <AdminTablePagination
+            page={usersPagination.safePage}
+            pageCount={usersPagination.pageCount}
+            onPageChange={setUsersPage}
+          />
         </div>
       )}
     </section>

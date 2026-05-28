@@ -5909,3 +5909,60 @@ dd {
   color: #041016 !important;
   box-shadow: 0 8px 20px rgba(0, 209, 255, 0.16) !important;
 }
+
+/* Step 50M fix: shared pagination for Users, Plans, Routers and table-card pages */
+.pf-real-app .table-card .pf-admin-table-pagination,
+.pf-real-app .pf-table-wrap .pf-admin-table-pagination {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  width: auto !important;
+  max-width: calc(100% - 48px) !important;
+  margin: 18px 24px 18px auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.pf-real-app .pf-admin-table-pagination .pf-page-control-button {
+  appearance: none !important;
+  min-width: 38px !important;
+  width: auto !important;
+  height: 34px !important;
+  padding: 0 12px !important;
+  border: 1px solid rgba(0, 209, 255, 0.34) !important;
+  border-radius: 10px !important;
+  background: rgba(0, 209, 255, 0.08) !important;
+  color: var(--pf-primary) !important;
+  box-shadow: none !important;
+  font: inherit !important;
+  font-size: 0.78rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+  cursor: pointer !important;
+}
+
+.pf-real-app .pf-admin-table-pagination .pf-page-control-button-wide {
+  min-width: 76px !important;
+}
+
+.pf-real-app .pf-admin-table-pagination .pf-page-control-button:hover:not(:disabled) {
+  background: rgba(0, 209, 255, 0.14) !important;
+  border-color: rgba(0, 209, 255, 0.62) !important;
+}
+
+.pf-real-app .pf-admin-table-pagination .pf-page-control-button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.42 !important;
+}
+
+.pf-real-app .pf-admin-table-pagination .pf-page-control-button-active {
+  background: var(--pf-primary) !important;
+  border-color: var(--pf-primary) !important;
+  color: #041016 !important;
+  box-shadow: 0 8px 20px rgba(0, 209, 255, 0.16) !important;
+}

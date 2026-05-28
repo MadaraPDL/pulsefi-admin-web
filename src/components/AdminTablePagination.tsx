@@ -1,4 +1,4 @@
-﻿const ADMIN_TABLE_QUICK_PAGE_COUNT = 3;
+const ADMIN_TABLE_QUICK_PAGE_COUNT = 3;
 
 export function AdminTablePagination({
   page,

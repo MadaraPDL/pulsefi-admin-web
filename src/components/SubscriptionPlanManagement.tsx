@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
+import { AdminTablePagination } from "./AdminTablePagination";
+import { paginateRows } from "./adminPaginationUtils";
 import {
   createSubscriptionPlan,
   getSubscriptionPlan,
@@ -100,6 +102,9 @@ export function SubscriptionPlanManagement() {
   const [isCreating, setIsCreating] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [selectingPlanId, setSelectingPlanId] = useState<string | null>(null);
+  const [plansPage, setPlansPage] = useState(1);
+
+  const plansPagination = paginateRows(plans, plansPage);
 
   function setEditableFields(plan: SubscriptionPlan) {
     setEditPlanName(plan.plan_name);
@@ -635,7 +640,7 @@ export function SubscriptionPlanManagement() {
               </tr>
             </thead>
             <tbody>
-              {plans.map((plan) => (
+              {plansPagination.pageRows.map((plan) => (
                 <tr
                   key={plan.id}
                   className={
@@ -685,6 +690,11 @@ export function SubscriptionPlanManagement() {
               )}
             </tbody>
           </table>
+          <AdminTablePagination
+            page={plansPagination.safePage}
+            pageCount={plansPagination.pageCount}
+            onPageChange={setPlansPage}
+          />
         </div>
       )}
     </section>

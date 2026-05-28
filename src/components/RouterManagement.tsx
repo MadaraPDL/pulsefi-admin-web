@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
+import { AdminTablePagination } from "./AdminTablePagination";
+import { paginateRows } from "./adminPaginationUtils";
 import {
   createRouter,
   createUserSubscription,
@@ -118,6 +120,7 @@ export function RouterManagement() {
   >(null);
   const [simulatorScenario, setSimulatorScenario] =
     useState<SimulatorScenario>("normal_usage");
+  const [routersPage, setRoutersPage] = useState(1);
 
   const userNameById = useMemo(() => {
     return new Map(users.map((user) => [user.id, user.full_name]));
@@ -160,6 +163,8 @@ export function RouterManagement() {
     // getServiceLineLabel depends on these maps.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subscriptions, userNameById, planNameById, routerCountByServiceLineId]);
+
+  const routersPagination = paginateRows(routers, routersPage);
 
   function getServiceLineLabel(subscription: UserSubscription) {
     const userName = userNameById.get(subscription.user_id) ?? "Unknown user";
@@ -872,7 +877,10 @@ export function RouterManagement() {
               statusFilter === filter.value ? "active-filter" : ""
             }`}
             aria-pressed={statusFilter === filter.value}
-            onClick={() => setStatusFilter(filter.value)}
+            onClick={() => {
+              setRoutersPage(1);
+              setStatusFilter(filter.value);
+            }}
           >
             {filter.label}
           </button>
@@ -881,7 +889,10 @@ export function RouterManagement() {
         <select
           className="filter-select"
           value={subscriptionFilter}
-          onChange={(event) => setSubscriptionFilter(event.target.value)}
+          onChange={(event) => {
+            setRoutersPage(1);
+            setSubscriptionFilter(event.target.value);
+          }}
         >
           <option value="all">All assigned subscriptions</option>
           {subscriptions.map((subscription) => (
@@ -928,7 +939,7 @@ export function RouterManagement() {
               </tr>
             </thead>
             <tbody>
-              {routers.map((router) => (
+              {routersPagination.pageRows.map((router) => (
                 <tr
                   key={router.id}
                   className={
@@ -993,6 +1004,11 @@ export function RouterManagement() {
               )}
             </tbody>
           </table>
+          <AdminTablePagination
+            page={routersPagination.safePage}
+            pageCount={routersPagination.pageCount}
+            onPageChange={setRoutersPage}
+          />
         </div>
       )}
     </section>

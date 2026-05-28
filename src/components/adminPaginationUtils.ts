@@ -1,4 +1,4 @@
-﻿export const ADMIN_TABLE_PAGE_SIZE = 5;
+export const ADMIN_TABLE_PAGE_SIZE = 5;
 
 export function getAdminPageCount(
   totalItems: number,
