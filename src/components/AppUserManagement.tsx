@@ -491,7 +491,7 @@ export function AppUserManagement() {
       {isLoading && <p>Loading App Users...</p>}
 
       {!isLoading && (
-        <div className="table-card">
+        <div className="table-card pf-app-users-table-card">
           <table>
             <thead>
               <tr>

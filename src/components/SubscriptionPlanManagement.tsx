@@ -626,7 +626,7 @@ export function SubscriptionPlanManagement() {
       {isLoading && <p>Loading subscription plans...</p>}
 
       {!isLoading && (
-        <div className="table-card">
+        <div className="table-card pf-plans-table-card">
           <table>
             <thead>
               <tr>

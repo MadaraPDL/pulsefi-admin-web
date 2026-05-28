@@ -924,8 +924,8 @@ export function RouterManagement() {
       {isLoading && <p>Loading routers...</p>}
 
       {!isLoading && (
-        <div className="table-card">
-          <table>
+        <div className="table-card pf-router-table-card">
+          <table className="pf-router-management-table">
             <thead>
               <tr>
                 <th>Name</th>
