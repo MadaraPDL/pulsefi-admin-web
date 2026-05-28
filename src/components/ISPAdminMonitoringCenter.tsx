@@ -24,6 +24,77 @@ const monitoringAlertFilters: Array<{
   { label: "Limit reached only", value: "plan_exceed_risk" },
 ];
 
+const ADMIN_MONITORING_PAGE_SIZE = 5;
+const ADMIN_MONITORING_QUICK_PAGE_COUNT = 3;
+
+function getPageCount(totalItems: number) {
+  return Math.max(1, Math.ceil(totalItems / ADMIN_MONITORING_PAGE_SIZE));
+}
+
+function paginateRows<T>(rows: T[], page: number) {
+  const safePage = Math.min(page, getPageCount(rows.length));
+  const start = (safePage - 1) * ADMIN_MONITORING_PAGE_SIZE;
+
+  return {
+    safePage,
+    pageRows: rows.slice(start, start + ADMIN_MONITORING_PAGE_SIZE),
+    pageCount: getPageCount(rows.length),
+  };
+}
+
+function MonitoringPagination({
+  page,
+  pageCount,
+  onPageChange,
+}: {
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+}) {
+  const safePage = Math.min(page, pageCount);
+  const visiblePages = Array.from(
+    { length: Math.min(ADMIN_MONITORING_QUICK_PAGE_COUNT, pageCount) },
+    (_, index) => index + 1
+  );
+
+  return (
+    <div className="pf-admin-pagination pf-monitoring-pagination">
+      <button
+        className="pf-page-control-button pf-page-control-button-wide"
+        type="button"
+        disabled={safePage <= 1}
+        onClick={() => onPageChange(Math.max(safePage - 1, 1))}
+      >
+        Previous
+      </button>
+
+      {visiblePages.map((pageNumber) => (
+        <button
+          key={pageNumber}
+          className={
+            pageNumber === safePage
+              ? "pf-page-control-button pf-page-control-button-active"
+              : "pf-page-control-button"
+          }
+          type="button"
+          onClick={() => onPageChange(pageNumber)}
+        >
+          {pageNumber}
+        </button>
+      ))}
+
+      <button
+        className="pf-page-control-button pf-page-control-button-wide"
+        type="button"
+        disabled={safePage >= pageCount}
+        onClick={() => onPageChange(Math.min(safePage + 1, pageCount))}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
+
 function formatNumber(value: number | string) {
   const numericValue =
     typeof value === "number" ? value : Number.parseFloat(value);
@@ -144,12 +215,18 @@ function AlertList({
   selectedAlert,
   loadingAlertId,
   selectedUserId,
+  page,
+  pageCount,
+  onPageChange,
   onViewDetail,
 }: {
   alerts: ISPAdminAlert[];
   selectedAlert: ISPAdminAlert | null;
   loadingAlertId: string | null;
   selectedUserId: string;
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
   onViewDetail: (alertId: string) => void;
 }) {
   if (!selectedUserId) {
@@ -256,6 +333,11 @@ function AlertList({
           );
         })}
       </div>
+      <MonitoringPagination
+        page={page}
+        pageCount={pageCount}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 }
@@ -266,7 +348,7 @@ async function listMonitoringAlertsForSelectedUser(
 ) {
   const baseFilters: ISPAdminAlertListParams = {
     user_id: userId,
-    limit: 12,
+    limit: 50,
   };
 
   if (alertFilter !== "both") {
@@ -280,12 +362,12 @@ async function listMonitoringAlertsForSelectedUser(
     listISPAdminAlerts({
       ...baseFilters,
       alert_type: "high_usage",
-      limit: 8,
+      limit: 50,
     }),
     listISPAdminAlerts({
       ...baseFilters,
       alert_type: "plan_exceed_risk",
-      limit: 8,
+      limit: 50,
     }),
   ]);
 
@@ -295,7 +377,7 @@ async function listMonitoringAlertsForSelectedUser(
         new Date(second.created_at).getTime() -
         new Date(first.created_at).getTime()
     )
-    .slice(0, 12);
+    ;
 }
 
 export function ISPAdminMonitoringCenter() {
@@ -308,6 +390,7 @@ export function ISPAdminMonitoringCenter() {
   const [selectedUserId, setSelectedUserId] = useState("");
   const [loadingAlertId, setLoadingAlertId] = useState<string | null>(null);
   const [alertFilter, setAlertFilter] = useState<MonitoringAlertFilter>("both");
+  const [alertPage, setAlertPage] = useState(1);
   const [isUserPickerOpen, setIsUserPickerOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -406,6 +489,7 @@ export function ISPAdminMonitoringCenter() {
   }, [selectedUserId, alertFilter, loadSelectedUserAlerts]);
 
   const selectedUser = appUsers.find((appUser) => appUser.id === selectedUserId);
+  const alertPagination = paginateRows(alerts, alertPage);
 
   return (
     <section className="pf-content-card pf-monitoring-center">
@@ -543,6 +627,7 @@ export function ISPAdminMonitoringCenter() {
                           aria-selected={selectedUserId === appUser.id}
                           key={appUser.id}
                           onClick={() => {
+                            setAlertPage(1);
                             setSelectedUserId(appUser.id);
                             setIsUserPickerOpen(false);
                           }}
@@ -563,7 +648,10 @@ export function ISPAdminMonitoringCenter() {
                         alertFilter === filter.value ? "active-filter" : ""
                       }`}
                       type="button"
-                      onClick={() => setAlertFilter(filter.value)}
+                      onClick={() => {
+                        setAlertPage(1);
+                        setAlertFilter(filter.value);
+                      }}
                     >
                       {filter.label}
                     </button>
@@ -578,10 +666,13 @@ export function ISPAdminMonitoringCenter() {
               )}
 
               <AlertList
-                alerts={alerts}
+                alerts={alertPagination.pageRows}
                 selectedAlert={selectedAlert}
                 loadingAlertId={loadingAlertId}
                 selectedUserId={selectedUserId}
+                page={alertPagination.safePage}
+                pageCount={alertPagination.pageCount}
+                onPageChange={setAlertPage}
                 onViewDetail={handleViewAlertDetail}
               />
             </div>
