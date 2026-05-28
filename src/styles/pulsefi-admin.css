@@ -6216,3 +6216,171 @@ dd {
   }
 }
 
+
+
+/* Admin table consistency pass: users, routers, plans, monitoring pagination */
+.table-card {
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  background: var(--pf-surface);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.table-card table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.table-card thead {
+  background: var(--pf-surface-3);
+}
+
+.table-card th,
+.table-card td {
+  border-bottom: 1px solid var(--pf-row-border, var(--pf-border));
+  padding: 16px 20px;
+  color: var(--pf-muted);
+  text-align: left;
+  vertical-align: middle;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.table-card th {
+  color: var(--pf-muted);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table-card td {
+  color: var(--pf-text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.table-card tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-card .small-button {
+  min-width: 82px;
+}
+
+/* Keep pagers close to their rows instead of far below the table */
+.pf-admin-table-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--pf-border);
+  padding: 12px 16px;
+  margin: 0;
+  background: var(--pf-surface);
+}
+
+.pf-page-control-button {
+  min-width: 42px;
+  border: 1px solid var(--pf-primary-border);
+  border-radius: 10px;
+  background: var(--pf-primary-soft);
+  color: var(--pf-link);
+  padding: 9px 12px;
+  font-weight: 850;
+}
+
+.pf-page-control-button-wide {
+  min-width: 96px;
+}
+
+.pf-page-control-button-active {
+  border-color: var(--pf-primary);
+  background: var(--pf-primary);
+  color: #001217;
+}
+
+.pf-page-control-button:disabled {
+  opacity: 0.42;
+}
+
+/* Monitoring tables: keep pager visible without needing to hunt for it */
+.pf-monitoring-center .pf-table-wrap,
+.pf-monitoring-panel .pf-table-wrap {
+  max-height: none;
+}
+
+.pf-monitoring-center .pf-admin-table-pagination,
+.pf-monitoring-panel .pf-admin-table-pagination {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
+
+/* Service requests card refinement */
+.pf-service-requests-table tbody tr {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  padding: 18px;
+}
+
+.pf-service-request-action-cell {
+  border-top: 1px solid var(--pf-border) !important;
+  padding-top: 14px !important;
+}
+
+.pf-service-request-action-cell .pf-row-action-stack {
+  grid-template-columns: 180px minmax(0, 1fr);
+  align-items: stretch;
+}
+
+.pf-service-request-action-cell .pf-row-action-stack > .small-button {
+  align-self: start;
+  width: 154px;
+}
+
+.pf-service-request-action-cell .pf-review-actions {
+  align-self: stretch;
+}
+
+.pf-service-request-action-cell textarea {
+  min-height: 96px;
+}
+
+.pf-service-request-action-cell .pf-review-actions > div:last-child {
+  justify-content: flex-start;
+}
+
+.pf-service-request-action-cell .pf-review-actions .small-button {
+  min-width: 122px;
+}
+
+/* Responsive fallback for older management tables */
+@media (max-width: 1100px) {
+  .table-card {
+    overflow-x: auto;
+  }
+
+  .table-card table {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 900px) {
+  .pf-service-requests-table tbody tr,
+  .pf-service-request-action-cell .pf-row-action-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .pf-service-request-action-cell .pf-row-action-stack > .small-button {
+    width: fit-content;
+  }
+
+  .pf-admin-table-pagination {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
