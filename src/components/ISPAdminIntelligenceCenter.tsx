@@ -22,6 +22,77 @@ import type {
 
 type RecommendationFilter = ISPAdminRecommendationStatus | "all";
 
+const ADMIN_INTELLIGENCE_PAGE_SIZE = 5;
+const ADMIN_INTELLIGENCE_QUICK_PAGE_COUNT = 3;
+
+function getPageCount(totalItems: number) {
+  return Math.max(1, Math.ceil(totalItems / ADMIN_INTELLIGENCE_PAGE_SIZE));
+}
+
+function paginateRows<T>(rows: T[], page: number) {
+  const safePage = Math.min(page, getPageCount(rows.length));
+  const start = (safePage - 1) * ADMIN_INTELLIGENCE_PAGE_SIZE;
+
+  return {
+    safePage,
+    pageRows: rows.slice(start, start + ADMIN_INTELLIGENCE_PAGE_SIZE),
+    pageCount: getPageCount(rows.length),
+  };
+}
+
+function IntelligencePagination({
+  page,
+  pageCount,
+  onPageChange,
+}: {
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+}) {
+  const safePage = Math.min(page, pageCount);
+  const visiblePages = Array.from(
+    { length: Math.min(ADMIN_INTELLIGENCE_QUICK_PAGE_COUNT, pageCount) },
+    (_, index) => index + 1
+  );
+
+  return (
+    <div className="pf-admin-pagination pf-intelligence-pagination">
+      <button
+        className="pf-page-control-button pf-page-control-button-wide"
+        type="button"
+        disabled={safePage <= 1}
+        onClick={() => onPageChange(Math.max(safePage - 1, 1))}
+      >
+        Previous
+      </button>
+
+      {visiblePages.map((pageNumber) => (
+        <button
+          key={pageNumber}
+          className={
+            pageNumber === safePage
+              ? "pf-page-control-button pf-page-control-button-active"
+              : "pf-page-control-button"
+          }
+          type="button"
+          onClick={() => onPageChange(pageNumber)}
+        >
+          {pageNumber}
+        </button>
+      ))}
+
+      <button
+        className="pf-page-control-button pf-page-control-button-wide"
+        type="button"
+        disabled={safePage >= pageCount}
+        onClick={() => onPageChange(Math.min(safePage + 1, pageCount))}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
+
 const recommendationFilters: {
   label: string;
   value: RecommendationFilter;
@@ -163,8 +234,14 @@ function AnalyticsSnapshot({
 
 function RecommendationList({
   recommendations,
+  page,
+  pageCount,
+  onPageChange,
 }: {
   recommendations: ISPAdminRecommendation[];
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
 }) {
   if (recommendations.length === 0) {
     return (
@@ -214,11 +291,26 @@ function RecommendationList({
           </article>
         ))}
       </div>
+      <IntelligencePagination
+        page={page}
+        pageCount={pageCount}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 }
 
-function ReportList({ reports }: { reports: ISPAdminReport[] }) {
+function ReportList({
+  reports,
+  page,
+  pageCount,
+  onPageChange,
+}: {
+  reports: ISPAdminReport[];
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+}) {
   if (reports.length === 0) {
     return (
       <div className="pf-empty-state">
@@ -250,6 +342,11 @@ function ReportList({ reports }: { reports: ISPAdminReport[] }) {
           ))}
         </tbody>
       </table>
+      <IntelligencePagination
+        page={page}
+        pageCount={pageCount}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 }
@@ -266,6 +363,9 @@ export function ISPAdminIntelligenceCenter() {
   const [selectedSubscriptionId, setSelectedSubscriptionId] = useState("");
   const [recommendationFilter, setRecommendationFilter] =
     useState<RecommendationFilter>("all");
+  const [recommendationPage, setRecommendationPage] = useState(1);
+  const [reportPage, setReportPage] = useState(1);
+  const [runDetailPage, setRunDetailPage] = useState(1);
   const [predictionDate, setPredictionDate] = useState("");
   const [predictionResult, setPredictionResult] =
     useState<ISPAdminPredictionGenerationResponse | null>(null);
@@ -292,9 +392,9 @@ export function ISPAdminIntelligenceCenter() {
           listUserSubscriptions("active", null, 50, 0),
           listRecommendations({
             status: recommendationFilter === "all" ? null : recommendationFilter,
-            limit: 8,
+            limit: 50,
           }),
-          listISPAdminReports(null, 6, 0),
+          listISPAdminReports(null, 50, 0),
         ]);
 
       setAnalytics(analyticsData);
@@ -323,6 +423,16 @@ export function ISPAdminIntelligenceCenter() {
     // loadIntelligenceData intentionally stays local to avoid extra renders.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recommendationFilter]);
+
+  const recommendationPagination = paginateRows(
+    recommendations,
+    recommendationPage
+  );
+  const reportPagination = paginateRows(reports, reportPage);
+  const runDetailPagination = paginateRows(
+    automationResult?.items ?? [],
+    runDetailPage
+  );
 
   async function handleRunAutomation() {
     setErrorMessage("");
@@ -488,7 +598,7 @@ export function ISPAdminIntelligenceCenter() {
                 <summary>View run details</summary>
 
                 <div>
-                  {automationResult.items.map((item) => (
+                  {runDetailPagination.pageRows.map((item) => (
                     <article key={item.subscription_id}>
                       <span className={`status-pill status-${item.status}`}>
                         {item.status}
@@ -498,6 +608,11 @@ export function ISPAdminIntelligenceCenter() {
                     </article>
                   ))}
                 </div>
+                <IntelligencePagination
+                  page={runDetailPagination.safePage}
+                  pageCount={runDetailPagination.pageCount}
+                  onPageChange={setRunDetailPage}
+                />
               </details>
             )}
           </section>
@@ -726,7 +841,10 @@ export function ISPAdminIntelligenceCenter() {
                           : ""
                       }`}
                       type="button"
-                      onClick={() => setRecommendationFilter(filter.value)}
+                      onClick={() => {
+                        setRecommendationPage(1);
+                        setRecommendationFilter(filter.value);
+                      }}
                     >
                       {filter.label}
                     </button>
@@ -734,7 +852,12 @@ export function ISPAdminIntelligenceCenter() {
                 </div>
               </div>
 
-              <RecommendationList recommendations={recommendations} />
+              <RecommendationList
+                recommendations={recommendationPagination.pageRows}
+                page={recommendationPagination.safePage}
+                pageCount={recommendationPagination.pageCount}
+                onPageChange={setRecommendationPage}
+              />
             </article>
 
             <article className="pf-intelligence-result-card">
@@ -742,7 +865,12 @@ export function ISPAdminIntelligenceCenter() {
                 <h3>Recent Reports</h3>
               </div>
 
-              <ReportList reports={reports} />
+              <ReportList
+                reports={reportPagination.pageRows}
+                page={reportPagination.safePage}
+                pageCount={reportPagination.pageCount}
+                onPageChange={setReportPage}
+              />
             </article>
           </section>
         </>
