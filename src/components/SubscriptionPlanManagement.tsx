@@ -627,7 +627,8 @@ export function SubscriptionPlanManagement() {
 
       {!isLoading && (
         <div className="table-card pf-plans-table-card">
-          <table>
+          <div className="pf-management-table-scroll">
+          <table className="pf-plans-table">
             <thead>
               <tr>
                 <th>Plan</th>
@@ -690,6 +691,7 @@ export function SubscriptionPlanManagement() {
               )}
             </tbody>
           </table>
+          </div>
           <AdminTablePagination
             page={plansPagination.safePage}
             pageCount={plansPagination.pageCount}

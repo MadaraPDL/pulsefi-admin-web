@@ -925,6 +925,7 @@ export function RouterManagement() {
 
       {!isLoading && (
         <div className="table-card pf-router-table-card">
+          <div className="pf-management-table-scroll">
           <table className="pf-router-management-table">
             <thead>
               <tr>
@@ -1004,6 +1005,7 @@ export function RouterManagement() {
               )}
             </tbody>
           </table>
+          </div>
           <AdminTablePagination
             page={routersPagination.safePage}
             pageCount={routersPagination.pageCount}

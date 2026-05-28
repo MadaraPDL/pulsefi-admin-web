@@ -492,7 +492,8 @@ export function AppUserManagement() {
 
       {!isLoading && (
         <div className="table-card pf-app-users-table-card">
-          <table>
+          <div className="pf-management-table-scroll">
+          <table className="pf-app-users-table">
             <thead>
               <tr>
                 <th>Full name</th>
@@ -555,6 +556,7 @@ export function AppUserManagement() {
               )}
             </tbody>
           </table>
+          </div>
           <AdminTablePagination
             page={usersPagination.safePage}
             pageCount={usersPagination.pageCount}

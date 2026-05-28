@@ -5968,62 +5968,211 @@ dd {
 }
 
 
-/* Admin table targeted polish: service requests, monitoring pager, legacy tables */
-.table-card {
-  overflow-x: auto;
-  overflow-y: visible;
+/* Admin table final layout: scrollable management tables + service request cards */
+.pf-router-table-card,
+.pf-app-users-table-card,
+.pf-plans-table-card {
+  display: grid;
+  grid-template-rows: auto auto;
+  overflow: hidden;
   border: 1px solid var(--pf-border);
   border-radius: var(--pf-radius);
   background: var(--pf-surface);
-  box-shadow: none;
 }
 
-.table-card table {
+.pf-management-table-scroll {
   width: 100%;
-  min-width: 760px;
-  height: auto !important;
-  border-collapse: collapse;
-  table-layout: auto;
+  max-height: clamp(260px, 46vh, 520px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
-.table-card th,
-.table-card td {
-  height: auto !important;
+.pf-router-management-table,
+.pf-app-users-table,
+.pf-plans-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.pf-router-management-table {
+  min-width: 1120px;
+}
+
+.pf-app-users-table {
+  min-width: 1080px;
+}
+
+.pf-plans-table {
+  min-width: 900px;
+}
+
+.pf-router-management-table thead,
+.pf-app-users-table thead,
+.pf-plans-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--pf-surface-3);
+}
+
+.pf-router-management-table th,
+.pf-router-management-table td,
+.pf-app-users-table th,
+.pf-app-users-table td,
+.pf-plans-table th,
+.pf-plans-table td {
   border-bottom: 1px solid var(--pf-row-border, var(--pf-border));
-  padding: 16px 20px;
+  padding: 12px 16px;
   text-align: left;
   vertical-align: middle;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
 }
 
-.table-card th {
+.pf-router-management-table th,
+.pf-app-users-table th,
+.pf-plans-table th {
   color: var(--pf-muted);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 900;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.table-card td {
+.pf-router-management-table td,
+.pf-app-users-table td,
+.pf-plans-table td {
   color: var(--pf-text);
   font-size: 14px;
-  line-height: 1.45;
 }
 
-.table-card tbody tr:last-child td {
-  border-bottom: 0;
+/* Router column balance */
+.pf-router-management-table th:nth-child(1),
+.pf-router-management-table td:nth-child(1) {
+  width: 10%;
 }
 
-.table-card td:last-child {
+.pf-router-management-table th:nth-child(2),
+.pf-router-management-table td:nth-child(2) {
+  width: 24%;
+}
+
+.pf-router-management-table th:nth-child(3),
+.pf-router-management-table td:nth-child(3) {
+  width: 9%;
+}
+
+.pf-router-management-table th:nth-child(4),
+.pf-router-management-table td:nth-child(4),
+.pf-router-management-table th:nth-child(5),
+.pf-router-management-table td:nth-child(5) {
+  width: 10%;
+}
+
+.pf-router-management-table th:nth-child(6),
+.pf-router-management-table td:nth-child(6) {
+  width: 8%;
+}
+
+.pf-router-management-table th:nth-child(7),
+.pf-router-management-table td:nth-child(7) {
+  width: 14%;
+}
+
+.pf-router-management-table th:nth-child(8),
+.pf-router-management-table td:nth-child(8) {
+  width: 15%;
+}
+
+.pf-router-management-table td.router-action-cell {
+  display: table-cell !important;
   white-space: nowrap;
 }
 
-.table-card td:last-child .small-button {
-  width: auto;
+.pf-router-management-table .router-action-cell .small-button {
   min-width: 84px;
+  padding-inline: 12px;
 }
 
-/* Pagers should stay close to rows, not after a huge blank space */
+.pf-router-management-table .router-action-cell .small-button + .small-button {
+  margin-left: 8px;
+}
+
+/* Users column balance */
+.pf-app-users-table th:nth-child(1),
+.pf-app-users-table td:nth-child(1) {
+  width: 15%;
+}
+
+.pf-app-users-table th:nth-child(2),
+.pf-app-users-table td:nth-child(2) {
+  width: 22%;
+}
+
+.pf-app-users-table th:nth-child(3),
+.pf-app-users-table td:nth-child(3),
+.pf-app-users-table th:nth-child(4),
+.pf-app-users-table td:nth-child(4) {
+  width: 11%;
+}
+
+.pf-app-users-table th:nth-child(5),
+.pf-app-users-table td:nth-child(5),
+.pf-app-users-table th:nth-child(6),
+.pf-app-users-table td:nth-child(6) {
+  width: 8%;
+  text-align: center;
+}
+
+.pf-app-users-table th:nth-child(7),
+.pf-app-users-table td:nth-child(7) {
+  width: 9%;
+}
+
+.pf-app-users-table th:nth-child(8),
+.pf-app-users-table td:nth-child(8) {
+  width: 13%;
+}
+
+.pf-app-users-table th:nth-child(9),
+.pf-app-users-table td:nth-child(9) {
+  width: 7%;
+}
+
+/* Plans column balance */
+.pf-plans-table th:nth-child(1),
+.pf-plans-table td:nth-child(1) {
+  width: 20%;
+}
+
+.pf-plans-table th:nth-child(2),
+.pf-plans-table td:nth-child(2),
+.pf-plans-table th:nth-child(3),
+.pf-plans-table td:nth-child(3),
+.pf-plans-table th:nth-child(4),
+.pf-plans-table td:nth-child(4) {
+  width: 12%;
+}
+
+.pf-plans-table th:nth-child(5),
+.pf-plans-table td:nth-child(5) {
+  width: 12%;
+}
+
+.pf-plans-table th:nth-child(6),
+.pf-plans-table td:nth-child(6) {
+  width: 22%;
+}
+
+.pf-plans-table th:nth-child(7),
+.pf-plans-table td:nth-child(7) {
+  width: 10%;
+}
+
+/* Pagination outside the scroll area */
 .pf-admin-table-pagination,
 .pf-admin-pagination {
   display: flex;
@@ -6060,7 +6209,7 @@ dd {
   opacity: 0.42;
 }
 
-/* Monitoring should scroll only the alert content; pagination stays outside */
+/* Monitoring: only the alert list scrolls; pagination stays below it */
 .pf-monitoring-alert-scroll {
   display: grid;
   gap: 12px;
@@ -6081,7 +6230,7 @@ dd {
   border-radius: var(--pf-radius-sm);
 }
 
-/* Service requests stay as cards, not squeezed table columns */
+/* Service requests remain card-based */
 .pf-operations-table-panel-service .pf-table-wrap {
   overflow-x: hidden;
 }
@@ -6132,33 +6281,13 @@ dd {
   text-transform: uppercase;
 }
 
-.pf-service-requests-table td:nth-child(1)::before {
-  content: "User";
-}
-
-.pf-service-requests-table td:nth-child(2)::before {
-  content: "Router";
-}
-
-.pf-service-requests-table td:nth-child(3)::before {
-  content: "Current package";
-}
-
-.pf-service-requests-table td:nth-child(4)::before {
-  content: "Requested package";
-}
-
-.pf-service-requests-table td:nth-child(5)::before {
-  content: "Status";
-}
-
-.pf-service-requests-table td:nth-child(6)::before {
-  content: "Reason";
-}
-
-.pf-service-requests-table td:nth-child(7)::before {
-  content: "Action";
-}
+.pf-service-requests-table td:nth-child(1)::before { content: "User"; }
+.pf-service-requests-table td:nth-child(2)::before { content: "Router"; }
+.pf-service-requests-table td:nth-child(3)::before { content: "Current package"; }
+.pf-service-requests-table td:nth-child(4)::before { content: "Requested package"; }
+.pf-service-requests-table td:nth-child(5)::before { content: "Status"; }
+.pf-service-requests-table td:nth-child(6)::before { content: "Reason"; }
+.pf-service-requests-table td:nth-child(7)::before { content: "Action"; }
 
 .pf-service-requests-table .pf-request-reason-cell,
 .pf-service-requests-table .pf-service-request-action-cell,
@@ -6228,212 +6357,6 @@ dd {
   .pf-admin-pagination {
     justify-content: center;
     flex-wrap: wrap;
-  }
-}
-
-
-
-/* Targeted management table polish: routers, users, plans */
-.pf-router-table-card,
-.pf-app-users-table-card,
-.pf-plans-table-card {
-  overflow-x: auto;
-  overflow-y: visible;
-}
-
-.pf-router-management-table,
-.pf-app-users-table,
-.pf-plans-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-.pf-router-management-table th,
-.pf-router-management-table td,
-.pf-app-users-table th,
-.pf-app-users-table td,
-.pf-plans-table th,
-.pf-plans-table td {
-  padding: 13px 16px;
-  vertical-align: middle;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  line-height: 1.42;
-}
-
-.pf-router-management-table tbody tr,
-.pf-app-users-table tbody tr,
-.pf-plans-table tbody tr {
-  min-height: 0;
-}
-
-.pf-router-management-table td,
-.pf-app-users-table td,
-.pf-plans-table td {
-  font-size: 14px;
-}
-
-.pf-router-management-table th,
-.pf-app-users-table th,
-.pf-plans-table th {
-  font-size: 11.5px;
-}
-
-/* Router table column balance */
-.pf-router-management-table {
-  min-width: 1180px;
-}
-
-.pf-router-management-table th:nth-child(1),
-.pf-router-management-table td:nth-child(1) {
-  width: 11%;
-}
-
-.pf-router-management-table th:nth-child(2),
-.pf-router-management-table td:nth-child(2) {
-  width: 25%;
-}
-
-.pf-router-management-table th:nth-child(3),
-.pf-router-management-table td:nth-child(3) {
-  width: 9%;
-}
-
-.pf-router-management-table th:nth-child(4),
-.pf-router-management-table td:nth-child(4),
-.pf-router-management-table th:nth-child(5),
-.pf-router-management-table td:nth-child(5) {
-  width: 10%;
-}
-
-.pf-router-management-table th:nth-child(6),
-.pf-router-management-table td:nth-child(6) {
-  width: 8%;
-}
-
-.pf-router-management-table th:nth-child(7),
-.pf-router-management-table td:nth-child(7) {
-  width: 13%;
-}
-
-.pf-router-management-table th:nth-child(8),
-.pf-router-management-table td:nth-child(8) {
-  width: 14%;
-}
-
-.pf-router-management-table .router-action-cell {
-  display: grid;
-  grid-template-columns: minmax(86px, 0.8fr) minmax(132px, 1fr);
-  gap: 8px;
-  align-items: center;
-}
-
-.pf-router-management-table .router-action-cell .small-button {
-  width: 100%;
-  min-width: 0;
-  padding-inline: 10px;
-}
-
-/* App Users table column balance */
-.pf-app-users-table {
-  min-width: 1120px;
-}
-
-.pf-app-users-table th:nth-child(1),
-.pf-app-users-table td:nth-child(1) {
-  width: 16%;
-}
-
-.pf-app-users-table th:nth-child(2),
-.pf-app-users-table td:nth-child(2) {
-  width: 21%;
-}
-
-.pf-app-users-table th:nth-child(3),
-.pf-app-users-table td:nth-child(3),
-.pf-app-users-table th:nth-child(4),
-.pf-app-users-table td:nth-child(4) {
-  width: 11%;
-}
-
-.pf-app-users-table th:nth-child(5),
-.pf-app-users-table td:nth-child(5),
-.pf-app-users-table th:nth-child(6),
-.pf-app-users-table td:nth-child(6) {
-  width: 8%;
-  text-align: center;
-}
-
-.pf-app-users-table th:nth-child(7),
-.pf-app-users-table td:nth-child(7) {
-  width: 9%;
-}
-
-.pf-app-users-table th:nth-child(8),
-.pf-app-users-table td:nth-child(8) {
-  width: 13%;
-}
-
-.pf-app-users-table th:nth-child(9),
-.pf-app-users-table td:nth-child(9) {
-  width: 8%;
-}
-
-/* Plans table column balance */
-.pf-plans-table {
-  min-width: 960px;
-}
-
-.pf-plans-table th:nth-child(1),
-.pf-plans-table td:nth-child(1) {
-  width: 20%;
-}
-
-.pf-plans-table th:nth-child(2),
-.pf-plans-table td:nth-child(2),
-.pf-plans-table th:nth-child(3),
-.pf-plans-table td:nth-child(3),
-.pf-plans-table th:nth-child(4),
-.pf-plans-table td:nth-child(4) {
-  width: 12%;
-}
-
-.pf-plans-table th:nth-child(5),
-.pf-plans-table td:nth-child(5) {
-  width: 12%;
-}
-
-.pf-plans-table th:nth-child(6),
-.pf-plans-table td:nth-child(6) {
-  width: 22%;
-}
-
-.pf-plans-table th:nth-child(7),
-.pf-plans-table td:nth-child(7) {
-  width: 10%;
-}
-
-.pf-router-table-card .pf-admin-table-pagination,
-.pf-app-users-table-card .pf-admin-table-pagination,
-.pf-plans-table-card .pf-admin-table-pagination {
-  border-top: 1px solid var(--pf-border);
-  margin: 0;
-  padding: 12px 16px;
-}
-
-/* Keep wide management tables readable on smaller screens without deforming cells */
-@media (max-width: 1280px) {
-  .pf-router-management-table {
-    min-width: 1220px;
-  }
-
-  .pf-app-users-table {
-    min-width: 1160px;
-  }
-
-  .pf-plans-table {
-    min-width: 980px;
   }
 }
 
