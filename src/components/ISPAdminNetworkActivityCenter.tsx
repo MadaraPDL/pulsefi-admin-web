@@ -33,6 +33,77 @@ const compactCellStyle = {
 
 type DailyUsageKindFilter = "all" | "official" | "estimated";
 
+const ADMIN_TABLE_PAGE_SIZE = 5;
+const ADMIN_TABLE_QUICK_PAGE_COUNT = 3;
+
+function getPageCount(totalItems: number) {
+  return Math.max(1, Math.ceil(totalItems / ADMIN_TABLE_PAGE_SIZE));
+}
+
+function paginateRows<T>(rows: T[], page: number) {
+  const safePage = Math.min(page, getPageCount(rows.length));
+  const start = (safePage - 1) * ADMIN_TABLE_PAGE_SIZE;
+
+  return {
+    safePage,
+    pageRows: rows.slice(start, start + ADMIN_TABLE_PAGE_SIZE),
+    pageCount: getPageCount(rows.length),
+  };
+}
+
+function AdminTablePagination({
+  page,
+  pageCount,
+  onPageChange,
+}: {
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+}) {
+  const safePage = Math.min(page, pageCount);
+  const visiblePages = Array.from(
+    { length: Math.min(ADMIN_TABLE_QUICK_PAGE_COUNT, pageCount) },
+    (_, index) => index + 1
+  );
+
+  return (
+    <div className="pf-admin-pagination">
+      <button
+        className="small-button"
+        type="button"
+        disabled={safePage <= 1}
+        onClick={() => onPageChange(Math.max(safePage - 1, 1))}
+      >
+        Previous
+      </button>
+
+      {visiblePages.map((pageNumber) => (
+        <button
+          key={pageNumber}
+          className={
+            pageNumber === safePage
+              ? "small-button pf-admin-page-button-active"
+              : "small-button"
+          }
+          type="button"
+          onClick={() => onPageChange(pageNumber)}
+        >
+          {pageNumber}
+        </button>
+      ))}
+
+      <button
+        className="small-button"
+        type="button"
+        disabled={safePage >= pageCount}
+        onClick={() => onPageChange(Math.min(safePage + 1, pageCount))}
+      >
+        Next
+      </button>
+    </div>
+  );
+}
+
 
 function formatDateTime(value: string | null) {
   if (!value) {
@@ -569,6 +640,10 @@ export function ISPAdminNetworkActivityCenter() {
   const [routerActionStatus, setRouterActionStatus] = useState<
     RouterActionLogStatus | "all"
   >("all");
+  const [dailyUsagePage, setDailyUsagePage] = useState(1);
+  const [usageRecordsPage, setUsageRecordsPage] = useState(1);
+  const [connectionLogsPage, setConnectionLogsPage] = useState(1);
+  const [routerActionLogsPage, setRouterActionLogsPage] = useState(1);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -580,11 +655,11 @@ export function ISPAdminNetworkActivityCenter() {
       const [dailyByUserData, usageData, connectionData, actionData] =
         await Promise.all([
           listISPAdminDailyUsageByUser({ days: 7 }),
-          listISPAdminUsageRecords(8),
-          listISPAdminDeviceConnectionLogs(8),
+          listISPAdminUsageRecords(50),
+          listISPAdminDeviceConnectionLogs(50),
           listISPAdminRouterActionLogs(
             routerActionStatus === "all" ? null : routerActionStatus,
-            8
+            50
           ),
         ]);
 
@@ -685,6 +760,17 @@ export function ISPAdminNetworkActivityCenter() {
     return row.usage_kind === dailyUsageKindFilter;
   });
 
+  const dailyUsagePagination = paginateRows(
+    visibleDailyUsageByUserRows,
+    dailyUsagePage
+  );
+  const usageRecordsPagination = paginateRows(usageRecords, usageRecordsPage);
+  const connectionLogsPagination = paginateRows(connectionLogs, connectionLogsPage);
+  const routerActionLogsPagination = paginateRows(
+    routerActionLogs,
+    routerActionLogsPage
+  );
+
   return (
     <section className="pf-content-card pf-network-activity-center">
       <div className="pf-panel-title-row">
@@ -758,7 +844,12 @@ export function ISPAdminNetworkActivityCenter() {
               </div>
             </div>
 
-            <DailyUsageByUserTable rows={visibleDailyUsageByUserRows} />
+            <DailyUsageByUserTable rows={dailyUsagePagination.pageRows} />
+            <AdminTablePagination
+              page={dailyUsagePagination.safePage}
+              pageCount={dailyUsagePagination.pageCount}
+              onPageChange={setDailyUsagePage}
+            />
           </article>
 
           <article className="pf-network-panel pf-network-panel-wide">
@@ -767,10 +858,15 @@ export function ISPAdminNetworkActivityCenter() {
             </div>
 
             <UsageRecordsTable
-              records={usageRecords}
+              records={usageRecordsPagination.pageRows}
               selectedRecord={selectedUsageRecord}
               loadingRecordId={loadingUsageRecordId}
               onViewDetail={handleViewUsageRecord}
+            />
+            <AdminTablePagination
+              page={usageRecordsPagination.safePage}
+              pageCount={usageRecordsPagination.pageCount}
+              onPageChange={setUsageRecordsPage}
             />
           </article>
 
@@ -780,10 +876,15 @@ export function ISPAdminNetworkActivityCenter() {
             </div>
 
             <DeviceConnectionTable
-              logs={connectionLogs}
+              logs={connectionLogsPagination.pageRows}
               selectedLog={selectedConnectionLog}
               loadingLogId={loadingConnectionLogId}
               onViewDetail={handleViewConnectionLog}
+            />
+            <AdminTablePagination
+              page={connectionLogsPagination.safePage}
+              pageCount={connectionLogsPagination.pageCount}
+              onPageChange={setConnectionLogsPage}
             />
           </article>
 
@@ -800,7 +901,10 @@ export function ISPAdminNetworkActivityCenter() {
                         routerActionStatus === status ? "active-filter" : ""
                       }`}
                       type="button"
-                      onClick={() => setRouterActionStatus(status)}
+                      onClick={() => {
+                        setRouterActionLogsPage(1);
+                        setRouterActionStatus(status);
+                      }}
                     >
                       {status}
                     </button>
@@ -810,10 +914,15 @@ export function ISPAdminNetworkActivityCenter() {
             </div>
 
             <RouterActionLogTable
-              logs={routerActionLogs}
+              logs={routerActionLogsPagination.pageRows}
               selectedLog={selectedRouterActionLog}
               loadingLogId={loadingRouterActionLogId}
               onViewDetail={handleViewRouterActionLog}
+            />
+            <AdminTablePagination
+              page={routerActionLogsPagination.safePage}
+              pageCount={routerActionLogsPagination.pageCount}
+              onPageChange={setRouterActionLogsPage}
             />
           </article>
         </section>
