@@ -943,7 +943,7 @@ export function RouterManagement() {
           }}
           aria-label="Filter routers by App User"
         >
-          <option value="all">All App Users</option>
+          <option value="all">Select App User / show all routers</option>
           {users.map((user) => (
             <option key={user.id} value={user.id}>
               {user.full_name} / {user.email}
@@ -951,21 +951,24 @@ export function RouterManagement() {
           ))}
         </select>
 
-        <select
-          className="filter-select"
-          value={subscriptionFilter}
-          onChange={(event) => {
-            setRoutersPage(1);
-            setSubscriptionFilter(event.target.value);
-          }}
-        >
-          <option value="all">All assigned subscriptions</option>
-          {subscriptionOptionsForSelectedUser.map((subscription) => (
-            <option key={subscription.id} value={subscription.id}>
-              {subscriptionLabelById.get(subscription.id) ?? subscription.id}
-            </option>
-          ))}
-        </select>
+        {userFilter !== "all" ? (
+          <select
+            className="filter-select"
+            value={subscriptionFilter}
+            onChange={(event) => {
+              setRoutersPage(1);
+              setSubscriptionFilter(event.target.value);
+            }}
+            aria-label="Filter selected App User routers by service line"
+          >
+            <option value="all">All service lines for selected user</option>
+            {subscriptionOptionsForSelectedUser.map((subscription) => (
+              <option key={subscription.id} value={subscription.id}>
+                {subscriptionLabelById.get(subscription.id) ?? subscription.id}
+              </option>
+            ))}
+          </select>
+        ) : null}
 
         <select
           className="filter-select"
