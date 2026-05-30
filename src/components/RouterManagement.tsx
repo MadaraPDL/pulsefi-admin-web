@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import { AdminTablePagination } from "./AdminTablePagination";
@@ -90,6 +90,7 @@ function todayDateInputValue() {
 
 export function RouterManagement() {
   const [statusFilter, setStatusFilter] = useState<RouterFilter>("all");
+  const [userFilter, setUserFilter] = useState("all");
   const [subscriptionFilter, setSubscriptionFilter] = useState("all");
 
   const [routers, setRouters] = useState<ISPAdminRouter[]>([]);
@@ -141,11 +142,6 @@ export function RouterManagement() {
     return new Map(users.map((user) => [user.id, user.full_name]));
   }, [users]);
 
-  const userById = useMemo(() => {
-    return new Map(users.map((user) => [user.id, user]));
-  }, [users]);
-
-
   const planNameById = useMemo(() => {
     return new Map(plans.map((plan) => [plan.id, plan.plan_name]));
   }, [plans]);
@@ -183,50 +179,37 @@ export function RouterManagement() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subscriptions, userNameById, planNameById, routerCountByServiceLineId]);
 
-  const routersPagination = paginateRows(routers, routersPage);
-
   const subscriptionById = useMemo(() => {
     return new Map(
       subscriptions.map((subscription) => [subscription.id, subscription])
     );
   }, [subscriptions]);
 
-  const routerGroupsByUser = useMemo(() => {
-    const groups = new Map<
-      string,
-      {
-        userId: string;
-        userName: string;
-        userSubtitle: string;
-        routers: ISPAdminRouter[];
-      }
-    >();
+  const subscriptionOptionsForSelectedUser = useMemo(() => {
+    if (userFilter === "all") {
+      return subscriptions;
+    }
 
-    for (const router of routersPagination.pageRows) {
+    return subscriptions.filter(
+      (subscription) => subscription.user_id === userFilter
+    );
+  }, [subscriptions, userFilter]);
+
+  const userFilteredRouters = useMemo(() => {
+    if (userFilter === "all") {
+      return routers;
+    }
+
+    return routers.filter((router) => {
       const subscription = router.user_subscription_id
         ? subscriptionById.get(router.user_subscription_id)
         : null;
-      const user = subscription ? userById.get(subscription.user_id) : null;
-      const groupKey = user?.id ?? `unassigned-${router.user_subscription_id ?? router.id}`;
 
-      if (!groups.has(groupKey)) {
-        groups.set(groupKey, {
-          userId: groupKey,
-          userName: user?.full_name ?? "Unassigned / unknown user",
-          userSubtitle: user
-            ? `${user.email}${user.username ? ` / ${user.username}` : ""}`
-            : router.user_subscription_id
-              ? "Subscription owner not found"
-              : "Router has no assigned subscription",
-          routers: [],
-        });
-      }
+      return subscription?.user_id === userFilter;
+    });
+  }, [routers, subscriptionById, userFilter]);
 
-      groups.get(groupKey)?.routers.push(router);
-    }
-
-    return Array.from(groups.values());
-  }, [routersPagination.pageRows, subscriptionById, userById]);
+  const routersPagination = paginateRows(userFilteredRouters, routersPage);
 
   function getServiceLineLabel(subscription: UserSubscription) {
     const userName = userNameById.get(subscription.user_id) ?? "Unknown user";
@@ -951,6 +934,25 @@ export function RouterManagement() {
 
         <select
           className="filter-select"
+          value={userFilter}
+          onChange={(event) => {
+            setRoutersPage(1);
+            setUserFilter(event.target.value);
+            setSubscriptionFilter("all");
+            setSelectedRouter(null);
+          }}
+          aria-label="Filter routers by App User"
+        >
+          <option value="all">All App Users</option>
+          {users.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.full_name} / {user.email}
+            </option>
+          ))}
+        </select>
+
+        <select
+          className="filter-select"
           value={subscriptionFilter}
           onChange={(event) => {
             setRoutersPage(1);
@@ -958,7 +960,7 @@ export function RouterManagement() {
           }}
         >
           <option value="all">All assigned subscriptions</option>
-          {subscriptions.map((subscription) => (
+          {subscriptionOptionsForSelectedUser.map((subscription) => (
             <option key={subscription.id} value={subscription.id}>
               {subscriptionLabelById.get(subscription.id) ?? subscription.id}
             </option>
@@ -1003,80 +1005,65 @@ export function RouterManagement() {
               </tr>
             </thead>
             <tbody>
-              {routerGroupsByUser.map((group) => (
-                <Fragment key={group.userId}>
-                  <tr className="router-user-group-row">
-                    <td colSpan={8}>
-                      <strong>{group.userName}</strong>
-                      <span className="muted" style={{ marginLeft: 8 }}>
-                        {group.userSubtitle} / {group.routers.length}{" "}
-                        {group.routers.length === 1 ? "router" : "routers"}
-                      </span>
-                    </td>
-                  </tr>
-
-                  {group.routers.map((router) => (
-                    <tr
-                      key={router.id}
-                      className={
-                        selectedRouter?.id === router.id
-                          ? "selected-row"
-                          : "clickable-row"
-                      }
-                      onClick={() => chooseRouter(router)}
+              {routersPagination.pageRows.map((router) => (
+                <tr
+                  key={router.id}
+                  className={
+                    selectedRouter?.id === router.id
+                      ? "selected-row"
+                      : "clickable-row"
+                  }
+                  onClick={() => chooseRouter(router)}
+                >
+                  <td>{router.router_name ?? "-"}</td>
+                  <td>
+                    {router.user_subscription_id
+                      ? subscriptionLabelById.get(router.user_subscription_id) ??
+                        router.user_subscription_id
+                      : "-"}
+                  </td>
+                  <td>{router.router_model ?? "-"}</td>
+                  <td>{router.router_ip ?? "-"}</td>
+                  <td>{router.mac_address ?? "-"}</td>
+                  <td>
+                    <span className={`status-pill status-${router.status}`}>
+                      {router.status}
+                    </span>
+                  </td>
+                  <td>{formatDateTime(router.created_at)}</td>
+                  <td className="router-action-cell">
+                    <button
+                      className="small-button"
+                      type="button"
+                      disabled={selectingRouterId === router.id}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        chooseRouter(router);
+                      }}
                     >
-                      <td>{router.router_name ?? "-"}</td>
-                      <td>
-                        {router.user_subscription_id
-                          ? subscriptionLabelById.get(router.user_subscription_id) ??
-                            router.user_subscription_id
-                          : "-"}
-                      </td>
-                      <td>{router.router_model ?? "-"}</td>
-                      <td>{router.router_ip ?? "-"}</td>
-                      <td>{router.mac_address ?? "-"}</td>
-                      <td>
-                        <span className={`status-pill status-${router.status}`}>
-                          {router.status}
-                        </span>
-                      </td>
-                      <td>{formatDateTime(router.created_at)}</td>
-                      <td className="router-action-cell">
-                        <button
-                          className="small-button"
-                          type="button"
-                          disabled={selectingRouterId === router.id}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            chooseRouter(router);
-                          }}
-                        >
-                          {selectingRouterId === router.id ? "Loading..." : "View"}
-                        </button>
-                        <button
-                          className="small-button pf-simulator-action-button"
-                          type="button"
-                          disabled={simulatorRunningRouterId === router.id}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void handleRunFullSimulator(router);
-                          }}
-                        >
-                          {simulatorRunningRouterId === router.id
-                            ? "Running..."
-                            : "Run full simulator"}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </Fragment>
+                      {selectingRouterId === router.id ? "Loading..." : "View"}
+                    </button>
+                    <button
+                      className="small-button pf-simulator-action-button"
+                      type="button"
+                      disabled={simulatorRunningRouterId === router.id}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void handleRunFullSimulator(router);
+                      }}
+                    >
+                      {simulatorRunningRouterId === router.id
+                        ? "Running..."
+                        : "Run full simulator"}
+                    </button>
+                  </td>
+                </tr>
               ))}
 
-              {routers.length === 0 && (
+              {userFilteredRouters.length === 0 && (
                 <tr>
                   <td colSpan={8}>
-                    No routers match this filter. Create an independent service
-                    line first, then attach a router without collecting passwords.
+                    No routers match this App User, subscription, or status filter.
                   </td>
                 </tr>
               )}
