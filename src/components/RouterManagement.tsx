@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { getErrorMessage } from "../api/errors";
 import { AdminTablePagination } from "./AdminTablePagination";
@@ -59,6 +59,21 @@ function formatDateTime(value: string | null) {
   }
 
   return date.toLocaleString();
+}
+
+function formatUsageAmount(value: number | string | null | undefined) {
+  const totalMb =
+    typeof value === "number" ? value : Number.parseFloat(String(value ?? "0"));
+
+  if (!Number.isFinite(totalMb) || totalMb <= 0) {
+    return "0 MB";
+  }
+
+  if (totalMb >= 1024) {
+    return `${(totalMb / 1024).toFixed(2)} GB`;
+  }
+
+  return `${Math.round(totalMb)} MB`;
 }
 
 function optionalText(value: string) {
@@ -126,6 +141,10 @@ export function RouterManagement() {
     return new Map(users.map((user) => [user.id, user.full_name]));
   }, [users]);
 
+  const userById = useMemo(() => {
+    return new Map(users.map((user) => [user.id, user]));
+  }, [users]);
+
 
   const planNameById = useMemo(() => {
     return new Map(plans.map((plan) => [plan.id, plan.plan_name]));
@@ -165,6 +184,49 @@ export function RouterManagement() {
   }, [subscriptions, userNameById, planNameById, routerCountByServiceLineId]);
 
   const routersPagination = paginateRows(routers, routersPage);
+
+  const subscriptionById = useMemo(() => {
+    return new Map(
+      subscriptions.map((subscription) => [subscription.id, subscription])
+    );
+  }, [subscriptions]);
+
+  const routerGroupsByUser = useMemo(() => {
+    const groups = new Map<
+      string,
+      {
+        userId: string;
+        userName: string;
+        userSubtitle: string;
+        routers: ISPAdminRouter[];
+      }
+    >();
+
+    for (const router of routersPagination.pageRows) {
+      const subscription = router.user_subscription_id
+        ? subscriptionById.get(router.user_subscription_id)
+        : null;
+      const user = subscription ? userById.get(subscription.user_id) : null;
+      const groupKey = user?.id ?? `unassigned-${router.user_subscription_id ?? router.id}`;
+
+      if (!groups.has(groupKey)) {
+        groups.set(groupKey, {
+          userId: groupKey,
+          userName: user?.full_name ?? "Unassigned / unknown user",
+          userSubtitle: user
+            ? `${user.email}${user.username ? ` / ${user.username}` : ""}`
+            : router.user_subscription_id
+              ? "Subscription owner not found"
+              : "Router has no assigned subscription",
+          routers: [],
+        });
+      }
+
+      groups.get(groupKey)?.routers.push(router);
+    }
+
+    return Array.from(groups.values());
+  }, [routersPagination.pageRows, subscriptionById, userById]);
 
   function getServiceLineLabel(subscription: UserSubscription) {
     const userName = userNameById.get(subscription.user_id) ?? "Unknown user";
@@ -542,12 +604,13 @@ export function RouterManagement() {
         scenario: simulatorScenario,
       });
 
+      await loadOptions();
       await loadRouters();
 
       setSuccessMessage(
         `Full simulator completed (${formatScenarioLabel(
           result.scenario
-        )}): ${result.device_ingestion.devices_seen} devices seen, ${result.usage_ingestion.records_created} usage records created, ${result.alerts_created} alerts created.`
+        )}): ${result.device_ingestion.devices_seen} devices seen, ${result.usage_ingestion.records_created} usage records created, ${formatUsageAmount(result.usage_ingestion.total_mb)} added, ${result.alerts_created} alerts created.`
       );
     } catch (error) {
       setErrorMessage(
@@ -940,59 +1003,73 @@ export function RouterManagement() {
               </tr>
             </thead>
             <tbody>
-              {routersPagination.pageRows.map((router) => (
-                <tr
-                  key={router.id}
-                  className={
-                    selectedRouter?.id === router.id
-                      ? "selected-row"
-                      : "clickable-row"
-                  }
-                  onClick={() => chooseRouter(router)}
-                >
-                  <td>{router.router_name ?? "-"}</td>
-                  <td>
-                    {router.user_subscription_id
-                      ? subscriptionLabelById.get(router.user_subscription_id) ??
-                        router.user_subscription_id
-                      : "-"}
-                  </td>
-                  <td>{router.router_model ?? "-"}</td>
-                  <td>{router.router_ip ?? "-"}</td>
-                  <td>{router.mac_address ?? "-"}</td>
-                  <td>
-                    <span className={`status-pill status-${router.status}`}>
-                      {router.status}
-                    </span>
-                  </td>
-                  <td>{formatDateTime(router.created_at)}</td>
-                  <td className="router-action-cell">
-                    <button
-                      className="small-button"
-                      type="button"
-                      disabled={selectingRouterId === router.id}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        chooseRouter(router);
-                      }}
+              {routerGroupsByUser.map((group) => (
+                <Fragment key={group.userId}>
+                  <tr className="router-user-group-row">
+                    <td colSpan={8}>
+                      <strong>{group.userName}</strong>
+                      <span className="muted" style={{ marginLeft: 8 }}>
+                        {group.userSubtitle} / {group.routers.length}{" "}
+                        {group.routers.length === 1 ? "router" : "routers"}
+                      </span>
+                    </td>
+                  </tr>
+
+                  {group.routers.map((router) => (
+                    <tr
+                      key={router.id}
+                      className={
+                        selectedRouter?.id === router.id
+                          ? "selected-row"
+                          : "clickable-row"
+                      }
+                      onClick={() => chooseRouter(router)}
                     >
-                      {selectingRouterId === router.id ? "Loading..." : "View"}
-                    </button>
-                    <button
-                      className="small-button pf-simulator-action-button"
-                      type="button"
-                      disabled={simulatorRunningRouterId === router.id}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        void handleRunFullSimulator(router);
-                      }}
-                    >
-                      {simulatorRunningRouterId === router.id
-                        ? "Running..."
-                        : "Run full simulator"}
-                    </button>
-                  </td>
-                </tr>
+                      <td>{router.router_name ?? "-"}</td>
+                      <td>
+                        {router.user_subscription_id
+                          ? subscriptionLabelById.get(router.user_subscription_id) ??
+                            router.user_subscription_id
+                          : "-"}
+                      </td>
+                      <td>{router.router_model ?? "-"}</td>
+                      <td>{router.router_ip ?? "-"}</td>
+                      <td>{router.mac_address ?? "-"}</td>
+                      <td>
+                        <span className={`status-pill status-${router.status}`}>
+                          {router.status}
+                        </span>
+                      </td>
+                      <td>{formatDateTime(router.created_at)}</td>
+                      <td className="router-action-cell">
+                        <button
+                          className="small-button"
+                          type="button"
+                          disabled={selectingRouterId === router.id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            chooseRouter(router);
+                          }}
+                        >
+                          {selectingRouterId === router.id ? "Loading..." : "View"}
+                        </button>
+                        <button
+                          className="small-button pf-simulator-action-button"
+                          type="button"
+                          disabled={simulatorRunningRouterId === router.id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void handleRunFullSimulator(router);
+                          }}
+                        >
+                          {simulatorRunningRouterId === router.id
+                            ? "Running..."
+                            : "Run full simulator"}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </Fragment>
               ))}
 
               {routers.length === 0 && (
