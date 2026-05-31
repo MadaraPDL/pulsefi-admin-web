@@ -81,6 +81,66 @@ function formatJson(value: unknown) {
   return JSON.stringify(value, null, 2);
 }
 
+function safeReportFileName(title: string) {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "") || "pulsefi-report";
+}
+
+function downloadTextFile(filename: string, contents: string, mimeType: string) {
+  const blob = new Blob([contents], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+
+  URL.revokeObjectURL(url);
+}
+
+function getReportInsights(report: ISPAdminReport) {
+  const insights = report.report_data?.insights;
+
+  if (!Array.isArray(insights)) {
+    return [];
+  }
+
+  return insights.filter(
+    (item): item is Record<string, unknown> =>
+      item !== null && typeof item === "object" && !Array.isArray(item)
+  );
+}
+
+function getReportTableEntries(report: ISPAdminReport) {
+  const tables = report.report_data?.tables;
+
+  if (!tables || typeof tables !== "object" || Array.isArray(tables)) {
+    return [];
+  }
+
+  return Object.entries(tables as Record<string, unknown>)
+    .map(([key, value]) => {
+      const rows = Array.isArray(value)
+        ? value.filter(
+            (row): row is Record<string, unknown> =>
+              row !== null && typeof row === "object" && !Array.isArray(row)
+          )
+        : [];
+
+      return { key, rows };
+    })
+    .filter((entry) => entry.rows.length > 0);
+}
+
+function getReportTableHeaders(rows: Record<string, unknown>[]) {
+  return Array.from(new Set(rows.flatMap((row) => Object.keys(row)))).slice(0, 8);
+}
+
 function DetailLine({
   label,
   value,
@@ -128,6 +188,20 @@ function getReportMetricEntries(report: ISPAdminReport | null) {
 
 function ReportDetailPanel({ report }: { report: ISPAdminReport }) {
   const metricEntries = getReportMetricEntries(report);
+  const insights = getReportInsights(report);
+  const tableEntries = getReportTableEntries(report);
+
+  function handleExportJson() {
+    downloadTextFile(
+      `${safeReportFileName(report.title)}.json`,
+      JSON.stringify(report.report_data ?? {}, null, 2),
+      "application/json"
+    );
+  }
+
+  function handlePrintReport() {
+    window.print();
+  }
 
   return (
     <div className="pf-report-detail-panel">
@@ -141,7 +215,15 @@ function ReportDetailPanel({ report }: { report: ISPAdminReport }) {
           </p>
         </div>
 
-        <span className="status-pill status-active">Stored</span>
+        <div className="pf-row-action-stack">
+          <span className="status-pill status-active">Stored</span>
+          <button className="small-button" type="button" onClick={handleExportJson}>
+            Export JSON
+          </button>
+          <button className="small-button" type="button" onClick={handlePrintReport}>
+            Print
+          </button>
+        </div>
       </div>
 
       {metricEntries.length ? (
@@ -160,6 +242,62 @@ function ReportDetailPanel({ report }: { report: ISPAdminReport }) {
           <p>Open the raw report data below to inspect this report.</p>
         </div>
       )}
+
+      {insights.length ? (
+        <section className="pf-report-insights">
+          <h4>Report insights</h4>
+          {insights.map((insight, index) => (
+            <div className="pf-inline-detail-panel" key={`${insight.message ?? index}`}>
+              <DetailLine
+                label="Severity"
+                value={String(insight.severity ?? "info")}
+              />
+              <DetailLine
+                label="Insight"
+                value={String(insight.message ?? "-")}
+              />
+            </div>
+          ))}
+        </section>
+      ) : null}
+
+      {tableEntries.length ? (
+        <section className="pf-report-tables">
+          <h4>Report tables</h4>
+          {tableEntries.map((entry) => {
+            const headers = getReportTableHeaders(entry.rows);
+
+            return (
+              <div className="pf-operations-table-panel" key={entry.key}>
+                <div className="pf-monitoring-panel-header">
+                  <h3>{formatReportType(entry.key)}</h3>
+                </div>
+
+                <div className="pf-table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        {headers.map((header) => (
+                          <th key={header}>{formatReportType(header)}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {entry.rows.map((row, rowIndex) => (
+                        <tr key={`${entry.key}-${rowIndex}`}>
+                          {headers.map((header) => (
+                            <td key={header}>{formatValue(row[header])}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+      ) : null}
 
       {report.report_data ? (
         <details className="pf-report-json-details">
@@ -262,6 +400,8 @@ export function ISPAdminOperationsCenter() {
   const [reportType, setReportType] =
     useState<ISPAdminReportType>("usage_report");
   const [reportTitle, setReportTitle] = useState("");
+  const [reportPeriodStart, setReportPeriodStart] = useState("");
+  const [reportPeriodEnd, setReportPeriodEnd] = useState("");
   const [requestFilter, setRequestFilter] =
     useState<PlanChangeRequestStatus | "all">("pending");
   const [errorMessage, setErrorMessage] = useState("");
@@ -417,6 +557,8 @@ export function ISPAdminOperationsCenter() {
       const report = await createISPAdminReport({
         report_type: reportType,
         title: reportTitle.trim() || null,
+        period_start: reportPeriodStart || null,
+        period_end: reportPeriodEnd || null,
       });
 
       setReportTitle("");
@@ -486,6 +628,26 @@ export function ISPAdminOperationsCenter() {
               placeholder="May 2026 usage summary"
             />
           </label>
+
+          <div className="pf-operations-filter-bar">
+            <label>
+              Period start
+              <input
+                type="date"
+                value={reportPeriodStart}
+                onChange={(event) => setReportPeriodStart(event.target.value)}
+              />
+            </label>
+
+            <label>
+              Period end
+              <input
+                type="date"
+                value={reportPeriodEnd}
+                onChange={(event) => setReportPeriodEnd(event.target.value)}
+              />
+            </label>
+          </div>
 
           <button
             className="pf-action-button"
