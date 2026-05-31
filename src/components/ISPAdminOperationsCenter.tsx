@@ -141,6 +141,257 @@ function getReportTableHeaders(rows: Record<string, unknown>[]) {
   return Array.from(new Set(rows.flatMap((row) => Object.keys(row)))).slice(0, 8);
 }
 
+function escapeHtml(value: unknown) {
+  return String(value ?? "-")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function buildPrintableReportHtml(report: ISPAdminReport) {
+  const metrics = getReportMetricEntries(report);
+  const insights = getReportInsights(report);
+  const tables = getReportTableEntries(report);
+
+  const metricHtml = metrics.length
+    ? `<section class="metrics">${metrics
+        .map(
+          ([key, value]) =>
+            `<article><span>${escapeHtml(formatReportType(key))}</span><strong>${escapeHtml(
+              formatValue(value)
+            )}</strong></article>`
+        )
+        .join("")}</section>`
+    : `<p class="muted">No simple summary metrics available.</p>`;
+
+  const insightHtml = insights.length
+    ? `<section><h2>Insights</h2>${insights
+        .map(
+          (insight) =>
+            `<div class="insight"><strong>${escapeHtml(
+              insight.severity ?? "info"
+            )}</strong><p>${escapeHtml(insight.message ?? "-")}</p></div>`
+        )
+        .join("")}</section>`
+    : "";
+
+  const tableHtml = tables.length
+    ? `<section><h2>Tables</h2>${tables
+        .map((entry) => {
+          const headers = getReportTableHeaders(entry.rows);
+
+          return `<div class="table-section">
+            <h3>${escapeHtml(formatReportType(entry.key))}</h3>
+            <table>
+              <thead>
+                <tr>${headers
+                  .map((header) => `<th>${escapeHtml(formatReportType(header))}</th>`)
+                  .join("")}</tr>
+              </thead>
+              <tbody>
+                ${entry.rows
+                  .map(
+                    (row) =>
+                      `<tr>${headers
+                        .map((header) => `<td>${escapeHtml(formatValue(row[header]))}</td>`)
+                        .join("")}</tr>`
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </div>`;
+        })
+        .join("")}</section>`
+    : "";
+
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${escapeHtml(report.title)}</title>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 14mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: #0f172a;
+      font-family: Inter, Arial, sans-serif;
+      background: #ffffff;
+      font-size: 12px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 16px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    h2 {
+      margin: 22px 0 10px;
+      font-size: 16px;
+    }
+
+    h3 {
+      margin: 16px 0 8px;
+      font-size: 13px;
+    }
+
+    .muted {
+      color: #64748b;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .metrics article,
+    .insight {
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 10px;
+      background: #f8fafc;
+    }
+
+    .metrics span {
+      display: block;
+      color: #64748b;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metrics strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 15px;
+      overflow-wrap: anywhere;
+    }
+
+    .insight {
+      margin-bottom: 8px;
+    }
+
+    .insight strong {
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .insight p {
+      margin: 5px 0 0;
+    }
+
+    .table-section {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin-bottom: 14px;
+    }
+
+    th,
+    td {
+      border: 1px solid #e2e8f0;
+      padding: 7px 8px;
+      text-align: left;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    th {
+      background: #f1f5f9;
+      color: #334155;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    tr {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    footer {
+      margin-top: 22px;
+      padding-top: 12px;
+      border-top: 1px solid #e2e8f0;
+      color: #64748b;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <p class="muted">PulseFi ISP Admin Report</p>
+      <h1>${escapeHtml(report.title)}</h1>
+      <p class="muted">${escapeHtml(formatReportType(report.report_type))}</p>
+    </div>
+    <div>
+      <p><strong>Created:</strong> ${escapeHtml(formatDateTime(report.created_at))}</p>
+      <p><strong>Period:</strong> ${escapeHtml(report.period_start ?? "Any")} → ${escapeHtml(
+        report.period_end ?? "Any"
+      )}</p>
+    </div>
+  </header>
+
+  ${metricHtml}
+  ${insightHtml}
+  ${tableHtml}
+
+  <footer>
+    Generated by PulseFi. Technical JSON is available through Export JSON in the admin dashboard.
+  </footer>
+
+  <script>
+    window.addEventListener("load", () => {
+      window.focus();
+      window.print();
+    });
+  </script>
+</body>
+</html>`;
+}
+
+function printReport(report: ISPAdminReport) {
+  const printWindow = window.open("", "_blank", "noopener,noreferrer");
+
+  if (!printWindow) {
+    window.alert("Popup blocked. Allow popups for this site, then try Print again.");
+    return;
+  }
+
+  printWindow.document.open();
+  printWindow.document.write(buildPrintableReportHtml(report));
+  printWindow.document.close();
+}
+
 function DetailLine({
   label,
   value,
@@ -200,7 +451,7 @@ function ReportDetailPanel({ report }: { report: ISPAdminReport }) {
   }
 
   function handlePrintReport() {
-    window.print();
+    printReport(report);
   }
 
   return (
