@@ -380,16 +380,42 @@ function buildPrintableReportHtml(report: ISPAdminReport) {
 }
 
 function printReport(report: ISPAdminReport) {
-  const printWindow = window.open("", "_blank", "noopener,noreferrer");
+  const existingFrame = document.getElementById("pulsefi-report-print-frame");
+  existingFrame?.remove();
 
-  if (!printWindow) {
-    window.alert("Popup blocked. Allow popups for this site, then try Print again.");
-    return;
-  }
+  const iframe = document.createElement("iframe");
+  iframe.id = "pulsefi-report-print-frame";
+  iframe.title = "PulseFi printable report";
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  iframe.style.opacity = "0";
+  iframe.srcdoc = buildPrintableReportHtml(report).replace(
+    /<script[\s\S]*?<\/script>/,
+    ""
+  );
 
-  printWindow.document.open();
-  printWindow.document.write(buildPrintableReportHtml(report));
-  printWindow.document.close();
+  document.body.appendChild(iframe);
+
+  iframe.onload = () => {
+    const printWindow = iframe.contentWindow;
+
+    if (!printWindow) {
+      window.alert("Could not prepare the print view. Try Export JSON instead.");
+      iframe.remove();
+      return;
+    }
+
+    printWindow.focus();
+    printWindow.print();
+
+    window.setTimeout(() => {
+      iframe.remove();
+    }, 1500);
+  };
 }
 
 function DetailLine({
